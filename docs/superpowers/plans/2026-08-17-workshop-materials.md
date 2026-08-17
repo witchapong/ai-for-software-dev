@@ -1,0 +1,2555 @@
+# Workshop Materials Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build every artifact needed to run the 3-session "AI for Software Development" workshop — a student-facing template repository, lab briefs, project briefs, lecture decks, and instructor materials.
+
+**Architecture:** Two repositories. This repo (`ai-for-software-dev`) holds instructor materials: spec, plan, slides, rubric, pilot checklist. A second published repo (`ai-workshop-template`) is the GitHub *template repository* students clone with "Use this template" — it carries the devcontainer, the `.clinerules` gate rules, the Streamlit skeleton, lab instructions, and project briefs. The template is developed here under `template/` and published in the final task. Completed lab solutions ship as branches on the published template (`solution/lab1`, `solution/lab3`), giving stuck students a known-good reference without needing a third repo.
+
+**Tech Stack:** Python 3.11, Streamlit, NumPy, Matplotlib, google-genai, pytest, GitHub Codespaces (devcontainer), Cline (`saoudrizwan.claude-dev`), GitHub Actions.
+
+## Global Constraints
+
+- Python **3.11** (devcontainer image `mcr.microsoft.com/devcontainers/python:3.11`).
+- Dependencies are **exactly pinned**, and the list is closed: `streamlit==1.61.1`, `numpy==2.5.2`, `matplotlib==3.11.1`, `google-genai==2.18.1`, `python-dotenv==1.2.3`, `pytest==9.1.1`. No pandas. No other package may be added.
+- **No secrets in the repo, ever.** Keys are read from environment via `.env`, which is git-ignored. `.env.example` carries placeholder names only.
+- All code lives under `template/` in this repo until the publish task.
+- Tests run from the `template/` directory: `cd template && pytest`.
+- Tests requiring network are marked `@pytest.mark.live` and excluded from CI.
+- **One file per owner:** no task creates a file another task also modifies, except where explicitly stated.
+- All student-facing prose is **plain language** — every technical term defined at first use. The audience has completed one introductory Python course.
+- Student-facing text must not assume a teaching assistant is available.
+
+---
+
+## File Structure
+
+**Template repository** (`template/`, published as `ai-workshop-template`):
+
+| Path | Responsibility |
+|---|---|
+| `.devcontainer/devcontainer.json` | Identical environment for all students; pre-installs Cline |
+| `.clinerules` | Four Gates rules the agent obeys on every request |
+| `.env.example` | Placeholder key names; the real `.env` is git-ignored |
+| `.gitignore` | Blocks `.env`, `data/`, Python artifacts |
+| `pytest.ini` | Adds repo root to import path; registers the `live` marker |
+| `requirements.txt` | The six pinned dependencies |
+| `check_setup.py` | Pre-work verification: Python version, imports, keys, live API call |
+| `app.py` | Streamlit entry point: title and navigation. Nobody's "own" file |
+| `pages/1_Home.py` | Example feature page showing the one-file-per-feature pattern |
+| `core/models.py` | Example dataclass with `to_dict`/`from_dict` round trip |
+| `core/storage.py` | CSV persistence: `load`, `save`, `append` |
+| `core/llm.py` | Stub in `main`; implemented on `solution/lab3` |
+| `core/filters.py` | Does **not** exist on `main`; built by students, shipped on `solution/lab1` |
+| `tests/` | One test module per `core/` module |
+| `aidlc/{intent,requirements,design,tasks}.md` | The Four Gates artifact templates |
+| `labs/LAB1.md`, `labs/LAB2.md`, `labs/LAB3.md` | Student lab instructions |
+| `briefs/*.md` | Five pre-vetted group project briefs |
+| `session3/corpus/*.md` | Five component datasheet excerpts for the retrieval lab |
+| `README.md` | First-day orientation and setup |
+| `TROUBLESHOOTING.md` | "If X breaks, do Y" — the no-TA safety net |
+| `.github/workflows/ci.yml` | Runs pytest on push and pull request |
+
+**Instructor repository** (this repo):
+
+| Path | Responsibility |
+|---|---|
+| `slides/session1.md`, `session2.md`, `session3.md` | Lecture decks (Markdown, Marp-compatible) |
+| `instructor/rubric.md` | Assessment rubric |
+| `instructor/peer-score-form.md` | One-page demo-day peer scoring form |
+| `instructor/ai-collaboration-log.md` | Individual submission template |
+| `instructor/pilot-checklist.md` | The 8 pre-flight checks from spec §10 |
+| `scripts/publish-template.sh` | Publishes `template/` to the student repo |
+
+---
+
+## Task 1: Template skeleton and development environment
+
+**Files:**
+- Create: `template/requirements.txt`, `template/pytest.ini`, `template/.gitignore`, `template/.env.example`, `template/.devcontainer/devcontainer.json`, `template/.github/workflows/ci.yml`, `template/core/__init__.py`, `template/tests/__init__.py`
+
+**Interfaces:**
+- Consumes: nothing
+- Produces: a working Python environment where `cd template && pytest` runs and collects zero tests without error.
+
+- [ ] **Step 1: Create the dependency and pytest configuration**
+
+`template/requirements.txt`:
+```
+streamlit==1.61.1
+numpy==2.5.2
+matplotlib==3.11.1
+google-genai==2.18.1
+python-dotenv==1.2.3
+pytest==9.1.1
+```
+
+`template/pytest.ini`:
+```ini
+[pytest]
+pythonpath = .
+testpaths = tests
+markers =
+    live: test makes a real network call and needs an API key
+```
+
+- [ ] **Step 2: Create the ignore and environment files**
+
+`template/.gitignore`:
+```
+.env
+data/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.DS_Store
+```
+
+`template/.env.example`:
+```
+# Copy this file to .env and paste your own keys in.
+# NEVER commit .env — it is listed in .gitignore for a reason.
+
+# Get one free at https://aistudio.google.com/apikey
+GEMINI_API_KEY=paste-your-key-here
+
+# Optional backup. Get one free at https://console.mistral.ai
+MISTRAL_API_KEY=
+```
+
+- [ ] **Step 3: Create the devcontainer**
+
+`template/.devcontainer/devcontainer.json`:
+```json
+{
+  "name": "AI Workshop",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "saoudrizwan.claude-dev",
+        "ms-python.python"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install --no-cache-dir -r requirements.txt && cp -n .env.example .env",
+  "forwardPorts": [8501],
+  "portsAttributes": {
+    "8501": {
+      "label": "Streamlit app",
+      "onAutoForward": "openPreview"
+    }
+  }
+}
+```
+
+- [ ] **Step 4: Create the CI workflow**
+
+`template/.github/workflows/ci.yml`:
+```yaml
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: pytest -m "not live" -v
+```
+
+- [ ] **Step 5: Create empty package markers**
+
+Create `template/core/__init__.py` and `template/tests/__init__.py`, both empty files.
+
+- [ ] **Step 6: Verify the environment works**
+
+Run: `cd template && pip install -r requirements.txt && pytest`
+Expected: `no tests ran` — collection succeeds with zero tests and no import errors.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add template/
+git commit -m "feat: scaffold workshop template environment"
+```
+
+---
+
+## Task 2: `core/models.py` — the example data shape
+
+Students copy this pattern for their own project's data. It exists to demonstrate the `to_dict`/`from_dict` round trip that `storage.py` depends on.
+
+**Files:**
+- Create: `template/core/models.py`
+- Test: `template/tests/test_models.py`
+
+**Interfaces:**
+- Consumes: nothing
+- Produces:
+  - `new_id() -> str` — a short unique identifier
+  - `@dataclass Item` with fields `id: str`, `name: str`, `note: str`
+  - `Item.to_dict(self) -> dict[str, str]`
+  - `Item.from_dict(cls, data: dict[str, str]) -> Item`
+
+- [ ] **Step 1: Write the failing test**
+
+`template/tests/test_models.py`:
+```python
+from core.models import Item, new_id
+
+
+def test_item_round_trips_through_dict():
+    item = Item(id="abc123", name="Oscilloscope", note="Bench 4")
+    restored = Item.from_dict(item.to_dict())
+    assert restored == item
+
+
+def test_to_dict_returns_only_strings():
+    item = Item(id="abc123", name="Oscilloscope", note="Bench 4")
+    assert all(isinstance(v, str) for v in item.to_dict().values())
+
+
+def test_new_id_is_unique():
+    assert new_id() != new_id()
+
+
+def test_new_id_is_short_and_printable():
+    value = new_id()
+    assert len(value) == 8
+    assert value.isalnum()
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `cd template && pytest tests/test_models.py -v`
+Expected: FAIL — `ModuleNotFoundError: No module named 'core.models'`
+
+- [ ] **Step 3: Write the implementation**
+
+`template/core/models.py`:
+```python
+"""Example data shape. Copy this pattern for your own project's data.
+
+A dataclass describes ONE thing your app stores — a booking, a part, a reading.
+`to_dict` and `from_dict` convert it to and from the plain dictionaries that
+core/storage.py writes to CSV files.
+"""
+
+import uuid
+from dataclasses import dataclass, asdict
+
+
+def new_id() -> str:
+    """Return a short unique identifier, e.g. '3f2a9c01'."""
+    return uuid.uuid4().hex[:8]
+
+
+@dataclass
+class Item:
+    """One row of example data. Replace this with your own."""
+
+    id: str
+    name: str
+    note: str
+
+    def to_dict(self) -> dict[str, str]:
+        """Convert to a plain dictionary of strings, ready for storage."""
+        return {key: str(value) for key, value in asdict(self).items()}
+
+    @classmethod
+    def from_dict(cls, data: dict[str, str]) -> "Item":
+        """Rebuild an Item from a dictionary read back out of storage."""
+        return cls(id=data["id"], name=data["name"], note=data["note"])
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `cd template && pytest tests/test_models.py -v`
+Expected: 4 passed
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add template/core/models.py template/tests/test_models.py
+git commit -m "feat: add example Item model with dict round trip"
+```
+
+---
+
+## Task 3: `core/storage.py` — CSV persistence
+
+Deliberately CSV, not a database: students can open the file and see their data, which makes storage concrete rather than magic.
+
+**Files:**
+- Create: `template/core/storage.py`
+- Test: `template/tests/test_storage.py`
+
+**Interfaces:**
+- Consumes: nothing
+- Produces:
+  - `load(name: str, data_dir: Path | None = None) -> list[dict[str, str]]`
+  - `save(name: str, records: list[dict[str, str]], data_dir: Path | None = None) -> None`
+  - `append(name: str, record: dict[str, str], data_dir: Path | None = None) -> None`
+  - Files are written to `data/<name>.csv`. `data_dir` exists so tests can use a temporary folder.
+
+- [ ] **Step 1: Write the failing test**
+
+`template/tests/test_storage.py`:
+```python
+import pytest
+
+from core.storage import load, save, append
+
+
+def test_load_returns_empty_list_when_file_missing(tmp_path):
+    assert load("nothing", data_dir=tmp_path) == []
+
+
+def test_save_then_load_round_trips(tmp_path):
+    records = [
+        {"id": "1", "name": "Scope", "note": "Bench 4"},
+        {"id": "2", "name": "Meter", "note": "Bench 1"},
+    ]
+    save("kit", records, data_dir=tmp_path)
+    assert load("kit", data_dir=tmp_path) == records
+
+
+def test_append_adds_to_existing_file(tmp_path):
+    save("kit", [{"id": "1", "name": "Scope"}], data_dir=tmp_path)
+    append("kit", {"id": "2", "name": "Meter"}, data_dir=tmp_path)
+    assert load("kit", data_dir=tmp_path) == [
+        {"id": "1", "name": "Scope"},
+        {"id": "2", "name": "Meter"},
+    ]
+
+
+def test_append_creates_file_when_missing(tmp_path):
+    append("fresh", {"id": "1", "name": "Scope"}, data_dir=tmp_path)
+    assert load("fresh", data_dir=tmp_path) == [{"id": "1", "name": "Scope"}]
+
+
+def test_save_empty_list_produces_empty_load(tmp_path):
+    save("kit", [], data_dir=tmp_path)
+    assert load("kit", data_dir=tmp_path) == []
+
+
+def test_append_rejects_record_with_different_columns(tmp_path):
+    save("kit", [{"id": "1", "name": "Scope"}], data_dir=tmp_path)
+    with pytest.raises(ValueError, match="columns"):
+        append("kit", {"id": "2", "colour": "blue"}, data_dir=tmp_path)
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `cd template && pytest tests/test_storage.py -v`
+Expected: FAIL — `ModuleNotFoundError: No module named 'core.storage'`
+
+- [ ] **Step 3: Write the implementation**
+
+`template/core/storage.py`:
+```python
+"""Save and load records as CSV files in the data/ folder.
+
+Each "name" is one table. load("bookings") reads data/bookings.csv and gives
+you a list of dictionaries. Open the file in the editor any time to see
+exactly what your app has stored — there is no hidden database.
+"""
+
+import csv
+from pathlib import Path
+
+DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+
+def _path_for(name: str, data_dir: Path | None) -> Path:
+    directory = Path(data_dir) if data_dir is not None else DEFAULT_DATA_DIR
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory / f"{name}.csv"
+
+
+def load(name: str, data_dir: Path | None = None) -> list[dict[str, str]]:
+    """Read every record. Returns [] if nothing has been saved yet."""
+    path = _path_for(name, data_dir)
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def save(name: str, records: list[dict[str, str]], data_dir: Path | None = None) -> None:
+    """Overwrite everything with the given records."""
+    path = _path_for(name, data_dir)
+    if not records:
+        path.write_text("", encoding="utf-8")
+        return
+    columns = list(records[0].keys())
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer.writeheader()
+        writer.writerows(records)
+
+
+def append(name: str, record: dict[str, str], data_dir: Path | None = None) -> None:
+    """Add one record to the end, keeping existing records."""
+    existing = load(name, data_dir)
+    if existing and set(record.keys()) != set(existing[0].keys()):
+        raise ValueError(
+            f"columns do not match: {name}.csv has {sorted(existing[0])}, "
+            f"you gave {sorted(record)}"
+        )
+    save(name, existing + [record], data_dir)
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `cd template && pytest tests/test_storage.py -v`
+Expected: 6 passed
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add template/core/storage.py template/tests/test_storage.py
+git commit -m "feat: add CSV storage helpers"
+```
+
+---
+
+## Task 4: `check_setup.py` — the pre-work verification script
+
+Students run this before Session 1. It converts setup failure from a classroom emergency into an email the instructor can answer in advance.
+
+**Files:**
+- Create: `template/check_setup.py`
+- Test: `template/tests/test_check_setup.py`
+
+**Interfaces:**
+- Consumes: nothing
+- Produces:
+  - `check_python_version() -> tuple[bool, str]`
+  - `check_imports() -> tuple[bool, str]`
+  - `check_env(environ: dict[str, str]) -> tuple[bool, str]`
+  - `main() -> int` — prints results, returns 0 on success and 1 on failure
+  - Each check returns `(passed, human_readable_message)`.
+
+- [ ] **Step 1: Write the failing test**
+
+`template/tests/test_check_setup.py`:
+```python
+from check_setup import check_env, check_imports, check_python_version
+
+
+def test_python_version_passes_on_supported_version():
+    passed, message = check_python_version()
+    assert passed is True
+    assert "3.11" in message or "3.1" in message
+
+
+def test_imports_pass_when_dependencies_installed():
+    passed, message = check_imports()
+    assert passed is True, message
+
+
+def test_env_fails_when_no_key_present():
+    passed, message = check_env({})
+    assert passed is False
+    assert "GEMINI_API_KEY" in message
+
+
+def test_env_fails_when_key_is_still_the_placeholder():
+    passed, message = check_env({"GEMINI_API_KEY": "paste-your-key-here"})
+    assert passed is False
+    assert "placeholder" in message.lower()
+
+
+def test_env_passes_when_gemini_key_present():
+    passed, _ = check_env({"GEMINI_API_KEY": "AIzaSyRealLookingKey123"})
+    assert passed is True
+
+
+def test_env_passes_when_only_mistral_key_present():
+    passed, _ = check_env({"MISTRAL_API_KEY": "realmistralkey123"})
+    assert passed is True
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `cd template && pytest tests/test_check_setup.py -v`
+Expected: FAIL — `ModuleNotFoundError: No module named 'check_setup'`
+
+- [ ] **Step 3: Write the implementation**
+
+`template/check_setup.py`:
+```python
+"""Run this before the first session:  python check_setup.py
+
+It checks four things and tells you exactly what to fix if any of them fail.
+Do not come to class until this prints "ALL CHECKS PASSED".
+"""
+
+import os
+import sys
+
+PLACEHOLDER = "paste-your-key-here"
+REQUIRED_PACKAGES = ["streamlit", "numpy", "matplotlib", "google.genai", "dotenv", "pytest"]
+
+
+def check_python_version() -> tuple[bool, str]:
+    """Python must be 3.11 or newer."""
+    major, minor = sys.version_info[:2]
+    found = f"{major}.{minor}"
+    if (major, minor) >= (3, 11):
+        return True, f"Python {found}"
+    return False, (
+        f"Python {found} is too old. This project needs 3.11 or newer. "
+        "If you are in a Codespace, rebuild the container: "
+        "Command Palette > Codespaces: Rebuild Container."
+    )
+
+
+def check_imports() -> tuple[bool, str]:
+    """Every required package must be importable."""
+    import importlib
+
+    missing = []
+    for package in REQUIRED_PACKAGES:
+        try:
+            importlib.import_module(package)
+        except ImportError:
+            missing.append(package)
+    if not missing:
+        return True, f"All {len(REQUIRED_PACKAGES)} packages installed"
+    return False, (
+        f"Missing packages: {', '.join(missing)}. "
+        "Fix it by running:  pip install -r requirements.txt"
+    )
+
+
+def check_env(environ: dict[str, str]) -> tuple[bool, str]:
+    """At least one usable API key must be set."""
+    for name in ("GEMINI_API_KEY", "MISTRAL_API_KEY"):
+        value = (environ.get(name) or "").strip()
+        if not value:
+            continue
+        if value == PLACEHOLDER:
+            return False, (
+                f"{name} is still the placeholder text. Open .env and replace "
+                f"'{PLACEHOLDER}' with the key you created."
+            )
+        return True, f"{name} is set"
+    return False, (
+        "No API key found. Copy .env.example to .env, then paste your key into "
+        "GEMINI_API_KEY. Get one free at https://aistudio.google.com/apikey"
+    )
+
+
+def check_live_call() -> tuple[bool, str]:
+    """Make one real request, to prove the key actually works."""
+    key = (os.environ.get("GEMINI_API_KEY") or "").strip()
+    if not key or key == PLACEHOLDER:
+        return False, "Skipped — no usable GEMINI_API_KEY to test"
+    try:
+        from google import genai
+
+        client = genai.Client(api_key=key)
+        client.models.generate_content(
+            model="gemini-2.5-flash", contents="Reply with the single word: ok"
+        )
+        return True, "Live API call succeeded"
+    except Exception as error:  # noqa: BLE001 - we want to show students the raw reason
+        return False, (
+            f"The API rejected the request: {error}\n"
+            "   Most likely your key is wrong or was copied with extra spaces. "
+            "Create a new one at https://aistudio.google.com/apikey"
+        )
+
+
+def main() -> int:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    checks = [
+        ("Python version", check_python_version()),
+        ("Packages", check_imports()),
+        ("API key present", check_env(dict(os.environ))),
+        ("API key works", check_live_call()),
+    ]
+
+    print()
+    all_passed = True
+    for label, (passed, message) in checks:
+        mark = "PASS" if passed else "FAIL"
+        print(f"[{mark}] {label}: {message}")
+        all_passed = all_passed and passed
+
+    print()
+    if all_passed:
+        print("ALL CHECKS PASSED - you are ready for the session.")
+        return 0
+    print("Some checks failed. Fix the items marked FAIL above, then run this again.")
+    print("Still stuck after 10 minutes? See TROUBLESHOOTING.md")
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `cd template && pytest tests/test_check_setup.py -v`
+Expected: 6 passed
+
+- [ ] **Step 5: Verify the script runs end to end**
+
+Run: `cd template && python check_setup.py`
+Expected: exit code 1, with `[FAIL] API key present` (no `.env` exists yet) and every other check passing. This confirms the failure path prints useful guidance.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add template/check_setup.py template/tests/test_check_setup.py
+git commit -m "feat: add pre-work setup verification script"
+```
+
+---
+
+## Task 5: `core/llm.py` stub and the Streamlit skeleton
+
+**Files:**
+- Create: `template/core/llm.py`, `template/app.py`, `template/pages/1_Home.py`
+- Test: `template/tests/test_llm.py`
+
+**Interfaces:**
+- Consumes: `core.storage.load`, `core.storage.append`, `core.models.Item`, `core.models.new_id`
+- Produces:
+  - `ask(question: str, context: str = "", client=None) -> str` — raises `NotImplementedError` on `main`
+  - `ask_structured(question: str, schema: dict, context: str = "", client=None) -> dict` — raises `NotImplementedError` on `main`
+  - Both are implemented in Task 13 on the `solution/lab3` branch. The `client` parameter exists so tests can inject a fake and never touch the network.
+
+- [ ] **Step 1: Write the failing test**
+
+`template/tests/test_llm.py`:
+```python
+import pytest
+
+from core.llm import ask, ask_structured
+
+
+def test_ask_is_not_implemented_yet():
+    with pytest.raises(NotImplementedError, match="LAB3"):
+        ask("What is a resistor?")
+
+
+def test_ask_structured_is_not_implemented_yet():
+    with pytest.raises(NotImplementedError, match="LAB3"):
+        ask_structured("What is a resistor?", schema={"type": "object"})
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `cd template && pytest tests/test_llm.py -v`
+Expected: FAIL — `ModuleNotFoundError: No module named 'core.llm'`
+
+- [ ] **Step 3: Write the stub**
+
+`template/core/llm.py`:
+```python
+"""Where your app talks to a language model.
+
+This file is deliberately empty until Session 3. Leaving the slot here means
+you can add an AI feature later without rearranging anything you have built.
+"""
+
+NOT_YET = "You build this in Session 3. See labs/LAB3.md."
+
+
+def ask(question: str, context: str = "", client=None) -> str:
+    """Ask a question in plain language and get plain text back."""
+    raise NotImplementedError(NOT_YET)
+
+
+def ask_structured(question: str, schema: dict, context: str = "", client=None) -> dict:
+    """Ask a question and get an answer in a fixed shape you specify."""
+    raise NotImplementedError(NOT_YET)
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `cd template && pytest tests/test_llm.py -v`
+Expected: 2 passed
+
+- [ ] **Step 5: Write the Streamlit entry point**
+
+`template/app.py`:
+```python
+"""Start here. Run the app with:  streamlit run app.py
+
+Streamlit turns every file in the pages/ folder into a tab automatically.
+That is why one feature = one file in pages/ = one person's work.
+"""
+
+import streamlit as st
+
+st.set_page_config(page_title="My Project", page_icon="*", layout="wide")
+
+st.title("My Project")
+st.write(
+    "Replace this text with what your project does. "
+    "Use the sidebar to move between features."
+)
+st.info("Each feature lives in its own file in the pages/ folder.")
+```
+
+- [ ] **Step 6: Write the example page**
+
+`template/pages/1_Home.py`:
+```python
+"""Example feature page. Copy this file as the starting point for your own.
+
+The number at the front of the filename sets the order in the sidebar.
+"""
+
+import streamlit as st
+
+from core.models import Item, new_id
+from core.storage import append, load
+
+st.title("Example: a list of things")
+st.caption("Delete this page once you have built your own.")
+
+with st.form("add_item"):
+    name = st.text_input("Name")
+    note = st.text_input("Note")
+    submitted = st.form_submit_button("Add")
+
+if submitted and name:
+    append("items", Item(id=new_id(), name=name, note=note).to_dict())
+    st.success(f"Added {name}")
+
+items = load("items")
+if items:
+    st.dataframe(items, use_container_width=True)
+else:
+    st.write("Nothing saved yet. Add something above.")
+```
+
+- [ ] **Step 7: Verify the app starts**
+
+Run: `cd template && streamlit run app.py --server.headless true --server.port 8501`
+Expected: starts without error and prints a local URL. Open it, add an item on the Home page, confirm it appears in the table, confirm `template/data/items.csv` now exists. Stop with Ctrl+C.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add template/core/llm.py template/tests/test_llm.py template/app.py template/pages/1_Home.py
+git commit -m "feat: add Streamlit skeleton and LLM stub"
+```
+
+---
+
+## Task 6: `.clinerules` — the gate rules the agent obeys
+
+The single highest-leverage artifact in the workshop. With 30–60 students and no teaching assistants, the instructor cannot enforce process by walking the room, so the tool enforces it.
+
+**Files:**
+- Create: `template/.clinerules`
+
+**Interfaces:**
+- Consumes: the `aidlc/` filenames created in Task 7 — the paths named here must match exactly.
+- Produces: agent behaviour relied on by every lab.
+
+- [ ] **Step 1: Write the rules file**
+
+`template/.clinerules`:
+```markdown
+# How you must work on this project
+
+You are working with a student who is learning software engineering.
+They have completed one introductory Python course. Follow the Four Gates
+below and never skip ahead, even if the student asks you to.
+
+## The Four Gates
+
+**Gate 1 — Intent.** If `aidlc/intent.md` still contains the placeholder
+text, ask the student to fill it in first. Write no code.
+
+**Gate 2 — Spec.** Before any code exists, `aidlc/requirements.md` must list
+numbered requirements, each with an acceptance criterion that can be checked
+by running something. Draft it, then STOP and ask for approval. Do not write
+code until the student replies with "approved".
+
+**Gate 3 — Plan.** Before any code exists, `aidlc/design.md` and
+`aidlc/tasks.md` must exist. Every task in `tasks.md` must name exactly ONE
+owner and touch exactly ONE file that no other task touches. Draft both, then
+STOP and ask for approval.
+
+**Gate 4 — Build.** Implement ONE task at a time. After each task: run the
+tests, report the result honestly, and STOP. Do not begin the next task
+until asked.
+
+## Coding rules
+
+- Python 3.11 and Streamlit only.
+- Do not add a dependency without asking first. The approved list is in
+  `requirements.txt` and it is closed.
+- One feature = one file in `pages/`. Never edit a file that `aidlc/tasks.md`
+  assigns to a different owner.
+- Every function in `core/` needs a test in `tests/`.
+- Keep diffs small. Never rewrite a whole file when an edit will do.
+- Never put an API key in code. Read it from the environment.
+- If a requirement is ambiguous, ask. Do not guess and carry on.
+
+## Teaching rules
+
+- Before doing anything, say what you are about to do in two sentences.
+- Explain any term the student may not know, the first time you use it.
+- When you finish a task, state plainly what you did NOT test.
+- If you are unsure whether something works, say so. Never claim success you
+  have not verified by running something.
+```
+
+- [ ] **Step 2: Verify the referenced paths**
+
+Run: `grep -o 'aidlc/[a-z]*\.md' template/.clinerules | sort -u`
+Expected: exactly `aidlc/design.md`, `aidlc/intent.md`, `aidlc/requirements.md`, `aidlc/tasks.md`. These must match the files created in Task 7.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add template/.clinerules
+git commit -m "feat: add Four Gates agent rules"
+```
+
+---
+
+## Task 7: The `aidlc/` gate templates
+
+**Files:**
+- Create: `template/aidlc/intent.md`, `template/aidlc/requirements.md`, `template/aidlc/design.md`, `template/aidlc/tasks.md`
+
+**Interfaces:**
+- Consumes: filenames fixed by Task 6's `.clinerules`
+- Produces: the artifacts students fill in at Gates 1–3
+
+- [ ] **Step 1: Write `template/aidlc/intent.md`**
+
+```markdown
+# Gate 1 — Intent
+
+<!-- PLACEHOLDER: replace every line below. Your agent will refuse to write
+     code while this placeholder text is still here. -->
+
+**Who is this for?**
+PLACEHOLDER — describe one real person and their situation in one sentence.
+
+**What problem does it solve?**
+PLACEHOLDER — what is annoying or slow for them today?
+
+**What does "done" look like?**
+PLACEHOLDER — describe the moment you would call this finished. Be concrete:
+"a student can book a bench for a two-hour slot and see it in their list."
+
+**What is deliberately NOT included?**
+PLACEHOLDER — name at least two things you are choosing not to build. This
+matters more than it looks: it is what stops the agent inventing scope.
+```
+
+- [ ] **Step 2: Write `template/aidlc/requirements.md`**
+
+```markdown
+# Gate 2 — Requirements
+
+Your agent drafts this. You correct it and approve it.
+
+A requirement is only finished when its acceptance criterion can be **checked
+by running something**. "The app should be user friendly" cannot be checked.
+"Booking a taken slot shows the message 'already booked'" can.
+
+| # | Requirement | Acceptance criterion (how we check it) |
+|---|---|---|
+| 1 | | |
+| 2 | | |
+| 3 | | |
+
+**Approved by:** (your name)
+**Date:**
+```
+
+- [ ] **Step 3: Write `template/aidlc/design.md`**
+
+```markdown
+# Gate 3 — Design
+
+Your agent drafts this. You correct it and approve it.
+
+## What data do we store?
+
+One row per _______. Columns:
+
+| Column | Meaning | Example |
+|---|---|---|
+| id | unique identifier | 3f2a9c01 |
+| | | |
+
+## What are the screens?
+
+| Page file | What the user does here |
+|---|---|
+| `pages/1_....py` | |
+| `pages/2_....py` | |
+
+## How does data move?
+
+Describe in three sentences what happens when a user does the main action:
+what they type, what gets saved, what they see next.
+
+**Approved by:**
+**Date:**
+```
+
+- [ ] **Step 4: Write `template/aidlc/tasks.md`**
+
+```markdown
+# Gate 3 — Task list
+
+Your agent drafts this. You correct it and approve it.
+
+**The one rule that matters:** every task names exactly ONE owner and touches
+exactly ONE file that no other task touches. This is what lets four people
+build at the same time without their work colliding.
+
+| # | Task | Owner | The ONE file it touches | Done? |
+|---|---|---|---|---|
+| 1 | | | `pages/1_....py` | |
+| 2 | | | `pages/2_....py` | |
+| 3 | | | `core/models.py` | |
+| 4 | | | `core/storage.py` | |
+
+**Approved by:**
+**Date:**
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add template/aidlc/
+git commit -m "feat: add Four Gates artifact templates"
+```
+
+---
+
+## Task 8: `README.md` and `TROUBLESHOOTING.md`
+
+`TROUBLESHOOTING.md` is the no-TA safety net. Every entry must be answerable by a student without the instructor.
+
+**Files:**
+- Create: `template/README.md`, `template/TROUBLESHOOTING.md`
+
+**Interfaces:**
+- Consumes: `check_setup.py` from Task 4, the devcontainer from Task 1
+- Produces: the setup path students follow during pre-work
+
+- [ ] **Step 1: Write `template/README.md`**
+
+```markdown
+# AI for Software Development — project template
+
+This is the starting point for every lab and project in the workshop.
+
+## Before the first session (about 20 minutes)
+
+Do this at home. If it fails, message the class channel — do not wait until
+class, because 60 people cannot be unblocked at once.
+
+1. **Create a GitHub account** at https://github.com/signup using a personal
+   email address.
+2. **Get a free AI key.** Go to https://aistudio.google.com/apikey, sign in
+   with a Google account, click "Create API key", and copy it somewhere safe.
+   A key is a password — do not share it or paste it into a chat.
+3. **Make your own copy of this project.** Click the green **Use this
+   template** button at the top of this page, then **Create a new
+   repository**. Give it any name. Set it to **Public**.
+4. **Open it in a Codespace.** On your new repository, click **Code** >
+   **Codespaces** > **Create codespace on main**. A full code editor opens in
+   your browser. First launch takes two to three minutes.
+5. **Paste your key in.** Open the file called `.env` in the editor. Replace
+   `paste-your-key-here` with the key you copied. Save with Ctrl+S.
+6. **Check everything works.** In the terminal at the bottom, run:
+
+   ```
+   python check_setup.py
+   ```
+
+   Keep fixing what it reports until it prints `ALL CHECKS PASSED`.
+7. **Post "setup done" in the class channel.**
+
+## What is in here
+
+| Folder | What it is for |
+|---|---|
+| `aidlc/` | The four planning documents you fill in before writing code |
+| `pages/` | One file per feature. This is how your team works in parallel |
+| `core/` | Shared code: your data shapes, saving and loading, AI calls |
+| `tests/` | Automated checks that your code still works |
+| `labs/` | Instructions for each lab session |
+| `briefs/` | The project ideas you can choose from |
+
+## Running your app
+
+```
+streamlit run app.py
+```
+
+A preview opens automatically. If it does not, look for the **Ports** tab and
+click the globe icon next to port 8501.
+
+## Running your tests
+
+```
+pytest
+```
+
+## Something is broken
+
+See `TROUBLESHOOTING.md`. Give it a real try for ten minutes before asking.
+```
+
+- [ ] **Step 2: Write `template/TROUBLESHOOTING.md`**
+
+```markdown
+# If something breaks
+
+Work down this list. Each fix takes under two minutes. If you are still stuck
+after ten minutes, ask a neighbour before asking the instructor — the person
+next to you has probably hit the same thing.
+
+## Setup
+
+**`check_setup.py` says a package is missing**
+Run `pip install -r requirements.txt` in the terminal, then run the check
+again.
+
+**`check_setup.py` says the API rejected the request**
+Your key is wrong or was copied with an extra space. Create a fresh one at
+https://aistudio.google.com/apikey, paste it into `.env`, save, try again.
+
+**There is no `.env` file**
+Run `cp .env.example .env` in the terminal, then paste your key in.
+
+**My Codespace will not start, or is stuck**
+Go to https://github.com/codespaces, find yours, click the three dots, choose
+**Stop**, then open it again. If that fails, delete it and create a new one —
+your work is safe as long as you have pushed it.
+
+## The agent
+
+**Cline says I am rate limited, or requests keep failing**
+You have hit the free limit for that model. Open Cline's settings (gear icon),
+switch the provider from Mistral to Google Gemini (or back), and continue.
+This is why you set up two keys.
+
+**Cline refuses to write code and keeps asking for `requirements.md`**
+That is correct behaviour, not a bug. Fill in `aidlc/intent.md`, let it draft
+`aidlc/requirements.md`, read it, then reply "approved".
+
+**Cline rewrote a file and broke everything**
+Do not panic and do not try to fix it by prompting. In the terminal:
+`git checkout -- path/to/the/file.py` puts that file back to the last commit.
+This is why you commit after every working step.
+
+**The agent is going in circles on the same error**
+Stop it. Start a NEW task instead of continuing the conversation — a long
+conversation makes the agent worse, not better. Tell it what you already
+tried.
+
+## The app
+
+**`streamlit run app.py` shows "command not found"**
+Run `pip install -r requirements.txt` first.
+
+**The preview is blank or will not open**
+Open the **Ports** tab next to the terminal, find port 8501, click the globe
+icon.
+
+**`ModuleNotFoundError: No module named 'core'`**
+You are running from the wrong folder. Run `pwd`. You must be in the folder
+that contains `app.py`.
+
+**My page does not appear in the sidebar**
+The file must be inside `pages/` and end in `.py`. Restart Streamlit.
+
+## Git and teamwork
+
+**My teammate's changes are not showing up**
+`git pull` first, then keep working.
+
+**Git says there is a merge conflict**
+Two people edited the same file, which the one-file-per-owner rule exists to
+prevent. Tell your team, agree who owns that file, and have the other person
+undo their change to it with `git checkout --theirs path/to/file.py`.
+
+**I accidentally committed my `.env` file**
+Tell the instructor immediately and create a new API key at
+https://aistudio.google.com/apikey — the old one must be treated as leaked.
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add template/README.md template/TROUBLESHOOTING.md
+git commit -m "docs: add student README and troubleshooting guide"
+```
+
+---
+
+## Task 9: Lab 1 brief and the filter solution
+
+Lab 1's value rests on one property: the acceptance criterion is analytically checkable. Students verify software against maths they already trust, which is a far better first experience of testing than taking it on faith.
+
+**Files:**
+- Create: `template/labs/LAB1.md`
+- Create (on `solution/lab1` branch only, in Task 15): `template/core/filters.py`, `template/tests/test_filters.py`, `template/pages/2_Filter_Designer.py`
+
+**Interfaces:**
+- Consumes: nothing
+- Produces: the solution module signatures students' work is compared against:
+  - `rc_cutoff_hz(r_ohm: float, c_farad: float) -> float`
+  - `rc_lowpass_response(r_ohm: float, c_farad: float, freqs_hz: np.ndarray) -> tuple[np.ndarray, np.ndarray]` returning `(magnitude_db, phase_deg)`
+
+- [ ] **Step 1: Write the reference implementation**
+
+`template/core/filters.py`:
+```python
+"""Frequency response maths for a first-order RC filter."""
+
+import numpy as np
+
+
+def rc_cutoff_hz(r_ohm: float, c_farad: float) -> float:
+    """The -3 dB cutoff frequency in hertz: f = 1 / (2 * pi * R * C)."""
+    if r_ohm <= 0 or c_farad <= 0:
+        raise ValueError("resistance and capacitance must both be positive")
+    return 1.0 / (2.0 * np.pi * r_ohm * c_farad)
+
+
+def rc_lowpass_response(
+    r_ohm: float, c_farad: float, freqs_hz: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Magnitude in decibels and phase in degrees, at each frequency given."""
+    if r_ohm <= 0 or c_farad <= 0:
+        raise ValueError("resistance and capacitance must both be positive")
+    ratio = np.asarray(freqs_hz, dtype=float) / rc_cutoff_hz(r_ohm, c_farad)
+    transfer = 1.0 / (1.0 + 1j * ratio)
+    magnitude_db = 20.0 * np.log10(np.abs(transfer))
+    phase_deg = np.degrees(np.angle(transfer))
+    return magnitude_db, phase_deg
+```
+
+- [ ] **Step 2: Write the tests**
+
+`template/tests/test_filters.py`:
+```python
+import numpy as np
+import pytest
+
+from core.filters import rc_cutoff_hz, rc_lowpass_response
+
+
+def test_cutoff_matches_the_textbook_formula():
+    r_ohm, c_farad = 1000.0, 1e-6
+    expected = 1.0 / (2.0 * np.pi * r_ohm * c_farad)
+    assert rc_cutoff_hz(r_ohm, c_farad) == pytest.approx(expected)
+
+
+def test_cutoff_of_1k_and_1uF_is_about_159_hz():
+    assert rc_cutoff_hz(1000.0, 1e-6) == pytest.approx(159.15, abs=0.01)
+
+
+def test_magnitude_at_cutoff_is_minus_3_db():
+    r_ohm, c_farad = 1000.0, 1e-6
+    cutoff = rc_cutoff_hz(r_ohm, c_farad)
+    magnitude_db, _ = rc_lowpass_response(r_ohm, c_farad, np.array([cutoff]))
+    assert magnitude_db[0] == pytest.approx(-3.0103, abs=0.001)
+
+
+def test_phase_at_cutoff_is_minus_45_degrees():
+    r_ohm, c_farad = 1000.0, 1e-6
+    cutoff = rc_cutoff_hz(r_ohm, c_farad)
+    _, phase_deg = rc_lowpass_response(r_ohm, c_farad, np.array([cutoff]))
+    assert phase_deg[0] == pytest.approx(-45.0, abs=0.001)
+
+
+def test_gain_well_below_cutoff_is_flat_at_0_db():
+    magnitude_db, _ = rc_lowpass_response(1000.0, 1e-6, np.array([0.001]))
+    assert magnitude_db[0] == pytest.approx(0.0, abs=0.001)
+
+
+def test_slope_above_cutoff_is_20_db_per_decade():
+    magnitude_db, _ = rc_lowpass_response(1000.0, 1e-6, np.array([1.6e4, 1.6e5]))
+    assert magnitude_db[0] - magnitude_db[1] == pytest.approx(20.0, abs=0.1)
+
+
+def test_negative_component_values_are_rejected():
+    with pytest.raises(ValueError, match="positive"):
+        rc_cutoff_hz(-1.0, 1e-6)
+```
+
+- [ ] **Step 3: Run the tests to verify they pass**
+
+Run: `cd template && pytest tests/test_filters.py -v`
+Expected: 7 passed
+
+- [ ] **Step 4: Write the solution page**
+
+`template/pages/2_Filter_Designer.py`:
+```python
+"""Lab 1 reference solution: RC low-pass filter designer."""
+
+import matplotlib.pyplot as plt
+import numpy as np
+import streamlit as st
+
+from core.filters import rc_cutoff_hz, rc_lowpass_response
+
+st.title("RC Low-Pass Filter Designer")
+
+col_left, col_right = st.columns(2)
+r_kohm = col_left.number_input("Resistance R (kilo-ohms)", 0.1, 1000.0, 1.0, step=0.1)
+c_uf = col_right.number_input("Capacitance C (microfarads)", 0.001, 1000.0, 1.0, step=0.1)
+
+r_ohm = r_kohm * 1e3
+c_farad = c_uf * 1e-6
+cutoff = rc_cutoff_hz(r_ohm, c_farad)
+
+st.metric("Cutoff frequency", f"{cutoff:,.1f} Hz")
+st.caption("Cutoff is where the output drops to -3 dB: f = 1 / (2 * pi * R * C)")
+
+freqs = np.logspace(np.log10(cutoff / 100), np.log10(cutoff * 100), 500)
+magnitude_db, phase_deg = rc_lowpass_response(r_ohm, c_farad, freqs)
+
+figure, (top, bottom) = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
+top.semilogx(freqs, magnitude_db)
+top.axvline(cutoff, linestyle="--", linewidth=1)
+top.axhline(-3.0103, linestyle=":", linewidth=1)
+top.set_ylabel("Magnitude (dB)")
+top.grid(True, which="both", alpha=0.3)
+
+bottom.semilogx(freqs, phase_deg)
+bottom.axvline(cutoff, linestyle="--", linewidth=1)
+bottom.set_ylabel("Phase (degrees)")
+bottom.set_xlabel("Frequency (Hz)")
+bottom.grid(True, which="both", alpha=0.3)
+
+st.pyplot(figure)
+```
+
+- [ ] **Step 5: Verify the page renders**
+
+Run: `cd template && streamlit run app.py --server.headless true --server.port 8501`
+Expected: the "Filter Designer" tab appears in the sidebar, shows 159.2 Hz for the default 1 kΩ / 1 µF, and draws both plots with the dashed cutoff line crossing the magnitude curve at −3 dB. Stop with Ctrl+C.
+
+- [ ] **Step 6: Write the lab brief**
+
+`template/labs/LAB1.md`:
+```markdown
+# Lab 1 — Build a filter designer, twice
+
+You will build the same app two ways. The comparison is the whole point.
+
+## Round 1: just ask for it (25 minutes)
+
+Open Cline. Type:
+
+> Build me an RC low-pass filter designer in Streamlit.
+
+Accept whatever it does. Do not plan. Do not write a spec. Try to get it
+working. Note what happens.
+
+When time is up, answer these in your AI collaboration log:
+- Did it run first time?
+- Did you check whether the numbers were correct? How would you even know?
+- If a classmate asked "what does this app do exactly", could you answer
+  without reading the code?
+
+Now delete it: `git checkout -- .` and `rm -f pages/2_*.py`
+
+## Round 2: the Four Gates (70 minutes)
+
+Same app. Different route.
+
+**Gate 1 — Intent (5 min).** Fill in `aidlc/intent.md` yourself. The agent
+will not proceed until you do.
+
+**Gate 2 — Spec (10 min).** Ask Cline to draft `aidlc/requirements.md`.
+Read every line. At least one requirement must be checkable by maths you
+already know, for example:
+
+> The displayed cutoff frequency equals 1 / (2 * pi * R * C), within 0.1 Hz.
+
+Fix what is wrong, then reply "approved".
+
+**Gate 3 — Plan (10 min).** Ask for `aidlc/design.md` and `aidlc/tasks.md`.
+The maths belongs in `core/filters.py`; the screen belongs in
+`pages/2_Filter_Designer.py`. Approve.
+
+**Gate 4 — Build (40 min).** One task at a time. After each one, run
+`pytest` and look at the app. Commit every time the tests pass:
+
+```
+git add -A && git commit -m "what you just did"
+```
+
+**Gate 5 — Ship (15 min).** Push, then deploy at
+https://share.streamlit.io — sign in with GitHub, pick your repository,
+set the main file to `app.py`, click Deploy. Post your public URL.
+
+## You are done when
+
+- [ ] Entering 1 kΩ and 1 µF shows a cutoff of about 159.2 Hz
+- [ ] A magnitude plot and a phase plot both appear, with a log frequency axis
+- [ ] `pytest` passes and at least one test checks the cutoff formula
+- [ ] Your app is live at a public URL
+
+## If you finish early
+
+Add a phase plot if you have not. Add a second-order RLC option. Let the user
+compare two designs on the same axes. Add a CSV export of the response.
+```
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add template/labs/LAB1.md template/core/filters.py template/tests/test_filters.py template/pages/2_Filter_Designer.py
+git commit -m "feat: add Lab 1 brief and filter reference solution"
+```
+
+> **Note for Task 15:** `core/filters.py`, `tests/test_filters.py` and
+> `pages/2_Filter_Designer.py` are the solution — they must be removed from
+> the published `main` branch and kept only on `solution/lab1`.
+
+---
+
+## Task 10: The five project briefs and the Lab 2 runbook
+
+**Files:**
+- Create: `template/briefs/1-equipment-booking.md`, `template/briefs/2-inventory-bom.md`, `template/briefs/3-energy-tracker.md`, `template/briefs/4-project-matcher.md`, `template/briefs/5-solar-sizing.md`, `template/briefs/README.md`, `template/labs/LAB2.md`
+
+**Interfaces:**
+- Consumes: the `aidlc/` templates from Task 7
+- Produces: the project options and the parallel-work protocol used in Session 2
+
+- [ ] **Step 1: Write `template/briefs/README.md`**
+
+```markdown
+# Project briefs
+
+Pick one. Each has been checked to fit the template, the time you have, and
+the free tools we are using.
+
+| # | Project | In one sentence |
+|---|---|---|
+| 1 | Lab Equipment Booking | Book benches and instruments so two people never turn up for the same oscilloscope |
+| 2 | Component Inventory and BOM Helper | Track what parts are in stock and check whether a project can be built from them |
+| 3 | Energy Usage and Tariff Tracker | Log appliance usage, work out the monthly bill, compare tariffs |
+| 4 | Capstone Project Matcher | Post project ideas and find teammates with the skills you need |
+| 5 | Solar Panel Sizing Service | Enter a site and a load, get a panel and battery recommendation you can save |
+
+**Want to build your own idea?** Allowed, with one condition: get the
+instructor to confirm it fits the template — pages, a data shape, saved
+records, and optionally one AI feature. If your idea does not fit that shape,
+it will not finish in the time available.
+
+Every brief has an "AI feature" section. That is what you build in Session 3.
+It is a bonus, not a requirement — a working project without it beats a
+broken project with it.
+```
+
+- [ ] **Step 2: Write `template/briefs/1-equipment-booking.md`**
+
+```markdown
+# Brief 1 — Lab Equipment Booking
+
+## The situation
+
+The teaching lab has a handful of oscilloscopes, signal generators and power
+supplies. Students turn up and find the one they need already in use. There
+is a paper sign-up sheet that nobody can see until they walk to the lab.
+
+## What you are building
+
+A web app where a student can see what is free and book it for a time slot.
+
+## Suggested pages (one per person)
+
+| Page | What happens here |
+|---|---|
+| Browse equipment | A list of instruments and whether each is free right now |
+| Make a booking | Pick an instrument, a date and a time slot, confirm |
+| My bookings | See and cancel your own bookings |
+| Admin | Add or remove instruments |
+
+## Suggested data
+
+One row per booking: `id`, `equipment_name`, `student_name`, `date`,
+`start_time`, `end_time`.
+One row per instrument: `id`, `name`, `location`, `notes`.
+
+## The hard part (this is the interesting bit)
+
+Two people must not be able to book the same instrument for overlapping
+times. Write that as an acceptance criterion at Gate 2 and a test at Gate 4.
+
+## AI feature for Session 3
+
+Let a student type "I need a scope on Friday afternoon for two hours" and
+turn that sentence into a filled-in booking form they confirm.
+```
+
+- [ ] **Step 3: Write `template/briefs/2-inventory-bom.md`**
+
+```markdown
+# Brief 2 — Component Inventory and BOM Helper
+
+## The situation
+
+A student society keeps a drawer of components. Nobody knows what is in it.
+People buy parts that are already in the drawer, and start projects that
+cannot be finished because one part is missing.
+
+## What you are building
+
+A web app that tracks stock and checks whether a project's parts list — its
+bill of materials, or BOM — can be built from what is on hand.
+
+## Suggested pages (one per person)
+
+| Page | What happens here |
+|---|---|
+| Stock | Every part, how many there are, where it lives |
+| Add or remove stock | Record parts arriving or being taken |
+| Build check | Paste a parts list, see what is missing |
+| Shortages | Everything below its minimum quantity |
+
+## Suggested data
+
+One row per part: `id`, `part_number`, `description`, `quantity`,
+`minimum_quantity`, `location`.
+
+## The hard part
+
+Quantities must never go negative, and taking the last of something must show
+up on the shortages page immediately.
+
+## AI feature for Session 3
+
+Let a user paste a messy parts list copied from a datasheet or a forum post,
+and turn it into a clean table of part numbers and quantities.
+```
+
+- [ ] **Step 4: Write `template/briefs/3-energy-tracker.md`**
+
+```markdown
+# Brief 3 — Energy Usage and Tariff Tracker
+
+## The situation
+
+A household has no idea which appliances dominate the electricity bill, or
+whether a different tariff would be cheaper.
+
+## What you are building
+
+A web app to log appliance usage, work out energy in kilowatt-hours and cost,
+and compare tariffs side by side.
+
+## Suggested pages (one per person)
+
+| Page | What happens here |
+|---|---|
+| Appliances | Add appliances with their power rating in watts |
+| Log usage | Record hours used on a date |
+| Bill | Total kilowatt-hours and cost for a month |
+| Compare tariffs | The same usage priced under two different tariffs |
+
+## Suggested data
+
+One row per appliance: `id`, `name`, `watts`.
+One row per usage entry: `id`, `appliance_id`, `date`, `hours`.
+One row per tariff: `id`, `name`, `cost_per_kwh`, `standing_charge`.
+
+## The hard part
+
+Kilowatt-hours equal watts times hours divided by 1000. Write a test for that
+conversion — it is the number everything else depends on.
+
+## AI feature for Session 3
+
+Give the model the user's actual logged usage and ask for three specific
+suggestions to cut the bill, each naming a real appliance from their data.
+```
+
+- [ ] **Step 5: Write `template/briefs/4-project-matcher.md`**
+
+```markdown
+# Brief 4 — Capstone Project Matcher
+
+## The situation
+
+Final-year students need project teammates. Right now this happens through
+whoever you already know, so good ideas die for lack of a teammate who can do
+the firmware.
+
+## What you are building
+
+A web app where students post project ideas and find teammates whose skills
+fit.
+
+## Suggested pages (one per person)
+
+| Page | What happens here |
+|---|---|
+| Post an idea | Title, description, skills needed |
+| Browse ideas | All open ideas, filterable by skill |
+| My profile | Your name, your skills, what you are looking for |
+| Matches | Ideas that need a skill you have |
+
+## Suggested data
+
+One row per student: `id`, `name`, `skills`, `looking_for`.
+One row per idea: `id`, `title`, `description`, `skills_needed`, `posted_by`.
+
+## The hard part
+
+Skills are free text, so "PCB design", "pcb", and "PCB layout" must be
+treated as the same thing. Decide how, and write a test for it.
+
+## AI feature for Session 3
+
+Read a student's free-text description of themselves and pull out a clean
+list of skills, then explain in one sentence why a given idea matches them.
+```
+
+- [ ] **Step 6: Write `template/briefs/5-solar-sizing.md`**
+
+```markdown
+# Brief 5 — Solar Panel Sizing Service
+
+## The situation
+
+A homeowner wants solar panels but every quote assumes they already know how
+many kilowatts they need.
+
+## What you are building
+
+A web app that takes a location, a rough daily electricity use and a budget,
+and recommends a panel and battery size, saving each quote.
+
+## Suggested pages (one per person)
+
+| Page | What happens here |
+|---|---|
+| New estimate | Enter location, daily usage, budget |
+| Recommendation | Suggested panel kilowatts, battery kilowatt-hours, reasoning |
+| Saved quotes | Every estimate made so far |
+| Assumptions | The sun-hours and prices used, editable |
+
+## Suggested data
+
+One row per quote: `id`, `location`, `daily_kwh`, `budget`, `panel_kw`,
+`battery_kwh`, `created`.
+One row per location: `name`, `peak_sun_hours`.
+
+## The hard part
+
+Panel size in kilowatts is roughly daily kilowatt-hours divided by peak sun
+hours, divided by a system efficiency factor. Pick your factor, write it
+down in `design.md`, and test the calculation.
+
+## AI feature for Session 3
+
+Explain the recommendation in plain language to someone with no electrical
+background, and answer follow-up questions using a sizing guide document you
+provide.
+```
+
+- [ ] **Step 7: Write `template/labs/LAB2.md`**
+
+```markdown
+# Lab 2 — Design and build a product as a team
+
+Your team is 3 to 4 people. What you build today is your group project — you
+will keep working on it during the week and demo it in Session 3.
+
+## Before you start (10 minutes)
+
+1. Pick a brief from `briefs/`.
+2. **One person** clicks "Use this template" to create the team repository,
+   then adds the others as collaborators: Settings > Collaborators > Add
+   people.
+3. **Everyone else** opens their own Codespace on that shared repository.
+   Everyone codes at the same time, on their own machine, with their own
+   agent and their own free quota.
+
+## Part 1 — Think together (25 minutes)
+
+**All of you at one screen. One person drives.**
+
+Work through Gates 1, 2 and 3 as a group. Argue about the requirements now,
+because it is a hundred times cheaper than arguing about them after the code
+exists.
+
+When you fill in `aidlc/tasks.md`, obey the one rule:
+
+> Every task names exactly ONE owner and touches exactly ONE file that no
+> other task touches.
+
+If two tasks want the same file, they are one task, or the file needs
+splitting. Do not skip past this — it is what stops your work colliding.
+
+## Part 2 — Build in parallel (50 minutes)
+
+**Back to your own machines. Everyone builds at the same time.**
+
+```
+git checkout -b your-name-feature-name
+```
+
+Now work through Gate 4 on **your** task only, in **your** file only. When
+your tests pass:
+
+```
+git add -A
+git commit -m "what you did"
+git push -u origin your-name-feature-name
+```
+
+Then open a pull request on GitHub: a request to merge your work into the
+team's main copy.
+
+## Part 3 — Review each other (25 minutes)
+
+Pair up. Open your partner's pull request and read every changed line. You
+are looking for:
+
+- Something that does not do what the requirement says
+- A test that would still pass if the code were broken
+- A function invented out of thin air that does not exist
+- Code that was silently deleted to make an error go away
+
+Leave at least two comments. Approve and merge only when you are satisfied.
+
+Reviewing code you did not write **is the job now**. Take it seriously.
+
+## Part 4 — Ship and plan (15 minutes)
+
+Deploy at https://share.streamlit.io. Then agree, in writing in
+`aidlc/tasks.md`, who does what before Session 3.
+
+## You are done when
+
+- [ ] All four gate documents are filled in and approved
+- [ ] Every member has at least one merged pull request
+- [ ] Every pull request was reviewed by someone who did not write it
+- [ ] `pytest` passes on main
+- [ ] The app is live at a public URL
+```
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add template/briefs/ template/labs/LAB2.md
+git commit -m "feat: add five project briefs and Lab 2 runbook"
+```
+
+---
+
+## Task 11: Session 3 retrieval corpus
+
+**Files:**
+- Create: `template/session3/corpus/lm7805.md`, `template/session3/corpus/ne555.md`, `template/session3/corpus/atmega328p.md`, `template/session3/corpus/lm358.md`, `template/session3/corpus/bc547.md`
+
+**Interfaces:**
+- Consumes: nothing
+- Produces: the text corpus that `retrieve()` searches in Task 12. Each file must contain a `## Absolute Maximum Ratings` section with at least three specification lines, because the structured-output and evaluation steps depend on that shape.
+
+- [ ] **Step 1: Write the five corpus files**
+
+Each follows this exact structure. `template/session3/corpus/lm7805.md`:
+```markdown
+# LM7805 — 5 V Positive Voltage Regulator
+
+## Description
+
+Three-terminal positive voltage regulator providing a fixed 5 V output.
+Includes internal thermal overload protection and short-circuit current
+limiting. Requires no external components for basic operation, though input
+and output capacitors improve stability.
+
+## Absolute Maximum Ratings
+
+- Input voltage: 35 V maximum
+- Output current: 1.5 A maximum
+- Operating junction temperature: 0 to 125 degrees Celsius
+- Power dissipation: internally limited
+
+## Electrical Characteristics
+
+- Output voltage: 4.8 V to 5.2 V
+- Dropout voltage: 2.0 V typical at 1 A
+- Quiescent current: 5 mA typical
+- Line regulation: 3 mV typical
+
+## Typical Application Notes
+
+Place a 0.33 microfarad capacitor on the input and a 0.1 microfarad capacitor
+on the output, both close to the device. A heatsink is required above roughly
+0.5 A of load current.
+```
+
+Write the remaining four with the same four section headings and comparable
+detail:
+- `ne555.md` — NE555 timer. Supply 4.5 V to 16 V, output current 200 mA,
+  operating temperature 0 to 70 degrees Celsius, timing accuracy 1 percent
+  typical, astable and monostable notes.
+- `atmega328p.md` — 8-bit microcontroller. Supply 1.8 V to 5.5 V, DC current
+  per I/O pin 40 mA, operating temperature −40 to 85 degrees Celsius,
+  32 kilobytes flash, 2 kilobytes SRAM, 20 MHz maximum clock.
+- `lm358.md` — dual operational amplifier. Supply 3 V to 32 V, input voltage
+  range −0.3 V to 32 V, operating temperature 0 to 70 degrees Celsius, gain
+  bandwidth product 1 MHz, single-supply operation notes.
+- `bc547.md` — NPN transistor. Collector-emitter voltage 45 V, collector
+  current 100 mA, power dissipation 500 milliwatts, DC current gain 110 to
+  800, small-signal amplifier notes.
+
+- [ ] **Step 2: Verify the structure is consistent**
+
+Run: `grep -c "^## Absolute Maximum Ratings" template/session3/corpus/*.md`
+Expected: every file reports `1`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add template/session3/corpus/
+git commit -m "feat: add datasheet corpus for retrieval lab"
+```
+
+---
+
+## Task 12: Lab 3 solution — retrieval, plain calls and structured output
+
+Implemented on `main` during development, then moved to the `solution/lab3` branch in Task 15. Every test injects a fake client, so the suite never touches the network.
+
+**Files:**
+- Create: `template/core/retrieval.py`
+- Modify: `template/core/llm.py` (replace the stubs from Task 5)
+- Test: `template/tests/test_retrieval.py`, `template/tests/test_llm_solution.py`
+
+**Interfaces:**
+- Consumes: `template/session3/corpus/` from Task 11
+- Produces:
+  - `retrieve(query: str, corpus_dir: Path, k: int = 1) -> list[tuple[str, str]]` returning `(filename, text)` pairs, best match first
+  - `ask(question: str, context: str = "", client=None) -> str`
+  - `ask_structured(question: str, schema: dict, context: str = "", client=None) -> dict`
+  - A client is any object with `.models.generate_content(model=..., contents=..., config=...)` returning an object with a `.text` attribute. This is the shape of `google.genai.Client`, so a fake is trivial to write.
+
+- [ ] **Step 1: Write the failing retrieval test**
+
+`template/tests/test_retrieval.py`:
+```python
+from pathlib import Path
+
+import pytest
+
+from core.retrieval import retrieve
+
+CORPUS = Path(__file__).resolve().parent.parent / "session3" / "corpus"
+
+
+def test_finds_the_regulator_document_for_a_regulator_question():
+    results = retrieve("what is the maximum input voltage of the LM7805", CORPUS)
+    assert results[0][0] == "lm7805.md"
+
+
+def test_finds_the_timer_document_for_a_timer_question():
+    results = retrieve("NE555 timer supply voltage range", CORPUS)
+    assert results[0][0] == "ne555.md"
+
+
+def test_returns_the_document_text_alongside_the_name():
+    results = retrieve("LM7805 dropout voltage", CORPUS)
+    assert "Dropout voltage" in results[0][1]
+
+
+def test_returns_k_results():
+    assert len(retrieve("voltage", CORPUS, k=3)) == 3
+
+
+def test_returns_empty_list_for_an_empty_corpus(tmp_path):
+    assert retrieve("anything", tmp_path) == []
+
+
+def test_raises_for_a_missing_corpus_folder():
+    with pytest.raises(FileNotFoundError):
+        retrieve("anything", Path("/no/such/folder"))
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `cd template && pytest tests/test_retrieval.py -v`
+Expected: FAIL — `ModuleNotFoundError: No module named 'core.retrieval'`
+
+- [ ] **Step 3: Write the retrieval implementation**
+
+`template/core/retrieval.py`:
+```python
+"""Find which document is most likely to answer a question.
+
+The model does not know anything about your files. Retrieval is how you hand
+it the right piece of text before asking. This version scores documents by
+counting shared words — crude, but it makes the idea visible, and you can read
+every line of it.
+"""
+
+import re
+from pathlib import Path
+
+STOP_WORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "for", "from", "how", "in",
+    "is", "it", "of", "on", "or", "the", "to", "what", "when", "which", "with",
+}
+
+
+def _words(text: str) -> set[str]:
+    return {
+        word
+        for word in re.findall(r"[a-z0-9]+", text.lower())
+        if word not in STOP_WORDS and len(word) > 1
+    }
+
+
+def retrieve(query: str, corpus_dir: Path, k: int = 1) -> list[tuple[str, str]]:
+    """Return the k documents most similar to the query, best first."""
+    corpus_dir = Path(corpus_dir)
+    if not corpus_dir.is_dir():
+        raise FileNotFoundError(f"no corpus folder at {corpus_dir}")
+
+    query_words = _words(query)
+    scored = []
+    for path in sorted(corpus_dir.glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        overlap = len(query_words & _words(text))
+        scored.append((overlap, path.name, text))
+
+    scored.sort(key=lambda row: (-row[0], row[1]))
+    return [(name, text) for _, name, text in scored[:k]]
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `cd template && pytest tests/test_retrieval.py -v`
+Expected: 6 passed
+
+- [ ] **Step 5: Write the failing LLM test**
+
+`template/tests/test_llm_solution.py`:
+```python
+import json
+
+import pytest
+
+from core.llm import ask, ask_structured
+
+
+class FakeResponse:
+    def __init__(self, text):
+        self.text = text
+
+
+class FakeModels:
+    def __init__(self, text):
+        self._text = text
+        self.last_call = None
+
+    def generate_content(self, *, model, contents, config=None):
+        self.last_call = {"model": model, "contents": contents, "config": config}
+        return FakeResponse(self._text)
+
+
+class FakeClient:
+    def __init__(self, text):
+        self.models = FakeModels(text)
+
+
+def test_ask_returns_the_model_text():
+    client = FakeClient("A resistor limits current.")
+    assert ask("What is a resistor?", client=client) == "A resistor limits current."
+
+
+def test_ask_includes_the_context_in_the_prompt():
+    client = FakeClient("ok")
+    ask("What is the max input?", context="Input voltage: 35 V maximum", client=client)
+    assert "35 V maximum" in client.models.last_call["contents"]
+
+
+def test_ask_includes_the_question_in_the_prompt():
+    client = FakeClient("ok")
+    ask("What is the max input?", client=client)
+    assert "What is the max input?" in client.models.last_call["contents"]
+
+
+def test_ask_structured_parses_json_into_a_dictionary():
+    client = FakeClient(json.dumps({"part": "LM7805", "max_input_v": 35}))
+    result = ask_structured("Extract specs", schema={"type": "object"}, client=client)
+    assert result == {"part": "LM7805", "max_input_v": 35}
+
+
+def test_ask_structured_passes_the_schema_to_the_model():
+    client = FakeClient("{}")
+    schema = {"type": "object", "properties": {"part": {"type": "string"}}}
+    ask_structured("Extract specs", schema=schema, client=client)
+    assert client.models.last_call["config"]["response_schema"] == schema
+
+
+def test_ask_structured_raises_a_clear_error_on_bad_json():
+    client = FakeClient("I'm afraid I can't do that.")
+    with pytest.raises(ValueError, match="did not return valid JSON"):
+        ask_structured("Extract specs", schema={"type": "object"}, client=client)
+```
+
+- [ ] **Step 6: Run the test to verify it fails**
+
+Run: `cd template && pytest tests/test_llm_solution.py -v`
+Expected: FAIL — `NotImplementedError` from the Task 5 stubs.
+
+- [ ] **Step 7: Replace `core/llm.py` with the implementation**
+
+`template/core/llm.py`:
+```python
+"""Where your app talks to a language model.
+
+Two ways to ask:
+  ask()            - question in, plain text out. Good for explanations.
+  ask_structured() - question in, a fixed shape out. Good for anything your
+                     code has to read afterwards.
+
+Prefer ask_structured whenever another part of your program uses the answer.
+Reading prose with code is guesswork; reading a known shape is not.
+"""
+
+import json
+import os
+
+MODEL = "gemini-2.5-flash"
+
+
+def _default_client():
+    from google import genai
+
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError(
+            "No GEMINI_API_KEY found. Put your key in .env, then restart the app."
+        )
+    return genai.Client(api_key=key)
+
+
+def ask(question: str, context: str = "", client=None) -> str:
+    """Ask a question in plain language and get plain text back."""
+    client = client or _default_client()
+    prompt = (
+        "You are a careful electronics assistant. Answer using ONLY the "
+        "reference text below. If the answer is not in it, say you do not know.\n\n"
+        f"Reference text:\n{context}\n\n"
+        f"Question: {question}"
+    )
+    return client.models.generate_content(model=MODEL, contents=prompt).text
+
+
+def ask_structured(question: str, schema: dict, context: str = "", client=None) -> dict:
+    """Ask a question and get the answer in the shape described by schema."""
+    client = client or _default_client()
+    prompt = (
+        "Extract the requested information from the reference text below. "
+        "Use ONLY what is in the text.\n\n"
+        f"Reference text:\n{context}\n\n"
+        f"Task: {question}"
+    )
+    config = {"response_mime_type": "application/json", "response_schema": schema}
+    raw = client.models.generate_content(model=MODEL, contents=prompt, config=config).text
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            f"The model did not return valid JSON. It said: {raw!r}"
+        ) from error
+```
+
+- [ ] **Step 8: Run the full suite**
+
+Run: `cd template && pytest -m "not live" -v`
+Expected: all tests pass **except** `tests/test_llm.py`, which asserts the old stub behaviour. Delete `template/tests/test_llm.py` — it was scaffolding for Task 5 and is now superseded by `test_llm_solution.py`.
+
+Run again: `cd template && pytest -m "not live" -v`
+Expected: all pass.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git rm template/tests/test_llm.py
+git add template/core/retrieval.py template/core/llm.py template/tests/test_retrieval.py template/tests/test_llm_solution.py
+git commit -m "feat: implement retrieval and LLM helpers for Lab 3"
+```
+
+---
+
+## Task 13: Lab 3 assistant page, evaluation tests and brief
+
+**Files:**
+- Create: `template/pages/9_Assistant.py`, `template/tests/test_assistant_eval.py`, `template/labs/LAB3.md`
+
+**Interfaces:**
+- Consumes: `core.retrieval.retrieve`, `core.llm.ask`, `core.llm.ask_structured`
+- Produces: the reference LLM feature students copy into their own project
+
+- [ ] **Step 1: Write the assistant page**
+
+`template/pages/9_Assistant.py`:
+```python
+"""Lab 3 reference solution: a question-answering assistant over datasheets."""
+
+from pathlib import Path
+
+import streamlit as st
+
+from core.llm import ask, ask_structured
+from core.retrieval import retrieve
+
+CORPUS = Path(__file__).resolve().parent.parent / "session3" / "corpus"
+
+SPEC_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "part_number": {"type": "string"},
+        "specifications": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "value": {"type": "string"},
+                },
+                "required": ["name", "value"],
+            },
+        },
+    },
+    "required": ["part_number", "specifications"],
+}
+
+st.title("Datasheet Assistant")
+st.caption("Ask about the components in session3/corpus/")
+
+question = st.text_input("Your question", "What is the maximum input voltage of the LM7805?")
+mode = st.radio("Answer as", ["Plain answer", "Table of specifications"], horizontal=True)
+
+if st.button("Ask") and question:
+    matches = retrieve(question, CORPUS, k=1)
+    if not matches:
+        st.error("No documents found in the corpus folder.")
+        st.stop()
+
+    source_name, source_text = matches[0]
+
+    with st.spinner("Asking the model..."):
+        if mode == "Plain answer":
+            st.write(ask(question, context=source_text))
+        else:
+            try:
+                data = ask_structured(question, SPEC_SCHEMA, context=source_text)
+                st.subheader(data["part_number"])
+                st.dataframe(data["specifications"], use_container_width=True)
+            except ValueError as error:
+                st.error(str(error))
+
+    st.caption(f"Source: {source_name}")
+    with st.expander("Show the text the model was given"):
+        st.text(source_text)
+```
+
+- [ ] **Step 2: Write the evaluation tests**
+
+`template/tests/test_assistant_eval.py`:
+```python
+"""Evaluation: does the assistant actually get the right answers?
+
+A prompt is code. These tests run it against known questions. They are marked
+"live" because they make real API calls, so they do not run in CI.
+
+Run them yourself with:  pytest -m live -v
+Run them twice. Notice that the answers are not always identical. That is
+normal, and it is why you test behaviour rather than exact wording.
+"""
+
+from pathlib import Path
+
+import pytest
+
+from core.llm import ask
+from core.retrieval import retrieve
+
+CORPUS = Path(__file__).resolve().parent.parent / "session3" / "corpus"
+
+CASES = [
+    ("What is the maximum input voltage of the LM7805?", "35"),
+    ("What is the maximum output current of the LM7805?", "1.5"),
+    ("How much flash memory does the ATmega328P have?", "32"),
+]
+
+
+@pytest.mark.live
+@pytest.mark.parametrize("question, expected_fragment", CASES)
+def test_assistant_answers_correctly(question, expected_fragment):
+    context = retrieve(question, CORPUS, k=1)[0][1]
+    answer = ask(question, context=context)
+    assert expected_fragment in answer
+
+
+@pytest.mark.live
+def test_assistant_admits_when_the_answer_is_not_in_the_documents():
+    context = retrieve("LM7805", CORPUS, k=1)[0][1]
+    answer = ask("What is the price of this part in Thai baht?", context=context)
+    assert any(phrase in answer.lower() for phrase in ("do not know", "don't know", "not in"))
+```
+
+- [ ] **Step 3: Verify the offline suite still passes and live tests are excluded**
+
+Run: `cd template && pytest -m "not live" -v`
+Expected: all pass; the five live tests report as deselected.
+
+- [ ] **Step 4: Write `template/labs/LAB3.md`**
+
+```markdown
+# Lab 3 — Put an AI feature inside an app
+
+Everyone builds the **same** thing first. That is deliberate: if you get
+stuck, the person next to you is on the same step.
+
+Start from a **fresh** copy of the template — click "Use this template"
+again, name it something like `lab3-practice`, and open a Codespace on it.
+Do not do this inside your group project; you will copy the finished files
+across at the end.
+
+## Checkpoint 1 — A plain answer (15 minutes)
+
+Ask Cline to implement `ask()` in `core/llm.py` so that it sends a question
+to Gemini and returns the text of the reply.
+
+Then build a page with a text box and a button that shows the answer.
+
+**Done when:** you can ask "what is Ohm's law" and get a sensible reply.
+
+**Now break it on purpose:** ask "what is the maximum input voltage of the
+LM7805?" The model may answer confidently and be wrong, because it is
+guessing from memory. That is the problem the next two checkpoints solve.
+
+## Checkpoint 2 — A fixed shape instead of prose (20 minutes)
+
+Prose is fine for a human to read. It is terrible for your code to read.
+Instead of hoping the answer contains a number you can find, tell the model
+exactly what shape to reply in.
+
+Implement `ask_structured()` so it asks for JSON matching a schema you
+provide, and returns it as a Python dictionary.
+
+Then show the result as a table.
+
+**Done when:** asking for the specifications of a part gives you a table,
+not a paragraph.
+
+**Also do this:** make the model fail. Ask it something the schema cannot
+express and watch what happens. Your code must show a clear error rather
+than crash.
+
+## Checkpoint 3 — Give it your documents (20 minutes)
+
+The model has never seen `session3/corpus/`. Retrieval means finding the
+right document first and handing it over with the question.
+
+Implement `retrieve()` in `core/retrieval.py`: score each file in the corpus
+by how many words it shares with the question, return the best one.
+
+Then wire it in: retrieve first, pass the text as context, and show which
+file the answer came from.
+
+**Done when:** the LM7805 question is answered correctly **and** the page
+shows `lm7805.md` as the source.
+
+Ask a question about something not in the corpus. It should say it does not
+know. If it invents an answer instead, your prompt needs to be stricter.
+
+## Checkpoint 4 — Test the prompt (10 minutes)
+
+A prompt is code, so test it. Write three questions with answers you can
+verify yourself, and assert the reply contains the right value.
+
+```
+pytest -m live -v
+```
+
+**Run it twice.** The wording changes between runs even though nothing in
+your code changed. This is called non-determinism, and it is why you assert
+on the important content rather than the exact sentence.
+
+**Done when:** your three tests pass, and you can explain to a classmate why
+they might pass now and fail in an hour.
+
+## Transfer it to your project (20 minutes)
+
+Optional but recommended. In your group project repository, copy across:
+
+- `core/llm.py`
+- `core/retrieval.py` (only if your feature needs your own documents)
+- Your assistant page, renamed to fit your project
+
+Then adapt it to the AI feature named in your brief.
+
+**If time runs out, stop and demo what you have.** A working project without
+an AI feature beats a broken one with it.
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add template/pages/9_Assistant.py template/tests/test_assistant_eval.py template/labs/LAB3.md
+git commit -m "feat: add Lab 3 assistant page, evaluation tests and brief"
+```
+
+---
+
+## Task 14: Instructor materials
+
+**Files:**
+- Create: `instructor/rubric.md`, `instructor/peer-score-form.md`, `instructor/ai-collaboration-log.md`, `instructor/pilot-checklist.md`
+
+**Interfaces:**
+- Consumes: spec §7 (assessment) and §10 (pilot checklist)
+- Produces: instructor-only documents; these stay in this repository and are never copied into the template
+
+- [ ] **Step 1: Write `instructor/rubric.md`**
+
+Transcribe spec §7 verbatim into a standalone marking sheet: the six group
+criteria with their weights (spec quality 20%, design and decomposition 15%,
+collaboration 20%, working software 20%, testing and review quality 15%,
+demo and reflection 10%) totalling 70%, plus the individual AI collaboration
+log at 30%. For each criterion add three descriptor bands — excellent, adequate,
+weak — written as observable evidence. Example for "Collaboration": *excellent —
+every member has at least two merged pull requests and has left substantive
+review comments on someone else's; adequate — every member has at least one
+merged pull request; weak — one member authored most commits.*
+
+- [ ] **Step 2: Write `instructor/peer-score-form.md`**
+
+A single page students complete for each group they visit during demos:
+group name, project name, three scores from 1 to 5 (does it work / is the
+problem worth solving / could you explain how it was built), and one free-text
+line: "the best thing about this project". Fits on one side of A4.
+
+- [ ] **Step 3: Write `instructor/ai-collaboration-log.md`**
+
+The individual submission template. One page, three entries — one per session.
+Each entry: what you asked the agent to do, what it got wrong, how you noticed,
+what you changed about the way you prompt. Include a filled-in worked example
+from Session 1 so students can see the expected depth, and state the rule that
+"it worked fine" is not an acceptable entry — if nothing went wrong, they did
+not look hard enough.
+
+- [ ] **Step 4: Write `instructor/pilot-checklist.md`**
+
+Transcribe the eight checks from spec §10 as a runbook with a pass/fail box
+and a "what to do if it fails" line for each. Mark checks 2 (Cline runs inside
+a browser Codespace) and 4 (Streamlit forwarded preview URL opens through the
+campus network) as blocking — if either fails, the browser-only approach is
+dead and the fallback is local VS Code plus Cline, which changes the install
+request handed to lab staff.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add instructor/
+git commit -m "docs: add rubric, peer score form, log template and pilot checklist"
+```
+
+---
+
+## Task 15: Publish the template repository with solution branches
+
+The published `main` must **not** contain the Lab 1 or Lab 3 solutions — those
+go on branches. This is the last task because it is the only one that touches
+GitHub.
+
+**Files:**
+- Create: `scripts/publish-template.sh`
+
+**Interfaces:**
+- Consumes: everything under `template/`
+- Produces: the published repository `witchapong/ai-workshop-template`, marked as a GitHub template repository, with branches `main`, `solution/lab1`, `solution/lab3`
+
+- [ ] **Step 1: Write the publish script**
+
+`scripts/publish-template.sh`:
+```bash
+#!/usr/bin/env bash
+# Publish template/ as the student-facing template repository.
+# Run from the repository root. Safe to re-run: it force-updates branches.
+set -euo pipefail
+
+REPO="ai-workshop-template"
+OWNER="$(gh api user --jq .login)"
+WORK="$(mktemp -d)"
+
+echo "Staging template/ into $WORK"
+cp -R template/. "$WORK/"
+cd "$WORK"
+
+git init -q -b main
+git add -A
+git commit -q -m "Workshop project template"
+
+# Solution branches carry the reference implementations.
+git branch solution/lab1
+git branch solution/lab3
+
+# main must not ship the answers.
+git rm -q core/filters.py tests/test_filters.py pages/2_Filter_Designer.py \
+          core/retrieval.py pages/9_Assistant.py tests/test_assistant_eval.py \
+          tests/test_llm_solution.py
+git checkout -q "$(git rev-parse HEAD)" -- core/llm.py 2>/dev/null || true
+git commit -q -m "Remove reference solutions from main"
+
+if ! gh repo view "$OWNER/$REPO" >/dev/null 2>&1; then
+  gh repo create "$OWNER/$REPO" --public \
+    --description "Student project template for the AI for Software Development workshop"
+fi
+
+git remote add origin "https://github.com/$OWNER/$REPO.git"
+git push -q --force origin main solution/lab1 solution/lab3
+
+gh repo edit "$OWNER/$REPO" --enable-issues=false --template
+echo "Published: https://github.com/$OWNER/$REPO"
+```
+
+- [ ] **Step 2: Restore the LLM stub on main**
+
+The publish script removes solution files but `core/llm.py` on `main` must be
+the **stub** from Task 5, not the implementation from Task 12. Replace the
+fragile `git checkout` line in the script with an explicit rewrite. Edit
+`scripts/publish-template.sh`, replacing the `git checkout -q ...` line with:
+
+```bash
+cat > core/llm.py <<'STUB'
+"""Where your app talks to a language model.
+
+This file is deliberately empty until Session 3. Leaving the slot here means
+you can add an AI feature later without rearranging anything you have built.
+"""
+
+NOT_YET = "You build this in Session 3. See labs/LAB3.md."
+
+
+def ask(question: str, context: str = "", client=None) -> str:
+    """Ask a question in plain language and get plain text back."""
+    raise NotImplementedError(NOT_YET)
+
+
+def ask_structured(question: str, schema: dict, context: str = "", client=None) -> dict:
+    """Ask a question and get an answer in a fixed shape you specify."""
+    raise NotImplementedError(NOT_YET)
+STUB
+git add core/llm.py
+```
+
+- [ ] **Step 3: Make the script executable and run it**
+
+Run: `chmod +x scripts/publish-template.sh && ./scripts/publish-template.sh`
+Expected: prints `Published: https://github.com/<owner>/ai-workshop-template`
+
+- [ ] **Step 4: Verify the published main has no solutions**
+
+Run:
+```bash
+gh api "repos/$(gh api user --jq .login)/ai-workshop-template/git/trees/main?recursive=1" \
+  --jq '.tree[].path' | grep -E 'filters|retrieval|Assistant|test_llm_solution' || echo "CLEAN"
+```
+Expected: `CLEAN`
+
+- [ ] **Step 5: Verify the solution branches do have them**
+
+Run:
+```bash
+gh api "repos/$(gh api user --jq .login)/ai-workshop-template/git/trees/solution/lab1?recursive=1" \
+  --jq '.tree[].path' | grep -c filters
+```
+Expected: `2` (`core/filters.py` and `tests/test_filters.py`)
+
+- [ ] **Step 6: Verify it is usable as a template**
+
+Open `https://github.com/<owner>/ai-workshop-template` in a browser.
+Expected: a green **Use this template** button appears. Click it, create a
+throwaway repository, open a Codespace on it, and confirm Cline appears in the
+sidebar and `python check_setup.py` runs. Delete the throwaway repository
+afterwards.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add scripts/publish-template.sh
+git commit -m "feat: add template publish script"
+```
+
+---
+
+## Task 16: Lecture decks
+
+Written last because the demos in them reference code that must already exist.
+
+**Files:**
+- Create: `slides/session1.md`, `slides/session2.md`, `slides/session3.md`
+
+**Interfaces:**
+- Consumes: every artifact above — slides must not reference anything that does not exist
+- Produces: nothing downstream
+
+- [ ] **Step 1: Write `slides/session1.md`**
+
+Marp-compatible Markdown, slides separated by `---`. Two blocks totalling
+40 minutes plus a 5-minute live demo.
+
+*Block 1 — How an agent works (20 min):* what a language model actually does
+(predicts the next token, has no memory between calls); harness versus model,
+and why swapping either is a configuration change; the read-plan-edit-run-observe
+loop drawn as a cycle; the context window and why long conversations get worse,
+not better; tokens, requests and quota, with the amplification arithmetic from
+spec §4 shown explicitly (one instruction becomes four to ten requests); why
+models fabricate, with a worked example of a plausible non-existent function.
+
+*Block 2 — Why vibe coding broke (20 min):* run immediately after the warm-up
+lab, opening with what students just experienced; the Four Gates table from
+spec §3; each gate mapped to the classical software lifecycle stage it
+replaces; AI-DLC vocabulary — intent, units, bolts, "AI proposes, human
+approves" — credited to AWS with the Google Maps analogy from the existing
+lecture notes; closing slide: the quota discipline line, "prompt like an
+engineer, not a slot machine".
+
+- [ ] **Step 2: Write `slides/session2.md`**
+
+Two blocks totalling 45 minutes.
+
+*Block 3 — Design and decomposition (30 min):* turning an intent into
+requirements; what makes an acceptance criterion checkable, with three
+before-and-after examples of vague versus testable; what a data model is,
+built live from Brief 1; the anatomy of a Streamlit app — pages, state,
+storage; why one file per owner makes parallel work possible, and the direct
+line from that to AI-DLC's units and bounded contexts; version control as a
+mental model — branch, pull request, review, merge — drawn as a diagram, not
+as commands; what continuous integration does and why the tests run on push.
+
+*Block 4 — Reviewing code you did not write (15 min):* delivered immediately
+before the review block; the five AI failure modes with a real code example of
+each — a hallucinated API call, a silent fallback that hides an error, code
+quietly deleted to make a test pass, unnecessary abstraction, and a test that
+asserts nothing; a four-question review checklist students apply to their
+partner's pull request.
+
+- [ ] **Step 3: Write `slides/session3.md`**
+
+Two blocks totalling 40 minutes.
+
+*Block 5 — Building with language models (25 min):* system prompt versus user
+prompt; structured output and the rule that anything your code reads must have
+a shape, demonstrated with `SPEC_SCHEMA` from Task 13; tool calling in one
+slide, as context only; retrieval-augmented generation explained as "the model
+has never seen your files, so hand them over", with the `retrieve` function
+shown; evaluating a prompt like code, using `test_assistant_eval.py`;
+guardrails and what to do when the model refuses or invents; cost, latency and
+privacy — including why the classroom rule is no personal data in prompts;
+non-determinism and designing around it.
+
+*Closing (15 min):* what students can now do unaided; when not to use AI —
+problems where the specification is the hard part, safety-critical work,
+anything where you cannot check the answer; security — keys, secrets, and what
+to do about a leaked one; academic honesty and disclosing AI use; vendor risk,
+using the 2026 free-tier collapse from spec §4 as the worked example; where to
+go next.
+
+- [ ] **Step 4: Verify no slide references a missing artifact**
+
+Run:
+```bash
+grep -ohE '(template|instructor|slides)/[A-Za-z0-9_./-]+' slides/*.md | sort -u | while read -r p; do
+  [ -e "$p" ] || echo "MISSING: $p"
+done
+```
+Expected: no output.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add slides/
+git commit -m "docs: add lecture decks for all three sessions"
+```
+
+---
+
+## Self-Review
+
+**Spec coverage.** Every section of the design spec maps to a task: §3 Four
+Gates → Tasks 6 and 7; §4 tooling → Task 1; §5 scaffolding → Tasks 1–8;
+§6 Session 1 → Tasks 9 and 16; §6 Session 2 → Tasks 10 and 16; §6 Session 3 →
+Tasks 11, 12, 13 and 16; §7 assessment → Task 14; §8 lab-staff requirements →
+already complete in the spec, no build work needed; §9 risk register →
+mitigations land in Task 8 (`TROUBLESHOOTING.md`) and Task 15 (solution
+branches); §10 pilot checklist → Task 14.
+
+**Deviation from the spec, deliberate.** The spec's §8 instructor pre-work
+names a separate "Session 3 reference repository". This plan consolidates it
+into `solution/lab3` on the single template repository. One repository is less
+to maintain and less for students to confuse, and the spec separately asks for
+known-good checkpoint branches anyway — the branch satisfies both needs. If a
+standalone reference repo turns out to be wanted, it is a five-minute fork of
+that branch.
+
+**Type consistency.** `ask` and `ask_structured` keep identical signatures
+across the Task 5 stub, the Task 12 implementation and the Task 15 republished
+stub. `retrieve` returns `list[tuple[str, str]]` in Task 12 and is consumed
+that way in Task 13. `rc_lowpass_response` returns `(magnitude_db, phase_deg)`
+in Task 9 and is unpacked in that order on the solution page. Storage's
+`load`/`save`/`append` signatures match between Task 3 and their use in
+Task 5's `pages/1_Home.py`.
+
+**Known scaffolding churn.** `template/tests/test_llm.py` is written in Task 5
+to pin the stub's behaviour and deleted in Task 12 when the stub is replaced.
+This is intentional and called out in Task 12 Step 8, not an oversight.
+
+---
+
+## Suggested build order
+
+The tasks are ordered so the workshop can be piloted before it is finished.
+
+| Milestone | Tasks | Unblocks |
+|---|---|---|
+| **Pilot-ready** | 1–8, 15 | Run the spec §10 pilot on a lab PC. Do this first — checks 2 and 4 can invalidate the whole browser-only approach. |
+| **Session 1 ready** | 9, 16 (deck 1) | First session can run |
+| **Session 2 ready** | 10, 16 (deck 2) | Second session can run |
+| **Session 3 ready** | 11, 12, 13, 16 (deck 3) | Third session can run |
+| **Grading ready** | 14 | Marking can begin |
+
+Task 15 appears twice deliberately: run it early with whatever exists to prove
+publishing works, then re-run it after each milestone — the script is
+idempotent and force-updates all three branches.
