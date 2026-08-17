@@ -44,6 +44,7 @@
 | `tests/` | One test module per `core/` module |
 | `aidlc/{intent,requirements,design,tasks}.md` | The Four Gates artifact templates |
 | `labs/LAB1.md`, `labs/LAB2.md`, `labs/LAB3.md` | Student lab instructions |
+| `labs/PROMPTS.md` | Copy-paste gate prompts, validated by the Task 9A eval |
 | `briefs/*.md` | Five pre-vetted group project briefs |
 | `session3/corpus/*.md` | Five component datasheet excerpts for the retrieval lab |
 | `README.md` | First-day orientation and setup |
@@ -59,6 +60,9 @@
 | `instructor/peer-score-form.md` | One-page demo-day peer scoring form |
 | `instructor/ai-collaboration-log.md` | Individual submission template |
 | `instructor/pilot-checklist.md` | The 8 pre-flight checks from spec §10 |
+| `instructor/rehearsal-labs-2-3.md` | Manual rehearsal record for the labs the eval cannot score |
+| `eval/run_lab1.sh`, `eval/score.py`, `eval/prompts/` | Automated Lab 1 reliability eval |
+| `eval/REPORT.md` | Measured pass rate per model — the evidence behind the model choice |
 | `scripts/publish-template.sh` | Publishes `template/` to the student repo |
 
 ---
@@ -1116,7 +1120,17 @@ Lab 1's value rests on one property: the acceptance criterion is analytically ch
 
 **Files:**
 - Create: `template/labs/LAB1.md`
-- Create (on `solution/lab1` branch only, in Task 15): `template/core/filters.py`, `template/tests/test_filters.py`, `template/pages/2_Filter_Designer.py`
+- Create (ships on published `main`): `template/tests/test_filters.py`
+- Create (on `solution/lab1` branch only, in Task 15): `template/core/filters.py`, `template/pages/2_Filter_Designer.py`
+
+> **Why the test file ships on `main` while the implementation does not.**
+> "Make these failing tests pass" is a far more reliable instruction to an
+> agent than "build something meeting these requirements", because success is
+> unambiguous and the agent can check its own work by running something.
+> Students still write acceptance criteria in their own words at Gate 2 — they
+> then open the provided tests and compare. Seeing "the cutoff should be
+> correct" next to `== pytest.approx(159.15, abs=0.01)` teaches what
+> *checkable* means better than any slide.
 
 **Interfaces:**
 - Consumes: nothing
@@ -1289,23 +1303,45 @@ Same app. Different route.
 will not proceed until you do.
 
 **Gate 2 — Spec (10 min).** Ask Cline to draft `aidlc/requirements.md`.
-Read every line. At least one requirement must be checkable by maths you
-already know, for example:
+Read every line and fix what is wrong.
 
-> The displayed cutoff frequency equals 1 / (2 * pi * R * C), within 0.1 Hz.
+Now write, in your own words, how you would *check* that the cutoff frequency
+the app displays is correct. Write it down before reading on.
 
-Fix what is wrong, then reply "approved".
+Then open `tests/test_filters.py`. Those tests were written for you — they are
+the acceptance criteria your "customer" is handing over, and your app is
+finished when they pass. Compare them to what you just wrote.
+
+Most people write something like "the cutoff should be correct". The test
+says `rc_cutoff_hz(1000.0, 1e-6) == pytest.approx(159.15, abs=0.01)`. The gap
+between those two sentences is the whole skill. Note it in your log.
+
+Reply "approved" once `requirements.md` reflects what the tests actually
+demand.
 
 **Gate 3 — Plan (10 min).** Ask for `aidlc/design.md` and `aidlc/tasks.md`.
 The maths belongs in `core/filters.py`; the screen belongs in
 `pages/2_Filter_Designer.py`. Approve.
 
-**Gate 4 — Build (40 min).** One task at a time. After each one, run
-`pytest` and look at the app. Commit every time the tests pass:
+**Gate 4 — Build (40 min).** One task at a time. Your goal is simple: make
+`pytest tests/test_filters.py` go green. After each task, run the tests and
+look at the app. Commit every time the tests pass:
 
 ```
 git add -A && git commit -m "what you just did"
 ```
+
+**If a task is not working after 15 minutes, stop.** Do not keep prompting —
+a long conversation makes the agent worse, not better. Take the reference
+implementation, read it, and carry on:
+
+```
+git checkout origin/solution/lab1 -- core/filters.py
+```
+
+This is not cheating and it does not cost you marks. Recognising a dead end
+and recovering from it is the skill being assessed. Write down in your log
+what the agent was doing wrong and what you tried.
 
 **Gate 5 — Ship (15 min).** Push, then deploy at
 https://share.streamlit.io — sign in with GitHub, pick your repository,
@@ -1331,9 +1367,329 @@ git add template/labs/LAB1.md template/core/filters.py template/tests/test_filte
 git commit -m "feat: add Lab 1 brief and filter reference solution"
 ```
 
-> **Note for Task 15:** `core/filters.py`, `tests/test_filters.py` and
-> `pages/2_Filter_Designer.py` are the solution — they must be removed from
-> the published `main` branch and kept only on `solution/lab1`.
+> **Note for Task 15:** `core/filters.py` and `pages/2_Filter_Designer.py` are
+> the solution and must be removed from the published `main` branch, kept only
+> on `solution/lab1`. `tests/test_filters.py` **stays on `main`** — it is the
+> acceptance specification students are given, not an answer.
+
+---
+
+## Task 9A: Lab 1 reliability eval — measure whether the free stack actually works
+
+Everything in this plan rests on an untested assumption: that Cline driven by a
+free-tier model can build Lab 1 from these prompts. This task replaces that
+assumption with a pass rate.
+
+It also settles a question the spec currently answers by reasoning rather than
+evidence. Spec §4 picks Mistral as the primary agent model for token headroom —
+but headroom is worthless if the model cannot emit a well-formed edit. Cline's
+`replace_in_file` requires a character-exact match on the text being replaced,
+and malformed blocks cause documented retry loops that burn quota and produce
+nothing. **Expect this eval to possibly reverse the primary/backup choice.**
+
+**Files:**
+- Create: `eval/README.md`, `eval/fixtures/intent.md`, `eval/prompts/01-gate2-spec.md`, `eval/prompts/02-gate3-plan.md`, `eval/prompts/03-gate4-maths.md`, `eval/prompts/04-gate4-page.md`, `eval/run_lab1.sh`, `eval/score.py`
+- Create (generated, committed): `eval/REPORT.md`, `eval/results/`
+- Create: `template/labs/PROMPTS.md`
+- Modify: `docs/superpowers/specs/2026-08-15-ai-for-software-dev-workshop-design.md` §4 if the winner differs from Mistral
+
+**Interfaces:**
+- Consumes: `template/` as built by Tasks 1–9; `template/tests/test_filters.py` is the scoring oracle (7 tests, all must pass)
+- Produces: `eval/REPORT.md` (pass rate, median request count and failure taxonomy per model) and `template/labs/PROMPTS.md` (the validated prompt library students copy from)
+
+- [ ] **Step 1: Install the CLI and record its real configuration surface**
+
+Do not guess flag names or provider identifiers — record them.
+
+```bash
+npm i -g cline
+cline --version
+cline --help > eval/cli-help.txt
+cline config --help >> eval/cli-help.txt 2>&1 || true
+```
+
+Then run one throwaway task with JSON output and inspect the message subtypes,
+because the scorer counts model requests by subtype:
+
+```bash
+cd /tmp && mkdir -p cline-probe && cd cline-probe
+cline --json --auto-approve true "create a file hello.txt containing the word hello" \
+  | tee /tmp/probe.jsonl
+python3 -c "
+import json, collections
+c = collections.Counter()
+for line in open('/tmp/probe.jsonl'):
+    try: m = json.loads(line)
+    except Exception: continue
+    k = m.get('say') or m.get('ask')
+    if k: c[k] += 1
+print(c.most_common())
+"
+```
+
+Write the exact provider identifier strings (for example `gemini`, `mistral`)
+and the subtype that marks one model request into `eval/README.md`. If that
+subtype is not `api_req_started`, update `REQUEST_SUBTYPE` in `eval/score.py`
+in Step 4.
+
+- [ ] **Step 2: Write the fixture and the four gate prompts**
+
+`eval/fixtures/intent.md` — the Gate 1 artifact a student would write:
+```markdown
+# Gate 1 — Intent
+
+**Who is this for?**
+A second-year electronics student checking a filter design before building it.
+
+**What problem does it solve?**
+Working out the cutoff frequency and sketching the frequency response by hand
+is slow and easy to get wrong.
+
+**What does "done" look like?**
+I type in a resistance and a capacitance, and immediately see the cutoff
+frequency and a Bode plot of magnitude and phase.
+
+**What is deliberately NOT included?**
+No saving of designs. No component ordering. No filter types other than a
+first-order RC low-pass.
+```
+
+`eval/prompts/01-gate2-spec.md`:
+```
+Using the Four Gates in .clinerules: I have filled in aidlc/intent.md.
+Read tests/test_filters.py first - those tests are the acceptance criteria.
+Draft aidlc/requirements.md so every requirement matches something those
+tests actually check. Then stop and wait for my approval.
+```
+
+`eval/prompts/02-gate3-plan.md`:
+```
+requirements.md is approved. Now draft aidlc/design.md and aidlc/tasks.md.
+The maths belongs in core/filters.py. The screen belongs in
+pages/2_Filter_Designer.py. Two tasks, one file each. Then stop.
+```
+
+`eval/prompts/03-gate4-maths.md`:
+```
+design.md and tasks.md are approved. Implement task 1 only.
+Create core/filters.py so that every test in tests/test_filters.py passes.
+Run pytest tests/test_filters.py and report exactly what it printed.
+```
+
+`eval/prompts/04-gate4-page.md`:
+```
+Task 1 is done. Implement task 2 only. Create pages/2_Filter_Designer.py:
+a Streamlit page with number inputs for resistance in kilo-ohms and
+capacitance in microfarads, showing the cutoff frequency, and a Bode plot of
+magnitude in decibels and phase in degrees against a logarithmic frequency
+axis. Do not modify core/filters.py.
+```
+
+Each prompt is a separate `cline` invocation, so each gate is a fresh task.
+That is deliberate: it mirrors the "start a new task per feature" rule the
+workshop teaches, and it keeps context small, which is the documented
+mitigation for edit failures. State lives on disk in `aidlc/*.md`, not in the
+conversation.
+
+- [ ] **Step 3: Write the runner**
+
+`eval/run_lab1.sh`:
+```bash
+#!/usr/bin/env bash
+# Run Lab 1 end to end N times for one model and record the results.
+# Usage: ./eval/run_lab1.sh <provider> <model> [runs]
+set -euo pipefail
+
+PROVIDER="$1"
+MODEL="$2"
+RUNS="${3:-5}"
+ROOT="$(git rev-parse --show-toplevel)"
+TAG="${PROVIDER}-${MODEL//\//_}"
+mkdir -p "$ROOT/eval/results"
+
+for i in $(seq 1 "$RUNS"); do
+  WORK="$(mktemp -d)"
+  cp -R "$ROOT/template/." "$WORK/"
+  # The agent must build these. The tests stay.
+  rm -f "$WORK/core/filters.py" "$WORK/pages/2_Filter_Designer.py"
+  cp "$ROOT/eval/fixtures/intent.md" "$WORK/aidlc/intent.md"
+
+  python3 -m venv "$WORK/.venv"
+  "$WORK/.venv/bin/pip" -q install -r "$WORK/requirements.txt"
+
+  LOG="$ROOT/eval/results/${TAG}-run${i}.jsonl"
+  : > "$LOG"
+  START=$(date +%s)
+
+  for prompt in "$ROOT"/eval/prompts/*.md; do
+    echo "  [run $i] $(basename "$prompt")"
+    cline --json --auto-approve true -P "$PROVIDER" -m "$MODEL" -c "$WORK" \
+      "$(cat "$prompt")" >> "$LOG" 2>&1 || echo "    (cline exited non-zero)"
+  done
+
+  END=$(date +%s)
+  echo "$((END - START))" > "$ROOT/eval/results/${TAG}-run${i}.seconds"
+
+  ( cd "$WORK" && .venv/bin/python -m pytest tests/test_filters.py -q ) \
+    > "$ROOT/eval/results/${TAG}-run${i}.pytest" 2>&1 || true
+
+  echo "run $i: $(tail -1 "$ROOT/eval/results/${TAG}-run${i}.pytest")"
+  rm -rf "$WORK"
+done
+```
+
+- [ ] **Step 4: Write the scorer**
+
+`eval/score.py`:
+```python
+"""Aggregate eval runs into a pass-rate table.
+
+A run is green only when all 7 tests in tests/test_filters.py pass.
+"""
+
+import json
+import re
+import statistics
+from collections import Counter
+from pathlib import Path
+
+RESULTS = Path(__file__).parent / "results"
+TOTAL_TESTS = 7
+REQUEST_SUBTYPE = "api_req_started"  # confirm in Step 1; change if different
+
+
+def read_run(log: Path) -> dict:
+    stem = log.stem
+    subtypes: Counter = Counter()
+    for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        key = message.get("say") or message.get("ask")
+        if key:
+            subtypes[key] += 1
+
+    report_path = RESULTS / f"{stem}.pytest"
+    report = report_path.read_text(encoding="utf-8") if report_path.exists() else ""
+    passed = int(match.group(1)) if (match := re.search(r"(\d+) passed", report)) else 0
+
+    seconds_path = RESULTS / f"{stem}.seconds"
+    seconds = int(seconds_path.read_text().strip()) if seconds_path.exists() else 0
+
+    model = stem.rsplit("-run", 1)[0]
+    return {
+        "model": model,
+        "green": passed == TOTAL_TESTS,
+        "passed": passed,
+        "requests": subtypes.get(REQUEST_SUBTYPE, 0),
+        "edit_failures": subtypes.get("diff_error", 0) + subtypes.get("error", 0),
+        "seconds": seconds,
+        "subtypes": subtypes,
+    }
+
+
+def main() -> None:
+    runs = [read_run(log) for log in sorted(RESULTS.glob("*.jsonl"))]
+    if not runs:
+        print("No results found. Run eval/run_lab1.sh first.")
+        return
+
+    by_model: dict[str, list[dict]] = {}
+    for run in runs:
+        by_model.setdefault(run["model"], []).append(run)
+
+    print("| Model | Green | Pass rate | Median requests | Median minutes | Edit failures |")
+    print("|---|---|---|---|---|---|")
+    for model, group in sorted(by_model.items()):
+        green = sum(1 for r in group if r["green"])
+        print(
+            f"| {model} | {green}/{len(group)} | {green / len(group):.0%} "
+            f"| {statistics.median(r['requests'] for r in group):.0f} "
+            f"| {statistics.median(r['seconds'] for r in group) / 60:.1f} "
+            f"| {sum(r['edit_failures'] for r in group)} |"
+        )
+
+    print("\n### Message subtypes seen (sanity check for REQUEST_SUBTYPE)\n")
+    combined: Counter = Counter()
+    for run in runs:
+        combined.update(run["subtypes"])
+    for name, count in combined.most_common(15):
+        print(f"- `{name}`: {count}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+- [ ] **Step 5: Run the eval**
+
+```bash
+chmod +x eval/run_lab1.sh
+./eval/run_lab1.sh gemini gemini-2.5-flash 5
+./eval/run_lab1.sh gemini gemini-2.5-flash-lite 5
+./eval/run_lab1.sh mistral codestral-latest 5
+./eval/run_lab1.sh mistral devstral-medium-latest 5
+```
+
+Use the provider identifiers recorded in Step 1; the ones above are the
+expected names, not verified ones.
+
+**Expect this to take days, not hours, and treat that as data.** Twenty runs at
+roughly 40–80 model requests each is 800–1,600 requests, against a free tier
+allowing 250 per day on Gemini 2.5 Flash. Do not "fix" this by switching to a
+paid key — the whole point is to find out what fits inside the free limits.
+
+**The disqualifying result:** if a single Lab 1 run does not fit inside one
+day's free quota for a model, that model cannot run the workshop, exactly as
+Antigravity was ruled out in spec §4.
+
+- [ ] **Step 6: Write the report and choose the primary model**
+
+```bash
+python3 eval/score.py > eval/REPORT.md
+```
+
+Then edit `eval/REPORT.md` by hand to add, beneath the generated table:
+
+1. **The chosen primary and backup model**, with the pass rate that justified it.
+2. **A failure taxonomy** — read the `.jsonl` logs of every non-green run and
+   group what went wrong: malformed edit blocks, ignored gates, invented
+   functions, rate limits, giving up. Count each.
+3. **The measured request count for one Lab 1 run**, which supersedes the
+   estimate of 100–200 per session in spec §4.
+4. **A go/no-go line**: whether at least one free model reaches 80% green.
+
+- [ ] **Step 7: Turn the winning prompts into the student prompt library**
+
+Create `template/labs/PROMPTS.md` containing the four gate prompts from Step 2,
+under this heading:
+
+```markdown
+# Prompts that work
+
+Copy these. They were tested — each one was run 5 times against the model you
+are using, and these are the wordings that worked most reliably.
+
+Improvise later, once you have seen what good looks like. On day one, use these.
+```
+
+If any prompt needed rewording during the eval to reach an acceptable pass
+rate, `PROMPTS.md` carries the **reworded** version, and `eval/prompts/` is
+updated to match so the two never drift.
+
+- [ ] **Step 8: Update the spec if the evidence disagrees with it**
+
+If the winning model is not Mistral, edit spec §4's tooling table and quota
+analysis to match, and add one line recording that the change came from
+`eval/REPORT.md` rather than from reasoning.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add eval/ template/labs/PROMPTS.md docs/superpowers/specs/
+git commit -m "test: add Lab 1 reliability eval and record measured pass rates"
+```
 
 ---
 
@@ -2278,11 +2634,36 @@ campus network) as blocking — if either fails, the browser-only approach is
 dead and the fallback is local VS Code plus Cline, which changes the install
 request handed to lab staff.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Write `instructor/rehearsal-labs-2-3.md` and run the rehearsal**
+
+Labs 2 and 3 cannot be scored automatically — Lab 2 builds whatever the team
+chose, and Lab 3's answers are judged rather than asserted. So they get a
+manual rehearsal instead of the Task 9A eval.
+
+Run each lab yourself, start to finish, on the model Task 9A selected, using
+the same prompt discipline students will use. Do Lab 2 against **Brief 1
+(Lab Equipment Booking)** specifically, because its overlapping-bookings rule
+is the hardest thing any brief asks for — if the agent handles that, the
+easier briefs are safe.
+
+Record, for each lab:
+
+| Field | Why it matters |
+|---|---|
+| Wall-clock time to reach each checkpoint | Confirms or breaks the session timings in spec §6 |
+| Number of model requests used | Confirms the quota budget holds for a 2-hour lab |
+| Every point where the agent went wrong, and what fixed it | Becomes new entries in `TROUBLESHOOTING.md` |
+| Any prompt you had to reword | Gets folded back into `template/labs/PROMPTS.md` |
+| Anything that took more than 15 minutes | Needs a timebox and a recovery instruction in the lab brief |
+
+If a lab overruns its allotted time by more than 20%, cut scope from the lab
+brief rather than assuming students will be faster than you. They will not be.
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add instructor/
-git commit -m "docs: add rubric, peer score form, log template and pilot checklist"
+git commit -m "docs: add rubric, peer score form, log template, pilot checklist and rehearsal notes"
 ```
 
 ---
@@ -2326,7 +2707,9 @@ git branch solution/lab1
 git branch solution/lab3
 
 # main must not ship the answers.
-git rm -q core/filters.py tests/test_filters.py pages/2_Filter_Designer.py \
+# NOTE: tests/test_filters.py deliberately stays — it is the acceptance
+# specification students are given, not an answer.
+git rm -q core/filters.py pages/2_Filter_Designer.py \
           core/retrieval.py pages/9_Assistant.py tests/test_assistant_eval.py \
           tests/test_llm_solution.py
 git checkout -q "$(git rev-parse HEAD)" -- core/llm.py 2>/dev/null || true
@@ -2379,14 +2762,18 @@ git add core/llm.py
 Run: `chmod +x scripts/publish-template.sh && ./scripts/publish-template.sh`
 Expected: prints `Published: https://github.com/<owner>/ai-workshop-template`
 
-- [ ] **Step 4: Verify the published main has no solutions**
+- [ ] **Step 4: Verify the published main has no solutions but does have the acceptance tests**
 
 Run:
 ```bash
-gh api "repos/$(gh api user --jq .login)/ai-workshop-template/git/trees/main?recursive=1" \
-  --jq '.tree[].path' | grep -E 'filters|retrieval|Assistant|test_llm_solution' || echo "CLEAN"
+PATHS=$(gh api "repos/$(gh api user --jq .login)/ai-workshop-template/git/trees/main?recursive=1" \
+  --jq '.tree[].path')
+echo "$PATHS" | grep -E 'core/filters\.py|core/retrieval\.py|9_Assistant|test_llm_solution|test_assistant_eval' \
+  && echo "PROBLEM: a solution file leaked onto main" || echo "no solutions on main - good"
+echo "$PATHS" | grep -q 'tests/test_filters\.py' \
+  && echo "acceptance tests present - good" || echo "PROBLEM: acceptance tests missing"
 ```
-Expected: `CLEAN`
+Expected: `no solutions on main - good` followed by `acceptance tests present - good`
 
 - [ ] **Step 5: Verify the solution branches do have them**
 
@@ -2532,6 +2919,13 @@ in Task 9 and is unpacked in that order on the solution page. Storage's
 `load`/`save`/`append` signatures match between Task 3 and their use in
 Task 5's `pages/1_Home.py`.
 
+**Verification coverage.** Task 9A measures Lab 1 automatically (its acceptance
+tests make scoring free). Task 14 Step 5 rehearses Labs 2 and 3 by hand, since
+neither can be scored mechanically. Together these replace the plan's two
+largest untested assumptions — that a free model can drive Cline to a working
+app, and that the session timings in spec §6 are achievable — with measurements.
+Neither existed in the first draft of this plan.
+
 **Known scaffolding churn.** `template/tests/test_llm.py` is written in Task 5
 to pin the stub's behaviour and deleted in Task 12 when the stub is replaced.
 This is intentional and called out in Task 12 Step 8, not an oversight.
@@ -2545,11 +2939,26 @@ The tasks are ordered so the workshop can be piloted before it is finished.
 | Milestone | Tasks | Unblocks |
 |---|---|---|
 | **Pilot-ready** | 1–8, 15 | Run the spec §10 pilot on a lab PC. Do this first — checks 2 and 4 can invalidate the whole browser-only approach. |
-| **Session 1 ready** | 9, 16 (deck 1) | First session can run |
+| **Lab 1 built** | 9 | Gives the eval something to measure |
+| **Evidence gate** | **9A** | **Blocking.** Picks the model on data, measures real request counts, and produces the tested prompt library. Nothing downstream is trustworthy until this passes. |
+| **Session 1 ready** | 16 (deck 1) | First session can run |
 | **Session 2 ready** | 10, 16 (deck 2) | Second session can run |
 | **Session 3 ready** | 11, 12, 13, 16 (deck 3) | Third session can run |
-| **Grading ready** | 14 | Marking can begin |
+| **Grading ready** | 14 (includes the Labs 2–3 rehearsal) | Marking can begin |
 
-Task 15 appears twice deliberately: run it early with whatever exists to prove
+**Two gates, and they fail differently.** The lab-PC pilot answers "can this
+run here at all" — if Cline will not load in a browser Codespace or the
+campus proxy strips the WebSocket connections Streamlit needs, the whole
+browser-only approach dies and the install request changes. Task 9A answers a
+separate question: "does the agent actually produce working software from
+these prompts." Passing one tells you nothing about the other, so run both.
+
+If Task 9A shows no free model reaching roughly 80% green, do not proceed to
+Tasks 10–13 as written. The options at that point are: shrink Lab 1 further,
+give the agent more scaffolding, or accept a lower unaided pass rate and lean
+harder on golden branches. All three are survivable — but that is a decision
+to take with the numbers in hand, not to discover during Session 1.
+
+Task 15 appears early deliberately: run it with whatever exists to prove
 publishing works, then re-run it after each milestone — the script is
 idempotent and force-updates all three branches.
