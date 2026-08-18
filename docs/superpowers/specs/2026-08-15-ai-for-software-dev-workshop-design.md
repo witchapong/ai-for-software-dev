@@ -275,9 +275,9 @@ Individual work. Everyone builds the same thing.
 | 0:00–0:15 | 15 | Open Codespace from template, run `check_setup.py` until it prints ✅. Instructor triages failures. | Hands-on |
 | 0:15–0:20 | 5 | Cold open: instructor builds and deploys something small, live | Lecture |
 | 0:20–0:40 | 20 | **Lecture 1** — How an agent works: harness vs model; the read→plan→edit→run→observe loop; context window; tokens and quota; why it hallucinates | Lecture |
-| 0:40–1:05 | 25 | **Warm-up lab (deliberately unstructured)** — "Build me a filter designer app." No spec, no plan, just prompt for it. It half-works. This is the point. | Hands-on |
+| 0:40–1:05 | 25 | **Warm-up lab (deliberately unstructured)** — "Build me a spectrum analyser." No spec, no plan, just prompt for it. It half-works. This is the point. | Hands-on |
 | 1:05–1:25 | 20 | **Lecture 2** — Why that broke → the Four Gates; SDLC fundamentals mapped onto them (requirements, design, implementation, test, deploy); AI-DLC concepts: intent, units, bolts, AI proposes / human approves | Lecture |
-| 1:25–2:35 | 70 | **Lab 1** — rebuild the *same* filter designer properly through the Four Gates | Hands-on |
+| 1:25–2:35 | 70 | **Lab 1** — rebuild the *same* spectrum analyser properly through the Four Gates | Hands-on |
 | 2:35–2:50 | 15 | Deploy to Streamlit Community Cloud; post URL to the class channel | Hands-on |
 | 2:50–3:00 | 10 | Debrief: "what did your agent get wrong?" + homework | Discussion |
 
@@ -292,19 +292,29 @@ than comparing two unrelated experiences. The comparison is the lesson.
 
 #### Lab 1 brief (fixed — everyone builds the same thing)
 
-**RC / RLC Filter Designer.** Enter component values, get a Bode plot (magnitude and phase
-against frequency), and read off the cutoff frequency.
+**Two-Tone Spectrum Analyser.** Add two sine waves together, then show both the combined
+waveform and a chart of which frequencies are inside it and how strong each one is.
 
 Chosen because:
-- Every 3rd-year EE has done this by hand — they can tell when the output is *wrong*, which
-  is exactly the judgment the workshop is trying to build.
-- It's visual, so progress is immediately legible and motivating.
-- It has an **analytically checkable acceptance criterion**: the −3 dB point must match
-  1/(2πRC). That gives a genuinely meaningful first unit test — students verify software
-  against maths they already trust, instead of taking testing on faith.
+- Every 3rd-year EE has just met the Fourier transform — they can tell when the output is
+  *wrong*, which is exactly the judgment the workshop is trying to build.
+- It's visual, and the payoff is genuinely striking: a messy waveform resolving into two
+  clean spikes.
+- It has an **analytically checkable acceptance criterion**: a tone entered at amplitude
+  1.0 must produce a spike of height 1.0, at exactly the frequency entered.
+- **It contains the best teaching trap available.** NumPy's FFT returns unscaled values, so
+  a correct-looking result needs a `2/N` factor. Agents routinely omit it or use `1/N`. Every
+  such mistake still puts the peaks in the *right places* — only their *heights* are wrong
+  (500.0 or 0.5 instead of 1.0). A student who checks only the shape passes it; a student who
+  checks the numbers catches it. That is the workshop's central skill in a single chart.
 
-Stretch goals for fast finishers: phase plot, second-order RLC, compare two designs on one
-axis, CSV export of the response.
+This trap is verified, not assumed: the supplied test suite was mutation-tested against all
+three common scaling bugs. Two tests fail on each, while the peak-*location* test stays green
+throughout — which is the point, and worth naming aloud in the Session 1 debrief.
+
+Stretch goals for fast finishers: a third tone; add noise and watch a noise floor appear;
+**aliasing** — sample a 300 Hz tone at 500 Hz and watch the spike fold back to 200 Hz; CSV
+export of the spectrum.
 
 Fixed rather than a menu because it's the first lab, students are solo, and there are no TAs.
 

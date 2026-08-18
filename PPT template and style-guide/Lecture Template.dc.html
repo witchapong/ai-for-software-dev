@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(0.93 0.004 85); }
+  a { color: oklch(0.55 0.12 65); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.12 65); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <section data-label="Title" data-screen-label="01" data-speaker-notes="Cover. Course line, lecture number, date, and your name. Keep it to four lines." style="box-sizing:border-box;background:oklch(0.985 0.004 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;justify-content:space-between;padding:96px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.12 65)">CS 4820 · Spring 2026</div>
+    <div style="display:flex;flex-direction:column;gap:28px;max-width:1400px">
+      <div style="font-size:96px;font-weight:600;line-height:1.05;letter-spacing:-0.02em">Distributed Consensus</div>
+      <div style="font-size:40px;font-weight:300;color:oklch(0.5 0.01 85);line-height:1.3">Lecture 07 — why agreement is hard, and what we do about it</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid oklch(0.89 0.006 85);padding-top:26px;font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.5 0.01 85)">
+      <div>Dr. Your Name · Department of Computer Science</div>
+      <div>17 Mar 2026</div>
+    </div>
+  </section>
+
+  <section data-label="Agenda" data-screen-label="02" data-speaker-notes="Agenda. Numbered so you can refer back to a section by number later." style="box-sizing:border-box;background:oklch(0.985 0.004 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;padding:56px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.01 85)">Lecture 07</div>
+    <div style="font-size:56px;font-weight:600;line-height:1.1;margin-top:10px">Agenda</div>
+    <div style="height:1px;background:oklch(0.89 0.006 85);margin-top:26px"></div>
+    <div style="flex:1;padding-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:36px 80px;align-content:start">
+      <div style="display:flex;gap:28px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.55 0.12 65)">01</span><span style="font-size:34px;line-height:1.35">The agreement problem</span></div>
+      <div style="display:flex;gap:28px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.55 0.12 65)">04</span><span style="font-size:34px;line-height:1.35">Raft in practice</span></div>
+      <div style="display:flex;gap:28px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.55 0.12 65)">02</span><span style="font-size:34px;line-height:1.35">Failure models and timing assumptions</span></div>
+      <div style="display:flex;gap:28px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.55 0.12 65)">05</span><span style="font-size:34px;line-height:1.35">Workshop: build a leader election</span></div>
+      <div style="display:flex;gap:28px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.55 0.12 65)">03</span><span style="font-size:34px;line-height:1.35">The FLP impossibility result</span></div>
+      <div style="display:flex;gap:28px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.55 0.12 65)">06</span><span style="font-size:34px;line-height:1.35">Reading and problem set</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.62 0.01 85)">
+      <div>CS 4820 · Distributed Consensus</div>
+      <div>02</div>
+    </div>
+  </section>
+
+  <section data-label="Section divider" data-screen-label="03" data-speaker-notes="Section divider. One per section, always identical apart from the number and name." style="box-sizing:border-box;background:oklch(0.955 0.008 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;justify-content:center;padding:96px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.14em;color:oklch(0.55 0.12 65)">SECTION 01</div>
+    <div style="font-size:80px;font-weight:600;line-height:1.08;margin-top:24px;max-width:1300px">The agreement problem</div>
+    <div style="font-size:34px;font-weight:300;color:oklch(0.5 0.01 85);line-height:1.4;margin-top:28px;max-width:1100px">What two machines must decide together, and why the network will not help.</div>
+  </section>
+
+  <section data-label="Title + body" data-screen-label="04" data-speaker-notes="Standard body slide. Four points is the ceiling; each one is a sentence, not a paragraph." style="box-sizing:border-box;background:oklch(0.985 0.004 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;padding:56px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.01 85)">Section 01</div>
+    <div style="font-size:56px;font-weight:600;line-height:1.1;margin-top:10px">Three properties every protocol must hold</div>
+    <div style="height:1px;background:oklch(0.89 0.006 85);margin-top:26px"></div>
+    <div style="flex:1;padding-top:52px;display:flex;flex-direction:column;gap:34px;max-width:1500px">
+      <div style="display:flex;gap:28px"><span style="color:oklch(0.55 0.12 65);font-size:34px;line-height:1.4">—</span><span style="font-size:34px;line-height:1.45;text-wrap:pretty"><strong style="font-weight:600">Agreement.</strong> No two correct processes decide on different values.</span></div>
+      <div style="display:flex;gap:28px"><span style="color:oklch(0.55 0.12 65);font-size:34px;line-height:1.4">—</span><span style="font-size:34px;line-height:1.45;text-wrap:pretty"><strong style="font-weight:600">Validity.</strong> The decided value was proposed by some process; nothing is invented.</span></div>
+      <div style="display:flex;gap:28px"><span style="color:oklch(0.55 0.12 65);font-size:34px;line-height:1.4">—</span><span style="font-size:34px;line-height:1.45;text-wrap:pretty"><strong style="font-weight:600">Termination.</strong> Every correct process eventually decides, rather than waiting forever.</span></div>
+      <div style="display:flex;gap:28px"><span style="color:oklch(0.55 0.12 65);font-size:34px;line-height:1.4">—</span><span style="font-size:34px;line-height:1.45;text-wrap:pretty">Drop any one of the three and the problem becomes easy — which is the whole story of the next hour.</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.62 0.01 85)">
+      <div>CS 4820 · Distributed Consensus</div>
+      <div>04</div>
+    </div>
+  </section>
+
+  <section data-label="Two-column" data-screen-label="05" data-speaker-notes="Two-column: concept on the left, concrete case on the right. Keep the two sides the same length." style="box-sizing:border-box;background:oklch(0.985 0.004 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;padding:56px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.01 85)">Section 02</div>
+    <div style="font-size:56px;font-weight:600;line-height:1.1;margin-top:10px">Synchronous and asynchronous models</div>
+    <div style="height:1px;background:oklch(0.89 0.006 85);margin-top:26px"></div>
+    <div style="flex:1;padding-top:52px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-content:start">
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.55 0.12 65)">Synchronous</div>
+        <div style="font-size:32px;line-height:1.45;text-wrap:pretty">Message delay has a known upper bound. A missing reply after that bound is a failure, not slowness.</div>
+        <div style="font-size:32px;line-height:1.45;color:oklch(0.5 0.01 85);text-wrap:pretty">Timeouts are evidence. Consensus is achievable with a simple round-based protocol.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.1em;text-transform:uppercase;color:oklch(0.55 0.12 65)">Asynchronous</div>
+        <div style="font-size:32px;line-height:1.45;text-wrap:pretty">No bound exists. A slow process and a crashed process look identical from the outside.</div>
+        <div style="font-size:32px;line-height:1.45;color:oklch(0.5 0.01 85);text-wrap:pretty">Timeouts are guesses. This is the model real networks force on us.</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.62 0.01 85)">
+      <div>CS 4820 · Distributed Consensus</div>
+      <div>05</div>
+    </div>
+  </section>
+
+  <section data-label="Full-bleed image" data-screen-label="06" data-speaker-notes="Full-bleed image with a caption band. Use for a photograph or a wide diagram that carries the slide on its own." style="box-sizing:border-box;background:oklch(0.25 0.008 85);color:oklch(0.985 0.004 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column">
+    <div style="flex:1;background:repeating-linear-gradient(135deg,oklch(0.42 0.008 85) 0 12px,oklch(0.38 0.008 85) 12px 24px);display:flex;align-items:center;justify-content:center">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.1em;color:oklch(0.85 0.004 85)">DROP IMAGE — 1920 × 900, full bleed</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:34px 88px 40px;gap:60px">
+      <div style="font-size:34px;font-weight:500;line-height:1.3">A 2018 partition in a three-region cluster, replayed from the write-ahead log.</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.72 0.006 85);white-space:nowrap">Source · internal postmortem</div>
+    </div>
+  </section>
+
+  <section data-label="Figure + caption" data-screen-label="07" data-speaker-notes="Figure slide. Diagram fits inside its frame — never crop a diagram. Explanation sits beside it." style="box-sizing:border-box;background:oklch(0.985 0.004 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;padding:56px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.01 85)">Section 03</div>
+    <div style="font-size:56px;font-weight:600;line-height:1.1;margin-top:10px">The bivalent configuration</div>
+    <div style="height:1px;background:oklch(0.89 0.006 85);margin-top:26px"></div>
+    <div style="flex:1;padding-top:44px;display:grid;grid-template-columns:1.35fr 1fr;gap:64px">
+      <div style="background:repeating-linear-gradient(135deg,oklch(0.945 0.006 85) 0 12px,oklch(0.915 0.006 85) 12px 24px);border:1px solid oklch(0.89 0.006 85);display:flex;align-items:center;justify-content:center">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.08em;color:oklch(0.5 0.01 85)">DROP FIGURE — aspect-fit, no crop</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:26px;padding-top:8px">
+        <div style="font-size:32px;line-height:1.45;text-wrap:pretty">From an undecided state, one further message can always be delayed so the system stays undecided.</div>
+        <div style="font-size:32px;line-height:1.45;color:oklch(0.5 0.01 85);text-wrap:pretty">The adversary never needs to crash anything. It only needs to choose an order.</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.62 0.01 85);margin-top:auto">Fig. 3 — after Fischer, Lynch &amp; Paterson (1985)</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.62 0.01 85);padding-top:24px">
+      <div>CS 4820 · Distributed Consensus</div>
+      <div>07</div>
+    </div>
+  </section>
+
+  <section data-label="Code" data-screen-label="08" data-speaker-notes="Code slide. Twelve lines maximum at 28px; highlight the one line you will talk about." style="box-sizing:border-box;background:oklch(0.985 0.004 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;padding:56px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.01 85)">Workshop 05</div>
+    <div style="font-size:56px;font-weight:600;line-height:1.1;margin-top:10px">Leader election, first pass</div>
+    <div style="height:1px;background:oklch(0.89 0.006 85);margin-top:26px"></div>
+    <div style="flex:1;padding-top:44px;display:grid;grid-template-columns:1.55fr 1fr;gap:56px">
+      <div style="background:oklch(0.955 0.008 85);border:1px solid oklch(0.89 0.006 85);padding:38px 40px;font-family:'IBM Plex Mono',monospace;font-size:28px;line-height:1.6;color:oklch(0.3 0.008 85);white-space:pre;overflow:hidden">async def election(self):
+    self.term += 1
+    self.vote = self.id
+    votes = 1
+
+    for peer in self.peers:
+        if await peer.request_vote(
+            term=self.term, cid=self.id
+        ):
+            votes += 1
+
+    if votes > len(self.peers) // 2:
+        self.become_leader()</div>
+      <div style="display:flex;flex-direction:column;gap:26px;padding-top:6px">
+        <div style="font-size:32px;line-height:1.45;text-wrap:pretty">A candidate counts its own vote first, then asks every peer once.</div>
+        <div style="font-size:32px;line-height:1.45;color:oklch(0.5 0.01 85);text-wrap:pretty">The majority test is the only line that matters. Everything above it is bookkeeping.</div>
+        <div style="border-left:2px solid oklch(0.55 0.12 65);padding-left:24px;font-size:30px;line-height:1.4;margin-top:auto">Your turn: what breaks when two candidates start in the same term?</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.62 0.01 85);padding-top:24px">
+      <div>CS 4820 · Distributed Consensus</div>
+      <div>08</div>
+    </div>
+  </section>
+
+  <section data-label="Takeaways" data-screen-label="09" data-speaker-notes="Takeaways. Three, numbered, in the order they were taught. This is the slide students photograph." style="box-sizing:border-box;background:oklch(0.955 0.008 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;padding:56px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.01 85)">Lecture 07</div>
+    <div style="font-size:56px;font-weight:600;line-height:1.1;margin-top:10px">What to take away</div>
+    <div style="height:1px;background:oklch(0.89 0.006 85);margin-top:26px"></div>
+    <div style="flex:1;padding-top:56px;display:flex;flex-direction:column;gap:44px;max-width:1560px">
+      <div style="display:flex;gap:36px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:34px;color:oklch(0.55 0.12 65)">01</span><span style="font-size:36px;line-height:1.4;text-wrap:pretty">Consensus is a bargain between safety and liveness, and you choose which one to give up.</span></div>
+      <div style="display:flex;gap:36px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:34px;color:oklch(0.55 0.12 65)">02</span><span style="font-size:36px;line-height:1.4;text-wrap:pretty">In an asynchronous system, a slow node and a dead node are the same observation.</span></div>
+      <div style="display:flex;gap:36px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:34px;color:oklch(0.55 0.12 65)">03</span><span style="font-size:36px;line-height:1.4;text-wrap:pretty">Raft works in production because it makes the leader explicit, not because it beats the impossibility result.</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.62 0.01 85)">
+      <div>CS 4820 · Distributed Consensus</div>
+      <div>09</div>
+    </div>
+  </section>
+
+  <section data-label="Closing" data-screen-label="10" data-speaker-notes="Closing slide. Leave it up during questions: reading, deadline, and how to reach you." style="box-sizing:border-box;background:oklch(0.985 0.004 85);color:oklch(0.25 0.008 85);font-family:'Libre Franklin',Helvetica,sans-serif;display:flex;flex-direction:column;justify-content:space-between;padding:96px 88px 48px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.55 0.12 65)">Questions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end">
+      <div style="font-size:80px;font-weight:600;line-height:1.08">Where should we<br>slow down?</div>
+      <div style="display:flex;flex-direction:column;gap:22px;padding-bottom:12px">
+        <div style="font-size:32px;line-height:1.45">Reading: Ongaro &amp; Ousterhout, §5.1–5.4</div>
+        <div style="font-size:32px;line-height:1.45">Problem set 4 due Friday, 23:59</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:oklch(0.5 0.01 85);padding-top:8px">office hours · tue 14:00–16:00 · room 312</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;border-top:1px solid oklch(0.89 0.006 85);padding-top:26px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:oklch(0.5 0.01 85)">
+      <div>Dr. Your Name · you@university.edu</div>
+      <div>10</div>
+    </div>
+  </section>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>

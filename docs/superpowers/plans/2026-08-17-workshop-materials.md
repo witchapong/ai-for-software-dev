@@ -40,7 +40,7 @@
 | `core/models.py` | Example dataclass with `to_dict`/`from_dict` round trip |
 | `core/storage.py` | CSV persistence: `load`, `save`, `append` |
 | `core/llm.py` | Stub in `main`; implemented on `solution/lab3` |
-| `core/filters.py` | Does **not** exist on `main`; built by students, shipped on `solution/lab1` |
+| `core/spectrum.py` | Does **not** exist on `main`; built by students, shipped on `solution/lab1` |
 | `tests/` | One test module per `core/` module |
 | `aidlc/{intent,requirements,design,tasks}.md` | The Four Gates artifact templates |
 | `labs/LAB1.md`, `labs/LAB2.md`, `labs/LAB3.md` | Student lab instructions |
@@ -1114,184 +1114,255 @@ git commit -m "docs: add student README and troubleshooting guide"
 
 ---
 
-## Task 9: Lab 1 brief and the filter solution
+## Task 9: Lab 1 brief and the spectrum analyser solution
 
-Lab 1's value rests on one property: the acceptance criterion is analytically checkable. Students verify software against maths they already trust, which is a far better first experience of testing than taking it on faith.
+Lab 1's value rests on one property: the acceptance criteria are checkable
+against maths the student already trusts, **and** the most likely failure is
+one they can spot with their eyes. A signal built from a 1.0 V tone must show
+a spike of height 1.0. Every common scaling mistake still produces peaks in
+the right *places* — only the *heights* betray it. That is the workshop's
+central skill in a single chart.
 
 **Files:**
 - Create: `template/labs/LAB1.md`
-- Create (ships on published `main`): `template/tests/test_filters.py`
-- Create (on `solution/lab1` branch only, in Task 15): `template/core/filters.py`, `template/pages/2_Filter_Designer.py`
+- Create (ships on published `main`): `template/tests/test_spectrum.py`
+- Create (on `solution/lab1` branch only, in Task 15): `template/core/spectrum.py`, `template/pages/2_Spectrum_Analyzer.py`
 
 > **Why the test file ships on `main` while the implementation does not.**
 > "Make these failing tests pass" is a far more reliable instruction to an
 > agent than "build something meeting these requirements", because success is
 > unambiguous and the agent can check its own work by running something.
 > Students still write acceptance criteria in their own words at Gate 2 — they
-> then open the provided tests and compare. Seeing "the cutoff should be
-> correct" next to `== pytest.approx(159.15, abs=0.01)` teaches what
-> *checkable* means better than any slide.
+> then open the provided tests and compare. Seeing "the amplitudes should be
+> right" next to `== pytest.approx(1.0, abs=0.001)` teaches what *checkable*
+> means better than any slide.
 
 **Interfaces:**
 - Consumes: nothing
-- Produces: the solution module signatures students' work is compared against:
-  - `rc_cutoff_hz(r_ohm: float, c_farad: float) -> float`
-  - `rc_lowpass_response(r_ohm: float, c_farad: float, freqs_hz: np.ndarray) -> tuple[np.ndarray, np.ndarray]` returning `(magnitude_db, phase_deg)`
+- Produces the solution signatures students' work is measured against:
+  - `make_signal(components: list[tuple[float, float]], fs: float, duration: float) -> tuple[np.ndarray, np.ndarray]` returning `(times, signal)`; `components` is a list of `(frequency_hz, amplitude)` pairs
+  - `spectrum(signal: np.ndarray, fs: float) -> tuple[np.ndarray, np.ndarray]` returning `(freqs, magnitudes)`
+  - `peak_frequency(freqs: np.ndarray, magnitudes: np.ndarray) -> float`
 
 - [ ] **Step 1: Write the reference implementation**
 
-`template/core/filters.py`:
+`template/core/spectrum.py`:
 ```python
-"""Frequency response maths for a first-order RC filter."""
+"""Build signals out of sine waves and look at their frequency content."""
 
 import numpy as np
 
 
-def rc_cutoff_hz(r_ohm: float, c_farad: float) -> float:
-    """The -3 dB cutoff frequency in hertz: f = 1 / (2 * pi * R * C)."""
-    if r_ohm <= 0 or c_farad <= 0:
-        raise ValueError("resistance and capacitance must both be positive")
-    return 1.0 / (2.0 * np.pi * r_ohm * c_farad)
-
-
-def rc_lowpass_response(
-    r_ohm: float, c_farad: float, freqs_hz: np.ndarray
+def make_signal(
+    components: list[tuple[float, float]], fs: float, duration: float
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Magnitude in decibels and phase in degrees, at each frequency given."""
-    if r_ohm <= 0 or c_farad <= 0:
-        raise ValueError("resistance and capacitance must both be positive")
-    ratio = np.asarray(freqs_hz, dtype=float) / rc_cutoff_hz(r_ohm, c_farad)
-    transfer = 1.0 / (1.0 + 1j * ratio)
-    magnitude_db = 20.0 * np.log10(np.abs(transfer))
-    phase_deg = np.degrees(np.angle(transfer))
-    return magnitude_db, phase_deg
+    """Add sine waves together.
+
+    components is a list of (frequency in hertz, amplitude) pairs.
+    fs is the sampling rate in samples per second.
+    Returns the time values and the signal values.
+    """
+    if fs <= 0 or duration <= 0:
+        raise ValueError("sampling rate and duration must both be positive")
+    times = np.arange(0, duration, 1.0 / fs)
+    signal = np.zeros_like(times)
+    for frequency_hz, amplitude in components:
+        signal += amplitude * np.sin(2 * np.pi * frequency_hz * times)
+    return times, signal
+
+
+def spectrum(signal: np.ndarray, fs: float) -> tuple[np.ndarray, np.ndarray]:
+    """Return the frequencies present in the signal and how strong each one is.
+
+    The scaling matters. numpy gives back unscaled numbers, so a one volt sine
+    would show up as five hundred. Multiplying by 2/n converts them back into
+    the amplitudes you actually put in. The nought hertz term is not doubled,
+    because it is not part of a pair.
+    """
+    n = len(signal)
+    if n == 0:
+        raise ValueError("signal is empty")
+    coefficients = np.fft.rfft(signal)
+    magnitudes = 2.0 * np.abs(coefficients) / n
+    magnitudes[0] = np.abs(coefficients[0]) / n
+    freqs = np.fft.rfftfreq(n, 1.0 / fs)
+    return freqs, magnitudes
+
+
+def peak_frequency(freqs: np.ndarray, magnitudes: np.ndarray) -> float:
+    """The frequency with the most energy in it."""
+    return float(freqs[np.argmax(magnitudes)])
 ```
 
 - [ ] **Step 2: Write the tests**
 
-`template/tests/test_filters.py`:
+`template/tests/test_spectrum.py`:
 ```python
 import numpy as np
 import pytest
 
-from core.filters import rc_cutoff_hz, rc_lowpass_response
+from core.spectrum import make_signal, peak_frequency, spectrum
+
+FS = 1000.0
+DURATION = 1.0
 
 
-def test_cutoff_matches_the_textbook_formula():
-    r_ohm, c_farad = 1000.0, 1e-6
-    expected = 1.0 / (2.0 * np.pi * r_ohm * c_farad)
-    assert rc_cutoff_hz(r_ohm, c_farad) == pytest.approx(expected)
+def test_a_50_hz_sine_peaks_at_50_hz():
+    _, signal = make_signal([(50.0, 1.0)], FS, DURATION)
+    freqs, magnitudes = spectrum(signal, FS)
+    assert peak_frequency(freqs, magnitudes) == pytest.approx(50.0)
 
 
-def test_cutoff_of_1k_and_1uF_is_about_159_hz():
-    assert rc_cutoff_hz(1000.0, 1e-6) == pytest.approx(159.15, abs=0.01)
+def test_a_one_volt_sine_shows_an_amplitude_of_one():
+    _, signal = make_signal([(50.0, 1.0)], FS, DURATION)
+    freqs, magnitudes = spectrum(signal, FS)
+    assert magnitudes[np.argmax(magnitudes)] == pytest.approx(1.0, abs=0.001)
 
 
-def test_magnitude_at_cutoff_is_minus_3_db():
-    r_ohm, c_farad = 1000.0, 1e-6
-    cutoff = rc_cutoff_hz(r_ohm, c_farad)
-    magnitude_db, _ = rc_lowpass_response(r_ohm, c_farad, np.array([cutoff]))
-    assert magnitude_db[0] == pytest.approx(-3.0103, abs=0.001)
+def test_two_tones_each_show_their_own_amplitude():
+    _, signal = make_signal([(50.0, 1.0), (120.0, 0.5)], FS, DURATION)
+    freqs, magnitudes = spectrum(signal, FS)
+    assert magnitudes[freqs == 50.0][0] == pytest.approx(1.0, abs=0.001)
+    assert magnitudes[freqs == 120.0][0] == pytest.approx(0.5, abs=0.001)
 
 
-def test_phase_at_cutoff_is_minus_45_degrees():
-    r_ohm, c_farad = 1000.0, 1e-6
-    cutoff = rc_cutoff_hz(r_ohm, c_farad)
-    _, phase_deg = rc_lowpass_response(r_ohm, c_farad, np.array([cutoff]))
-    assert phase_deg[0] == pytest.approx(-45.0, abs=0.001)
+def test_a_constant_offset_appears_at_zero_hz():
+    _, signal = make_signal([(50.0, 1.0)], FS, DURATION)
+    freqs, magnitudes = spectrum(signal + 2.0, FS)
+    assert magnitudes[0] == pytest.approx(2.0, abs=0.001)
 
 
-def test_gain_well_below_cutoff_is_flat_at_0_db():
-    magnitude_db, _ = rc_lowpass_response(1000.0, 1e-6, np.array([0.001]))
-    assert magnitude_db[0] == pytest.approx(0.0, abs=0.001)
+def test_the_frequency_axis_stops_at_half_the_sampling_rate():
+    _, signal = make_signal([(50.0, 1.0)], FS, DURATION)
+    freqs, _ = spectrum(signal, FS)
+    assert freqs[0] == 0.0
+    assert freqs[-1] == pytest.approx(FS / 2)
 
 
-def test_slope_above_cutoff_is_20_db_per_decade():
-    magnitude_db, _ = rc_lowpass_response(1000.0, 1e-6, np.array([1.6e4, 1.6e5]))
-    assert magnitude_db[0] - magnitude_db[1] == pytest.approx(20.0, abs=0.1)
+def test_one_second_of_signal_gives_one_hertz_resolution():
+    _, signal = make_signal([(50.0, 1.0)], FS, DURATION)
+    freqs, _ = spectrum(signal, FS)
+    assert freqs[1] - freqs[0] == pytest.approx(1.0)
 
 
-def test_negative_component_values_are_rejected():
+def test_a_negative_sampling_rate_is_rejected():
     with pytest.raises(ValueError, match="positive"):
-        rc_cutoff_hz(-1.0, 1e-6)
+        make_signal([(50.0, 1.0)], -1000.0, 1.0)
 ```
 
 - [ ] **Step 3: Run the tests to verify they pass**
 
-Run: `cd template && pytest tests/test_filters.py -v`
+Run: `cd template && pytest tests/test_spectrum.py -v`
 Expected: 7 passed
 
-- [ ] **Step 4: Write the solution page**
+- [ ] **Step 4: Confirm the tests actually catch the scaling bugs**
 
-`template/pages/2_Filter_Designer.py`:
+A test that passes on broken code is worthless, and this suite's whole purpose
+is to catch a specific class of bug. Verify it does, by breaking the code on
+purpose three times.
+
+Temporarily replace the `magnitudes = 2.0 * np.abs(coefficients) / n` line
+with each of these, running `pytest tests/test_spectrum.py -q` after each:
+
+| Broken line | Expected result |
+|---|---|
+| `magnitudes = np.abs(coefficients)` | 2 failed, 5 passed |
+| `magnitudes = np.abs(coefficients) / n` | 2 failed, 5 passed |
+| *(delete the `magnitudes[0] = ...` line)* | 1 failed, 6 passed |
+
+Then restore the correct line and confirm 7 pass again.
+
+Note what stays green in every broken case: `test_a_50_hz_sine_peaks_at_50_hz`.
+The peaks are in the right places no matter how wrong the scaling is. That is
+exactly why students are taught to check the numbers and not just the shape,
+and it is worth saying out loud in the Session 1 debrief.
+
+- [ ] **Step 5: Write the solution page**
+
+`template/pages/2_Spectrum_Analyzer.py`:
 ```python
-"""Lab 1 reference solution: RC low-pass filter designer."""
+"""Lab 1 reference solution: a two-tone spectrum analyser."""
 
 import matplotlib.pyplot as plt
-import numpy as np
 import streamlit as st
 
-from core.filters import rc_cutoff_hz, rc_lowpass_response
+from core.spectrum import make_signal, peak_frequency, spectrum
 
-st.title("RC Low-Pass Filter Designer")
+st.title("Spectrum Analyser")
+st.caption("Build a signal from two sine waves and see what it is made of.")
 
-col_left, col_right = st.columns(2)
-r_kohm = col_left.number_input("Resistance R (kilo-ohms)", 0.1, 1000.0, 1.0, step=0.1)
-c_uf = col_right.number_input("Capacitance C (microfarads)", 0.001, 1000.0, 1.0, step=0.1)
+fs = st.select_slider("Sampling rate (samples per second)", [500, 1000, 2000, 4000], 1000)
 
-r_ohm = r_kohm * 1e3
-c_farad = c_uf * 1e-6
-cutoff = rc_cutoff_hz(r_ohm, c_farad)
+left, right = st.columns(2)
+freq_a = left.number_input("Tone A frequency (Hz)", 1.0, float(fs) / 2, 50.0, step=1.0)
+amp_a = left.number_input("Tone A amplitude", 0.0, 5.0, 1.0, step=0.1)
+freq_b = right.number_input("Tone B frequency (Hz)", 1.0, float(fs) / 2, 120.0, step=1.0)
+amp_b = right.number_input("Tone B amplitude", 0.0, 5.0, 0.5, step=0.1)
 
-st.metric("Cutoff frequency", f"{cutoff:,.1f} Hz")
-st.caption("Cutoff is where the output drops to -3 dB: f = 1 / (2 * pi * R * C)")
+times, signal = make_signal([(freq_a, amp_a), (freq_b, amp_b)], fs, duration=1.0)
+freqs, magnitudes = spectrum(signal, fs)
 
-freqs = np.logspace(np.log10(cutoff / 100), np.log10(cutoff * 100), 500)
-magnitude_db, phase_deg = rc_lowpass_response(r_ohm, c_farad, freqs)
+st.metric("Strongest frequency", f"{peak_frequency(freqs, magnitudes):,.1f} Hz")
 
-figure, (top, bottom) = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
-top.semilogx(freqs, magnitude_db)
-top.axvline(cutoff, linestyle="--", linewidth=1)
-top.axhline(-3.0103, linestyle=":", linewidth=1)
-top.set_ylabel("Magnitude (dB)")
-top.grid(True, which="both", alpha=0.3)
+figure, (top, bottom) = plt.subplots(2, 1, figsize=(7, 6))
+top.plot(times[:200], signal[:200], linewidth=1)
+top.set_xlabel("Time (seconds)")
+top.set_ylabel("Amplitude")
+top.set_title("The signal (first 200 samples)")
+top.grid(alpha=0.3)
 
-bottom.semilogx(freqs, phase_deg)
-bottom.axvline(cutoff, linestyle="--", linewidth=1)
-bottom.set_ylabel("Phase (degrees)")
+bottom.stem(freqs, magnitudes, markerfmt=" ", basefmt=" ")
+bottom.set_xlim(0, min(fs / 2, max(freq_a, freq_b) * 2))
 bottom.set_xlabel("Frequency (Hz)")
-bottom.grid(True, which="both", alpha=0.3)
+bottom.set_ylabel("Amplitude")
+bottom.set_title("What it is made of")
+bottom.grid(alpha=0.3)
 
+figure.tight_layout()
 st.pyplot(figure)
+
+st.info(
+    f"Check it yourself: tone A is {amp_a} at {freq_a:.0f} Hz. "
+    "The spike should reach that height. If it does not, the scaling is wrong."
+)
 ```
 
-- [ ] **Step 5: Verify the page renders**
+- [ ] **Step 6: Verify the page renders**
 
 Run: `cd template && streamlit run app.py --server.headless true --server.port 8501`
-Expected: the "Filter Designer" tab appears in the sidebar, shows 159.2 Hz for the default 1 kΩ / 1 µF, and draws both plots with the dashed cutoff line crossing the magnitude curve at −3 dB. Stop with Ctrl+C.
+Expected: a "Spectrum Analyzer" tab appears in the sidebar. With the defaults
+(50 Hz at 1.0, 120 Hz at 0.5, sampling at 1000) the top chart shows a messy
+repeating waveform and the bottom chart shows exactly two spikes — one at
+50 Hz reaching 1.0, one at 120 Hz reaching 0.5. Read the heights off the axis
+and confirm them by eye. Stop with Ctrl+C.
 
-- [ ] **Step 6: Write the lab brief**
+- [ ] **Step 7: Write the lab brief**
 
 `template/labs/LAB1.md`:
 ```markdown
-# Lab 1 — Build a filter designer, twice
+# Lab 1 — Build a spectrum analyser, twice
 
 You will build the same app two ways. The comparison is the whole point.
+
+A spectrum analyser takes a signal and tells you which frequencies it is made
+of. You will build one that adds two sine waves together and then shows you
+that it can find both of them again.
 
 ## Round 1: just ask for it (25 minutes)
 
 Open Cline. Type:
 
-> Build me an RC low-pass filter designer in Streamlit.
+> Build me a spectrum analyser in Streamlit that adds two sine waves together
+> and plots the frequency spectrum.
 
 Accept whatever it does. Do not plan. Do not write a spec. Try to get it
 working. Note what happens.
 
 When time is up, answer these in your AI collaboration log:
 - Did it run first time?
-- Did you check whether the numbers were correct? How would you even know?
-- If a classmate asked "what does this app do exactly", could you answer
-  without reading the code?
+- Set tone A to 1.0 amplitude. **Does the spike reach 1.0?** If you cannot
+  tell from the chart, that is itself an answer.
+- If a classmate asked "is this correct", could you show them why?
 
 Now delete it: `git checkout -- .` and `rm -f pages/2_*.py`
 
@@ -1305,26 +1376,29 @@ will not proceed until you do.
 **Gate 2 — Spec (10 min).** Ask Cline to draft `aidlc/requirements.md`.
 Read every line and fix what is wrong.
 
-Now write, in your own words, how you would *check* that the cutoff frequency
-the app displays is correct. Write it down before reading on.
+Now write, in your own words, how you would *check* that the spectrum your app
+draws is correct. Write it down before reading on.
 
-Then open `tests/test_filters.py`. Those tests were written for you — they are
+Then open `tests/test_spectrum.py`. Those tests were written for you — they are
 the acceptance criteria your "customer" is handing over, and your app is
 finished when they pass. Compare them to what you just wrote.
 
-Most people write something like "the cutoff should be correct". The test
-says `rc_cutoff_hz(1000.0, 1e-6) == pytest.approx(159.15, abs=0.01)`. The gap
-between those two sentences is the whole skill. Note it in your log.
+Most people write something like "the peaks should be in the right places".
+The tests check that too — but they also check
+`magnitudes[np.argmax(magnitudes)] == pytest.approx(1.0, abs=0.001)`, because
+a spectrum can have every peak in exactly the right place and still be wrong
+by a factor of five hundred. The gap between those two sentences is the whole
+skill. Note it in your log.
 
 Reply "approved" once `requirements.md` reflects what the tests actually
 demand.
 
 **Gate 3 — Plan (10 min).** Ask for `aidlc/design.md` and `aidlc/tasks.md`.
-The maths belongs in `core/filters.py`; the screen belongs in
-`pages/2_Filter_Designer.py`. Approve.
+The maths belongs in `core/spectrum.py`; the screen belongs in
+`pages/2_Spectrum_Analyzer.py`. Approve.
 
 **Gate 4 — Build (40 min).** One task at a time. Your goal is simple: make
-`pytest tests/test_filters.py` go green. After each task, run the tests and
+`pytest tests/test_spectrum.py` go green. After each task, run the tests and
 look at the app. Commit every time the tests pass:
 
 ```
@@ -1336,7 +1410,7 @@ a long conversation makes the agent worse, not better. Take the reference
 implementation, read it, and carry on:
 
 ```
-git checkout origin/solution/lab1 -- core/filters.py
+git checkout origin/solution/lab1 -- core/spectrum.py
 ```
 
 This is not cheating and it does not cost you marks. Recognising a dead end
@@ -1349,30 +1423,34 @@ set the main file to `app.py`, click Deploy. Post your public URL.
 
 ## You are done when
 
-- [ ] Entering 1 kΩ and 1 µF shows a cutoff of about 159.2 Hz
-- [ ] A magnitude plot and a phase plot both appear, with a log frequency axis
-- [ ] `pytest` passes and at least one test checks the cutoff formula
+- [ ] Two tones at 50 Hz and 120 Hz produce exactly two spikes, in those places
+- [ ] A tone you set to amplitude 1.0 produces a spike that reaches 1.0
+- [ ] `pytest` passes all seven tests
 - [ ] Your app is live at a public URL
 
 ## If you finish early
 
-Add a phase plot if you have not. Add a second-order RLC option. Let the user
-compare two designs on the same axes. Add a CSV export of the response.
+- Add a third tone.
+- Add random noise to the signal and watch a noise floor appear underneath the
+  spikes. How much noise before you can no longer see the smaller tone?
+- **Aliasing:** allow tone A above half the sampling rate. Set the sampling
+  rate to 500 and tone A to 300 Hz. The spike appears at 200 Hz, not 300 —
+  the frequency has "folded back". This is why sampling rate matters, and it
+  is the single most important idea in digital signal processing.
+- Export the spectrum as a CSV file.
 ```
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add template/labs/LAB1.md template/core/filters.py template/tests/test_filters.py template/pages/2_Filter_Designer.py
-git commit -m "feat: add Lab 1 brief and filter reference solution"
+git add template/labs/LAB1.md template/core/spectrum.py template/tests/test_spectrum.py template/pages/2_Spectrum_Analyzer.py
+git commit -m "feat: add Lab 1 brief and spectrum analyser reference solution"
 ```
 
-> **Note for Task 15:** `core/filters.py` and `pages/2_Filter_Designer.py` are
-> the solution and must be removed from the published `main` branch, kept only
-> on `solution/lab1`. `tests/test_filters.py` **stays on `main`** — it is the
-> acceptance specification students are given, not an answer.
-
----
+> **Note for Task 15:** `core/spectrum.py` and `pages/2_Spectrum_Analyzer.py`
+> are the solution and must be removed from the published `main` branch, kept
+> only on `solution/lab1`. `tests/test_spectrum.py` **stays on `main`** — it
+> is the acceptance specification students are given, not an answer.
 
 ## Task 9A: Lab 1 reliability eval — measure whether the free stack actually works
 
@@ -1394,7 +1472,7 @@ nothing. **Expect this eval to possibly reverse the primary/backup choice.**
 - Modify: `docs/superpowers/specs/2026-08-15-ai-for-software-dev-workshop-design.md` §4 if the winner differs from Mistral
 
 **Interfaces:**
-- Consumes: `template/` as built by Tasks 1–9; `template/tests/test_filters.py` is the scoring oracle (7 tests, all must pass)
+- Consumes: `template/` as built by Tasks 1–9; `template/tests/test_spectrum.py` is the scoring oracle (7 tests, all must pass)
 - Produces: `eval/REPORT.md` (pass rate, median request count and failure taxonomy per model) and `template/labs/PROMPTS.md` (the validated prompt library students copy from)
 
 - [ ] **Step 1: Install the CLI and record its real configuration surface**
@@ -1439,25 +1517,27 @@ in Step 4.
 # Gate 1 — Intent
 
 **Who is this for?**
-A second-year electronics student checking a filter design before building it.
+A second-year electronics student who has just met the Fourier transform and
+wants to see what it actually does.
 
 **What problem does it solve?**
-Working out the cutoff frequency and sketching the frequency response by hand
-is slow and easy to get wrong.
+Looking at a waveform on a screen tells you almost nothing about which
+frequencies are inside it. Working that out by hand is not practical.
 
 **What does "done" look like?**
-I type in a resistance and a capacitance, and immediately see the cutoff
-frequency and a Bode plot of magnitude and phase.
+I set two sine waves going, and immediately see both the combined waveform and
+a chart showing exactly those two frequencies at exactly the amplitudes I
+chose.
 
 **What is deliberately NOT included?**
-No saving of designs. No component ordering. No filter types other than a
-first-order RC low-pass.
+No loading of real audio or measurement files. No saving. No more than two
+tones. No windowing options.
 ```
 
 `eval/prompts/01-gate2-spec.md`:
 ```
 Using the Four Gates in .clinerules: I have filled in aidlc/intent.md.
-Read tests/test_filters.py first - those tests are the acceptance criteria.
+Read tests/test_spectrum.py first - those tests are the acceptance criteria.
 Draft aidlc/requirements.md so every requirement matches something those
 tests actually check. Then stop and wait for my approval.
 ```
@@ -1465,24 +1545,24 @@ tests actually check. Then stop and wait for my approval.
 `eval/prompts/02-gate3-plan.md`:
 ```
 requirements.md is approved. Now draft aidlc/design.md and aidlc/tasks.md.
-The maths belongs in core/filters.py. The screen belongs in
-pages/2_Filter_Designer.py. Two tasks, one file each. Then stop.
+The maths belongs in core/spectrum.py. The screen belongs in
+pages/2_Spectrum_Analyzer.py. Two tasks, one file each. Then stop.
 ```
 
 `eval/prompts/03-gate4-maths.md`:
 ```
 design.md and tasks.md are approved. Implement task 1 only.
-Create core/filters.py so that every test in tests/test_filters.py passes.
-Run pytest tests/test_filters.py and report exactly what it printed.
+Create core/spectrum.py so that every test in tests/test_spectrum.py passes.
+Run pytest tests/test_spectrum.py and report exactly what it printed.
 ```
 
 `eval/prompts/04-gate4-page.md`:
 ```
-Task 1 is done. Implement task 2 only. Create pages/2_Filter_Designer.py:
-a Streamlit page with number inputs for resistance in kilo-ohms and
-capacitance in microfarads, showing the cutoff frequency, and a Bode plot of
-magnitude in decibels and phase in degrees against a logarithmic frequency
-axis. Do not modify core/filters.py.
+Task 1 is done. Implement task 2 only. Create pages/2_Spectrum_Analyzer.py:
+a Streamlit page with number inputs for two tones, each with a frequency in
+hertz and an amplitude, plus a sampling rate. Show the strongest frequency,
+then two charts: the combined waveform against time, and the amplitude of
+each frequency present. Do not modify core/spectrum.py.
 ```
 
 Each prompt is a separate `cline` invocation, so each gate is a fresh task.
@@ -1511,7 +1591,7 @@ for i in $(seq 1 "$RUNS"); do
   WORK="$(mktemp -d)"
   cp -R "$ROOT/template/." "$WORK/"
   # The agent must build these. The tests stay.
-  rm -f "$WORK/core/filters.py" "$WORK/pages/2_Filter_Designer.py"
+  rm -f "$WORK/core/spectrum.py" "$WORK/pages/2_Spectrum_Analyzer.py"
   cp "$ROOT/eval/fixtures/intent.md" "$WORK/aidlc/intent.md"
 
   python3 -m venv "$WORK/.venv"
@@ -1530,7 +1610,7 @@ for i in $(seq 1 "$RUNS"); do
   END=$(date +%s)
   echo "$((END - START))" > "$ROOT/eval/results/${TAG}-run${i}.seconds"
 
-  ( cd "$WORK" && .venv/bin/python -m pytest tests/test_filters.py -q ) \
+  ( cd "$WORK" && .venv/bin/python -m pytest tests/test_spectrum.py -q ) \
     > "$ROOT/eval/results/${TAG}-run${i}.pytest" 2>&1 || true
 
   echo "run $i: $(tail -1 "$ROOT/eval/results/${TAG}-run${i}.pytest")"
@@ -1544,7 +1624,7 @@ done
 ```python
 """Aggregate eval runs into a pass-rate table.
 
-A run is green only when all 7 tests in tests/test_filters.py pass.
+A run is green only when all 7 tests in tests/test_spectrum.py pass.
 """
 
 import json
@@ -2707,9 +2787,9 @@ git branch solution/lab1
 git branch solution/lab3
 
 # main must not ship the answers.
-# NOTE: tests/test_filters.py deliberately stays — it is the acceptance
+# NOTE: tests/test_spectrum.py deliberately stays — it is the acceptance
 # specification students are given, not an answer.
-git rm -q core/filters.py pages/2_Filter_Designer.py \
+git rm -q core/spectrum.py pages/2_Spectrum_Analyzer.py \
           core/retrieval.py pages/9_Assistant.py tests/test_assistant_eval.py \
           tests/test_llm_solution.py
 git checkout -q "$(git rev-parse HEAD)" -- core/llm.py 2>/dev/null || true
@@ -2768,9 +2848,9 @@ Run:
 ```bash
 PATHS=$(gh api "repos/$(gh api user --jq .login)/ai-workshop-template/git/trees/main?recursive=1" \
   --jq '.tree[].path')
-echo "$PATHS" | grep -E 'core/filters\.py|core/retrieval\.py|9_Assistant|test_llm_solution|test_assistant_eval' \
+echo "$PATHS" | grep -E 'core/spectrum\.py|core/retrieval\.py|9_Assistant|test_llm_solution|test_assistant_eval' \
   && echo "PROBLEM: a solution file leaked onto main" || echo "no solutions on main - good"
-echo "$PATHS" | grep -q 'tests/test_filters\.py' \
+echo "$PATHS" | grep -q 'tests/test_spectrum\.py' \
   && echo "acceptance tests present - good" || echo "PROBLEM: acceptance tests missing"
 ```
 Expected: `no solutions on main - good` followed by `acceptance tests present - good`
@@ -2780,9 +2860,9 @@ Expected: `no solutions on main - good` followed by `acceptance tests present - 
 Run:
 ```bash
 gh api "repos/$(gh api user --jq .login)/ai-workshop-template/git/trees/solution/lab1?recursive=1" \
-  --jq '.tree[].path' | grep -c filters
+  --jq '.tree[].path' | grep -cE 'core/spectrum\.py|2_Spectrum_Analyzer\.py'
 ```
-Expected: `2` (`core/filters.py` and `tests/test_filters.py`)
+Expected: `2` (`core/spectrum.py` and `pages/2_Spectrum_Analyzer.py`)
 
 - [ ] **Step 6: Verify it is usable as a template**
 
@@ -2914,8 +2994,9 @@ that branch.
 **Type consistency.** `ask` and `ask_structured` keep identical signatures
 across the Task 5 stub, the Task 12 implementation and the Task 15 republished
 stub. `retrieve` returns `list[tuple[str, str]]` in Task 12 and is consumed
-that way in Task 13. `rc_lowpass_response` returns `(magnitude_db, phase_deg)`
-in Task 9 and is unpacked in that order on the solution page. Storage's
+that way in Task 13. In Task 9, `make_signal` returns `(times, signal)` and
+`spectrum` returns `(freqs, magnitudes)`; both are unpacked in that order on
+the solution page and in every test. Storage's
 `load`/`save`/`append` signatures match between Task 3 and their use in
 Task 5's `pages/1_Home.py`.
 
