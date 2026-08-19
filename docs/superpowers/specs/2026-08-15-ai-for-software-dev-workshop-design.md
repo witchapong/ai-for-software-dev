@@ -278,10 +278,10 @@ Individual work. Everyone builds the same thing.
 | 0:40–1:05 | 25 | **Warm-up lab (deliberately unstructured)** — "Build me a spectrum analyser." No spec, no plan, just prompt for it. It half-works. This is the point. | Hands-on |
 | 1:05–1:25 | 20 | **Lecture 2** — Why that broke → the Four Gates; SDLC fundamentals mapped onto them (requirements, design, implementation, test, deploy); AI-DLC concepts: intent, units, bolts, AI proposes / human approves | Lecture |
 | 1:25–2:35 | 70 | **Lab 1** — rebuild the *same* spectrum analyser properly through the Four Gates | Hands-on |
-| 2:35–2:50 | 15 | Deploy to Streamlit Community Cloud; post URL to the class channel | Hands-on |
-| 2:50–3:00 | 10 | Debrief: "what did your agent get wrong?" + homework | Discussion |
+| 2:35–2:45 | 10 | Deploy to Streamlit Community Cloud; post URL to the class channel | Hands-on |
+| 2:45–3:00 | 15 | **Study the reference with your agent** (everyone), then debrief: "what did your agent get wrong?" + homework | Hands-on |
 
-**Lecture 45 min (25%), hands-on 125 min.**
+**Lecture 45 min (25%), hands-on 135 min.**
 
 The warm-up lab is load-bearing. Students must *feel* vibe coding fall over before the Four
 Gates reads as anything other than pointless paperwork. Do not skip it to save time.
@@ -289,6 +289,23 @@ Gates reads as anything other than pointless paperwork. Do not skip it to save t
 Crucially, the warm-up and Lab 1 build the **same application**. Students throw the warm-up
 away and rebuild it through the gates, so they compare two routes to one destination rather
 than comparing two unrelated experiences. The comparison is the lesson.
+
+The closing block is not padding. **Every student studies the reference implementation with
+their agent**, whether or not their own version worked. Three reasons it earns fifteen
+minutes:
+
+- Reading unfamiliar code with an AI explaining it is the most common way these tools get
+  used at work — more common than greenfield generation.
+- It levels the room before Session 2. Students who failed get the content; students who
+  succeeded compare against a second solution and discover there were alternatives.
+- It is the sturdiest activity in the workshop. Explaining edits no files, so it cannot hit
+  the agent failure mode that threatens the build path. **The rescue route is more reliable
+  than the route it rescues** — exactly the property a rescue route needs.
+
+The structural consequence matters more than the pedagogy: **this makes Lab 1 unable to fail
+outright.** Even if the free-tier model turns out weak at building, the lab degrades to
+"attempt it, then understand it" — still a good lab, and still assessable, since a student
+who never got a working app can write a substantive AI collaboration log entry about why.
 
 #### Lab 1 brief (fixed — everyone builds the same thing)
 
@@ -342,7 +359,7 @@ leave with a running skeleton and a week to build on it.
 | 2:20–2:45 | 25 | Pull requests → peer review → merge → deploy | Hands-on |
 | 2:45–3:00 | 15 | Plan the week: backlog, who does what, next check-in | Hands-on |
 
-**Lecture 45 min (25%), hands-on 125 min.**
+**Lecture 45 min (25%), hands-on 125 min, discussion 10 min.**
 
 #### The idle-spectator problem, and how this fixes it
 
@@ -397,7 +414,7 @@ Each has a natural slot for the Session 3 LLM feature, so the transfer is obviou
 | 2:00–2:45 | 45 | **Demos** — science fair format | Hands-on |
 | 2:45–3:00 | 15 | **Closing** — what you can now do alone; when *not* to use AI; security, ethics, academic honesty; where to go next | Lecture |
 
-**Lecture 40 min (22%), hands-on 130 min.**
+**Lecture 40 min (22%), hands-on 130 min, break 10 min.**
 
 #### Why guided-then-transfer
 
