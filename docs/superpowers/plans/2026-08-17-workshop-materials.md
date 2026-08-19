@@ -56,7 +56,8 @@
 
 | Path | Responsibility |
 |---|---|
-| `slides/session1.md`, `session2.md`, `session3.md` | Lecture decks (Markdown, Marp-compatible) |
+| `slides/Session N - <name>.dc.html` | Lecture decks — `deck-stage` HTML, built to `PPT template and style-guide/SLIDE-STYLE.md` |
+| `slides/support.js`, `slides/deck-stage.js` | Deck runtime, copied from the template folder |
 | `instructor/rubric.md` | Assessment rubric |
 | `instructor/peer-score-form.md` | One-page demo-day peer scoring form |
 | `instructor/ai-collaboration-log.md` | Individual submission template |
@@ -3711,7 +3712,22 @@ git commit -m "feat: add template publish script"
 Written last because the demos in them reference code that must already exist.
 
 **Files:**
-- Create: `slides/session1.md`, `slides/session2.md`, `slides/session3.md`
+- Create: `slides/Session 1 - Meet Your Agent.dc.html`, `slides/Session 2 - <name>.dc.html`, `slides/Session 3 - <name>.dc.html`
+- Copy once: `slides/support.js`, `slides/deck-stage.js`
+
+**Format.** Decks are `deck-stage` HTML, not Markdown: inline-styled
+`<section data-label="…">` children of `<deck-stage width="1920" height="1080">`,
+with speaker notes in `data-speaker-notes`. Follow
+`PPT template and style-guide/SLIDE-STYLE.md` literally — ten named layouts, two
+backgrounds, one accent, nothing below 24px, and none of the items on its Never
+list. `PPT template and style-guide/Lecture Template.dc.html` carries one worked
+example of each layout; copy its markup rather than inventing structure.
+
+**Verify each deck** before committing, with the checks used on Session 1:
+screen labels sequential, footer numbers matching them, dividers carrying no
+footer, every slide having speaker notes, Title+body capped at four bullets,
+code blocks at twelve lines or fewer, and no font under 24px. Then serve the
+folder and look at it — `python3 -m http.server` and open the file.
 
 **Interfaces:**
 - Consumes: every artifact above — slides must not reference anything that does not exist
