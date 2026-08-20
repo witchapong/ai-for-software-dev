@@ -1,0 +1,14 @@
+{
+  "name": "workshop-slides",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Lecture decks for the AI for Software Development workshop, built to SLIDE-STYLE.md",
+  "scripts": {
+    "build": "node build.js",
+    "session1": "node session1.js"
+  },
+  "dependencies": {
+    "pptxgenjs": "^4.0.1"
+  }
+}

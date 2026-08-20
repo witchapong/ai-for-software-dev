@@ -1,0 +1,130 @@
+# Project conventions
+
+Workshop materials for a 3-session course, "AI for Software Development", taught
+to 3rd-year electrical engineering undergraduates.
+
+| Path | What it holds |
+|---|---|
+| `docs/superpowers/specs/` | The workshop design — sessions, labs, tooling decisions |
+| `docs/superpowers/plans/` | The implementation plan for building the materials |
+| `template/` | The student-facing project template (published separately as a GitHub template repo) |
+| `slides/` | Lecture decks and the generator that builds them |
+| `resources/` | Source material: AI-DLC notes and reference decks |
+| `SLIDE-STYLE.md` | **The authority on slide design.** See below |
+
+---
+
+## Building slides
+
+**`SLIDE-STYLE.md` is the spec. Follow it literally.** It defines the palette,
+type scale, geometry, and exactly ten layouts. It says so itself: *"do not
+introduce styling that isn't described here."*
+
+### Build path
+
+**Generate `.pptx` programmatically with PptxGenJS.** Do not hand-author HTML
+decks unless explicitly asked. One file per session:
+
+```
+slides/deck.js       the ten layout recipes from SLIDE-STYLE.md — shared, do not edit per deck
+slides/session1.js   content only: which recipe, what text, what speaker note
+```
+
+```bash
+cd slides && node session1.js        # writes "Session 1 - <name>.pptx"
+```
+
+`deck.js` transcribes the recipes literally. **Content files never define
+layout.** If a slide fits none of the ten recipes, split the content — do not
+add a layout.
+
+### Required QA, in order
+
+Never claim a deck is done without running all three.
+
+```bash
+# 1. Schema and structure — must print "All validations PASSED!"
+/tmp/pptxqa/bin/python ~/.claude/skills/pptx/scripts/office/validate.py "Session 1 - Meet Your Agent.pptx"
+
+# 2. Content — check text, order, and that every slide has a speaker note
+/tmp/pptxqa/bin/markitdown "Session 1 - Meet Your Agent.pptx" | head -60
+
+# 3. Visual — render every slide and look at it
+osascript -e 'tell application "Keynote"
+  activate
+  delay 2
+  set d to open POSIX file "/absolute/path/to/deck.pptx"
+  delay 5
+  export d to POSIX file "/tmp/s1.pdf" as PDF with properties {PDF image quality:Best}
+  close d saving no
+end tell'
+cd /tmp && rm -f slide-*.jpg && pdftoppm -jpeg -r 100 /tmp/s1.pdf slide
+```
+
+Then read the images. **Look for text overflow and overlapping elements first** —
+they are the most common defects and always user-visible.
+
+### Environment notes
+
+- LibreOffice is **not** installed, so the pptx skill's `soffice` and
+  `thumbnail.py` paths do not work here. Keynote does the PDF conversion instead
+  (AppleScript above); `pdftoppm` comes from Homebrew poppler.
+- The validator needs Python 3.10+ and `defusedxml`. The system `python3` is
+  3.9, so a venv at `/tmp/pptxqa` holds `defusedxml`, `lxml`, `markitdown[pptx]`.
+- **Keynote substitutes fonts it lacks** (Libre Franklin, IBM Plex Mono are not
+  installed here), so the render approximates widths. Trust it for overlap and
+  position; leave ~10% slack rather than tuning text to exactly fill a box.
+
+### Precedence when guidance conflicts
+
+`SLIDE-STYLE.md` wins over the `pptx` skill's "Design Ideas" section, which
+disagrees with it on three points. The skill is general advice; this deck system
+is a deliberate design.
+
+| Skill says | This project does | Because |
+|---|---|---|
+| Never put a rule under a title | 1px hairline under every title | `SLIDE-STYLE.md` frame spec |
+| Avoid cream backgrounds | `FCFBF8` warm paper | It is the defined palette |
+| Every slide needs a visual | Most slides are text | The system is deliberately minimal |
+
+Use the skill for its **technical gotchas and QA tooling**, not its design
+opinions.
+
+### Two deliberate deviations from SLIDE-STYLE.md
+
+Both are bugs in the guide's recipes, found by rendering. `deck.js` carries a
+comment at each site. **`SLIDE-STYLE.md` should be updated to match.**
+
+1. **`rule()` outline.** The guide passes `line: { width: 0 }`, but PptxGenJS
+   reads width 0 as "use the default" and writes a 1pt `#333333` outline. On a
+   1px-tall rule that outline *is* the whole shape, so every hairline rendered
+   near-black. Fix: `line: { type: "none" }`, which emits an empty `<a:ln>`.
+
+2. **Fixed vertical steps in `bodySlide` and `takeawaysSlide`.** The guide steps
+   a constant 90px (and 132px) per item. PowerPoint has no flow layout, so an
+   item that wraps to two lines overlaps the next one. Fix: step by the wrapped
+   height, keeping the guide's 34px and 44px gaps. Single-line spacing is
+   unchanged, so decks that never wrap look identical.
+
+Character-per-line estimates in `deck.js` are deliberately conservative:
+under-estimating gives a slightly generous gap, over-estimating gives an
+overlap. Prefer the harmless failure.
+
+---
+
+## Writing for students
+
+The audience has completed one introductory Python course and has weak-to-basic
+programming background.
+
+- Define every technical term at first use, in one plain clause.
+- Never present a metrics table with undefined columns.
+- Lead a named concept with its one-sentence intuition before the mechanics.
+- Assume no teaching assistant is available: 30–60 students, one instructor.
+  Anything that needs individual intervention will fail.
+
+## Verifying work
+
+Run the thing before saying it works. In this repo that means: `pytest` for
+`template/`, the three-step QA above for slides, and an actual render or HTTP
+response for anything that claims to run. State plainly what was not tested.

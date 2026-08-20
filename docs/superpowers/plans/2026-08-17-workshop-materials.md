@@ -56,8 +56,9 @@
 
 | Path | Responsibility |
 |---|---|
-| `slides/Session N - <name>.dc.html` | Lecture decks — `deck-stage` HTML, built to `PPT template and style-guide/SLIDE-STYLE.md` |
-| `slides/support.js`, `slides/deck-stage.js` | Deck runtime, copied from the template folder |
+| `slides/deck.js` | The ten layout recipes from `SLIDE-STYLE.md`, shared by every deck |
+| `slides/sessionN.js` | Content for one deck: recipe, text, speaker note |
+| `slides/Session N - <name>.pptx` | The generated deck |
 | `instructor/rubric.md` | Assessment rubric |
 | `instructor/peer-score-form.md` | One-page demo-day peer scoring form |
 | `instructor/ai-collaboration-log.md` | Individual submission template |
@@ -3712,28 +3713,28 @@ git commit -m "feat: add template publish script"
 Written last because the demos in them reference code that must already exist.
 
 **Files:**
-- Create: `slides/Session 1 - Meet Your Agent.dc.html`, `slides/Session 2 - <name>.dc.html`, `slides/Session 3 - <name>.dc.html`
-- Copy once: `slides/support.js`, `slides/deck-stage.js`
+- Exists already: `slides/deck.js` (the ten recipes), `slides/package.json`
+- Create: `slides/session2.js`, `slides/session3.js`
+- Generated: `slides/Session N - <name>.pptx`
 
-**Format.** Decks are `deck-stage` HTML, not Markdown: inline-styled
-`<section data-label="…">` children of `<deck-stage width="1920" height="1080">`,
-with speaker notes in `data-speaker-notes`. Follow
-`PPT template and style-guide/SLIDE-STYLE.md` literally — ten named layouts, two
-backgrounds, one accent, nothing below 24px, and none of the items on its Never
-list. `PPT template and style-guide/Lecture Template.dc.html` carries one worked
-example of each layout; copy its markup rather than inventing structure.
+**Format.** Decks are `.pptx`, generated with **PptxGenJS**. `slides/deck.js`
+transcribes the ten layout recipes from `SLIDE-STYLE.md`; a `sessionN.js` file
+supplies content only — which recipe, what text, what speaker note. Never define
+layout in a content file, and never hand-author HTML. If a slide fits none of
+the ten recipes, split the content rather than adding a layout.
 
-**Verify each deck** before committing, with the checks used on Session 1:
-screen labels sequential, footer numbers matching them, dividers carrying no
-footer, every slide having speaker notes, Title+body capped at four bullets,
-code blocks at twelve lines or fewer, and no font under 24px. Then serve the
-folder and look at it — `python3 -m http.server` and open the file.
+Session 1 is built; copy `slides/session1.js` as the starting shape.
+
+**Verify each deck** with the three-step QA in `CLAUDE.md` — schema validation,
+`markitdown` content check, and a Keynote render inspected slide by slide. All
+three, every time. Text overflow and overlapping elements are the defects to
+hunt first; both appeared in Session 1's first render.
 
 **Interfaces:**
 - Consumes: every artifact above — slides must not reference anything that does not exist
 - Produces: nothing downstream
 
-- [ ] **Step 1: Write `slides/session1.md`**
+- [ ] **Step 1: Write `slides/session1.js`** *(done — see `slides/session1.js`)*
 
 Marp-compatible Markdown, slides separated by `---`. Two blocks totalling
 40 minutes plus a 5-minute live demo.
@@ -3754,7 +3755,7 @@ approves" — credited to AWS with the Google Maps analogy from the existing
 lecture notes; closing slide: the quota discipline line, "prompt like an
 engineer, not a slot machine".
 
-- [ ] **Step 2: Write `slides/session2.md`**
+- [ ] **Step 2: Write `slides/session2.js`**
 
 Two blocks totalling 45 minutes.
 
@@ -3774,7 +3775,7 @@ quietly deleted to make a test pass, unnecessary abstraction, and a test that
 asserts nothing; a four-question review checklist students apply to their
 partner's pull request.
 
-- [ ] **Step 3: Write `slides/session3.md`**
+- [ ] **Step 3: Write `slides/session3.js`**
 
 Two blocks totalling 40 minutes.
 
@@ -3797,10 +3798,13 @@ go next.
 
 - [ ] **Step 4: Verify no slide references a missing artifact**
 
-Run:
+Slides name real files — `labs/LAB1.md`, `tests/test_spectrum.py`, `.clinerules`.
+Check every one of them exists:
+
 ```bash
-grep -ohE '(template|instructor|slides)/[A-Za-z0-9_./-]+' slides/*.md | sort -u | while read -r p; do
-  [ -e "$p" ] || echo "MISSING: $p"
+grep -ohE '(template/|labs/|tests/|core/|pages/|aidlc/)[A-Za-z0-9_/-]+\.[A-Za-z]+' slides/session*.js \
+  | sed 's|^template/||' | sort -u | while read -r p; do
+  [ -e "template/$p" ] || echo "MISSING: $p"
 done
 ```
 Expected: no output.
