@@ -2079,9 +2079,15 @@ print(c.most_common())
 "
 ```
 
-Record in `eval/README.md`: the exact provider identifier strings (for example
-`gemini`, `mistral`) and the subtype marking one model request. If that subtype
-is not `api_req_started`, update `REQUEST_SUBTYPE` in `eval/score.py`.
+Record in `eval/README.md`: the exact provider identifier strings and the event
+that marks one model request.
+
+**Done on 20 Aug 2026, and the documented schema was wrong.** Cline CLI 3.0.55
+emits no `say`/`ask` subtypes. One model request is one `iteration_start`, and a
+`run_result` line carries `iterations`, `usage.inputTokens`, `usage.outputTokens`
+and `durationMs` directly — better data than counting messages. `score.py`
+already parses this. Provider id for Mistral is `mistral`. Gemini is unusable;
+see spec §4.
 
 This step is also a smoke test. If the CLI cannot authenticate, Node is missing,
 or `check_gate.py` crashes on real output, you learn it in twelve minutes.
@@ -2156,6 +2162,13 @@ python3 eval/score.py
 
 For each red gate, read that run's `.jsonl` log and assign a cause. The fix
 differs entirely by cause, so this is where most of the value sits.
+
+**Do this before reaching for a different model.** The first calibration scored
+0/4 and the agent said *"I don't have the capability to create files on your
+system"* — which reads unmistakably as *this model is too weak*. Three models
+were swapped in before the prompt was suspected. The cause was four words of
+prompt wording; the same model passed once they changed. Attribution first is
+not bureaucracy, it is the difference between a ten-minute fix and a wasted day.
 
 | Symptom | Cause | Fix |
 |---|---|---|
