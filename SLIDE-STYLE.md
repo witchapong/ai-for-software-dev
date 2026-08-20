@@ -272,7 +272,7 @@ const text = (s, x, y, w, h, runs, size, o = {}) => {
 const rule = (s, x, y, w, color = HAIRLINE, thickness = 1) =>
   s.addShape(pres.ShapeType.rect, {
     x: px(x), y: px(y), w: px(w), h: px(thickness),
-    fill: { color }, line: { width: 0 }, shadow: { type: "none" },
+    fill: { color }, line: { type: "none" }, shadow: { type: "none" },
   });
 
 const eyebrow = (s, label, color = INK_MUTED) =>
@@ -307,6 +307,17 @@ const placeholder = (s, x, y, w, h, label) => {
 
 Pass `shadow: { type: "none" }` on every shape and text box — the default theme adds
 a drop shadow, which this system forbids.
+
+Two footguns these blocks work around, both found by rendering rather than reading:
+
+- **`line: { width: 0 }` does not remove an outline.** PptxGenJS reads width 0 as
+  "use the default" and writes a 1pt `#333333` border. On a 1px-tall rule that
+  border *is* the entire shape, so every hairline renders near-black. Only
+  `line: { type: "none" }` suppresses it.
+- **PowerPoint has no flow layout.** A fixed vertical step per item overlaps the
+  next one as soon as a line wraps, so `bodySlide` and `takeawaysSlide` step by
+  the wrapped height. Keep the character estimates conservative: under-counting
+  costs a slightly generous gap, over-counting costs an overlap.
 
 ## Layout recipes
 
@@ -355,12 +366,16 @@ export const dividerSlide = ({ n, name, framing }) => {
 export const bodySlide = ({ eyebrow: eb, title, bullets, footerLeft, page }) => {
   const s = slide();
   chrome(s, eb, title, footerLeft, page);
+  const BULLET_W = 1500 - 58;
+  const CHARS_PER_LINE = 78;          // 34px sans in a 1442px box
+  const LINE_H = 34 * 1.45;
   let y = BODY_Y;
   bullets.slice(0, 4).forEach(b => {
-    text(s, M_X, y, 30, 50, "\u2014", 34, { color: ACCENT, line: 1.4 });
     const runs = typeof b === "string" ? [[b, false]] : [[b[0] + " ", true], [b[1], false]];
-    text(s, M_X + 58, y, 1500 - 58, 120, runs, 34, { line: 1.45 });
-    y += 90;
+    const rows = Math.max(1, Math.ceil(runs.reduce((n, [r]) => n + r.length, 0) / CHARS_PER_LINE));
+    text(s, M_X, y, 30, 50, "\u2014", 34, { color: ACCENT, line: 1.4 });
+    text(s, M_X + 58, y, BULLET_W, rows * LINE_H + 20, runs, 34, { line: 1.45 });
+    y += rows === 1 ? 90 : rows * LINE_H + 40;
   });
   return s;
 };
@@ -446,12 +461,16 @@ export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft,
 export const takeawaysSlide = ({ eyebrow: eb, lines, footerLeft, page }) => {
   const s = slide(PAPER_2);
   chrome(s, eb, "What to take away", footerLeft, page);
+  const TAKE_W = 1560 - 70;
+  const TAKE_CHARS = 80;              // 36px sans in a 1490px box
+  const TAKE_LINE = 36 * 1.4;
   let y = BODY_Y;
   lines.slice(0, 3).forEach((ln, i) => {
+    const rows = Math.max(1, Math.ceil(ln.length / TAKE_CHARS));
     text(s, M_X, y, 70, 50, String(i + 1).padStart(2, "0"), 34,
          { color: ACCENT, font: MONO });
-    text(s, M_X + 70, y - 2, 1560 - 70, 130, ln, 36, { line: 1.4 });
-    y += 132;
+    text(s, M_X + 70, y - 2, TAKE_W, rows * TAKE_LINE + 20, ln, 36, { line: 1.4 });
+    y += rows * TAKE_LINE + 44;
   });
   return s;
 };

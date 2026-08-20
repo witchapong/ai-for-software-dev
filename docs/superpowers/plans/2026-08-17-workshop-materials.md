@@ -3736,8 +3736,9 @@ hunt first; both appeared in Session 1's first render.
 
 - [ ] **Step 1: Write `slides/session1.js`** *(done — see `slides/session1.js`)*
 
-Marp-compatible Markdown, slides separated by `---`. Two blocks totalling
-40 minutes plus a 5-minute live demo.
+Built and verified. 22 slides covering two lecture blocks totalling 40 minutes
+plus a 5-minute live demo, with the warm-up and Lab 1 briefs slotted between
+them. Content below is what shipped.
 
 *Block 1 — How an agent works (20 min):* what a language model actually does
 (predicts the next token, has no memory between calls); harness versus model,

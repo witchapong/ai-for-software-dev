@@ -158,11 +158,10 @@ export const bodySlide = ({ eyebrow: eb, title, bullets, footerLeft, page }) => 
   let y = BODY_Y;
   bullets.slice(0, 4).forEach(b => {
     const runs = typeof b === "string" ? [[b, false]] : [[b[0] + " ", true], [b[1], false]];
-    const chars = runs.reduce((n, [t]) => n + t.length, 0);
-    const lines = Math.max(1, Math.ceil(chars / CHARS_PER_LINE));
+    const rows = Math.max(1, Math.ceil(runs.reduce((n, [r]) => n + r.length, 0) / CHARS_PER_LINE));
     text(s, M_X, y, 30, 50, "—", 34, { color: ACCENT, line: 1.4 });
-    text(s, M_X + 58, y, BULLET_W, lines * LINE_H + 20, runs, 34, { line: 1.45 });
-    y += lines === 1 ? 90 : lines * LINE_H + 40;
+    text(s, M_X + 58, y, BULLET_W, rows * LINE_H + 20, runs, 34, { line: 1.45 });
+    y += rows === 1 ? 90 : rows * LINE_H + 40;
   });
   return s;
 };
