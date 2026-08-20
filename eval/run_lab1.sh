@@ -18,6 +18,8 @@ ROOT="$(git rev-parse --show-toplevel)"
 TAG="${PROVIDER}-${MODEL//\//_}-${MODE}"
 GOLDEN="$ROOT/eval/golden/lab1"
 PYTHON="${EVAL_PYTHON:-python3}"
+GATE_TIMEOUT="${GATE_TIMEOUT:-600}"   # seconds per gate; a hung call must not stall the loop
+AGENT_KEY="${AGENT_KEY:-}"            # optional: overrides the provider's stored key
 mkdir -p "$ROOT/eval/results"
 
 command -v cline >/dev/null || { echo "cline not installed: npm i -g cline"; exit 1; }
@@ -43,6 +45,7 @@ for i in $(seq 1 "$RUNS"); do
     GATE=$((GATE + 1))
     echo "  [run $i] gate $GATE: $(basename "$prompt")"
     cline --json --auto-approve true -P "$PROVIDER" -m "$MODEL" -c "$WORK" \
+      ${GATE_TIMEOUT:+-t "$GATE_TIMEOUT"} ${AGENT_KEY:+-k "$AGENT_KEY"} \
       "$(cat "$prompt")" >> "$LOG" 2>&1 || echo "    (cline exited non-zero)"
 
     RESULT="$("$PYTHON" "$ROOT/eval/check_gate.py" "$WORK" "$GATE")"

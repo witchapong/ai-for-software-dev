@@ -114,7 +114,7 @@ const p = n => String(n).padStart(2, "0");
     "    ~ 20 instructions",
     "    ~ 100 to 200 requests",
     "",
-    "free tier, Gemini 2.5 Flash",
+    "free tier, one Gemini Flash key",
     "    250 requests per day",
     "    10 requests per minute",
   ].join("\n"),

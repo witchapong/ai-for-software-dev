@@ -18,21 +18,39 @@ from pathlib import Path
 
 RESULTS = Path(__file__).parent / "results"
 TOTAL_TESTS = 7
-REQUEST_SUBTYPE = "api_req_started"  # confirm in Phase B; change if different
 GATE_NAMES = {1: "Gate 2 spec", 2: "Gate 3 plan", 3: "Gate 4 maths", 4: "Gate 4 page"}
+
+# Cline CLI 3.0.55 JSON schema, confirmed by probing in Phase B:
+#   {"type":"agent_event","event":{"type":"iteration_start","iteration":N}}
+#   {"type":"run_result","finishReason":..,"iterations":N,"usage":{...},"durationMs":N}
+#   {"type":"error","message":".."}
+# One model request == one iteration. Each gate is its own invocation, so a run
+# has four run_result lines and the totals are summed across them.
 
 
 def read_run(log: Path) -> dict:
     stem = log.stem
     subtypes: Counter = Counter()
+    requests = tokens_in = tokens_out = 0
+    cost = 0.0
+    errors: list[str] = []
     for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
             message = json.loads(line)
         except json.JSONDecodeError:
             continue
-        key = message.get("say") or message.get("ask")
-        if key:
-            subtypes[key] += 1
+        kind = message.get("type")
+        subtypes[kind] += 1
+        if kind == "run_result":
+            requests += message.get("iterations", 0)
+            usage = message.get("usage") or {}
+            tokens_in += usage.get("inputTokens", 0)
+            tokens_out += usage.get("outputTokens", 0)
+            cost += usage.get("totalCost", 0) or 0
+            if message.get("finishReason") not in (None, "completed"):
+                errors.append(f"finishReason={message['finishReason']}")
+        elif kind == "error":
+            errors.append(str(message.get("message", ""))[:90])
 
     gates, problems = {}, []
     gates_file = RESULTS / f"{stem}.gates"
@@ -58,7 +76,11 @@ def read_run(log: Path) -> dict:
         "gates": gates,
         "red_gates": sum(1 for ok in gates.values() if not ok),
         "green": passed == TOTAL_TESTS,
-        "requests": subtypes.get(REQUEST_SUBTYPE, 0),
+        "requests": requests,
+        "tokens_in": tokens_in,
+        "tokens_out": tokens_out,
+        "cost": cost,
+        "errors": errors,
         "seconds": seconds,
         "problems": problems,
         "subtypes": subtypes,
@@ -76,8 +98,8 @@ def main() -> None:
         by_model.setdefault(run["model"], []).append(run)
 
     print("## Headline rates\n")
-    print("| Model | Unaided (all gates green) | Working app | Median requests | Median minutes |")
-    print("|---|---|---|---|---|")
+    print("| Model | Unaided | Working app | Median requests | Median input tokens | Median minutes |")
+    print("|---|---|---|---|---|---|")
     for model, group in sorted(by_model.items()):
         unaided = sum(1 for r in group if r["red_gates"] == 0)
         working = sum(1 for r in group if r["green"])
@@ -85,6 +107,7 @@ def main() -> None:
         print(
             f"| {model} | {unaided}/{n} ({unaided / n:.0%}) | {working}/{n} ({working / n:.0%}) "
             f"| {statistics.median(r['requests'] for r in group):.0f} "
+            f"| {statistics.median(r['tokens_in'] for r in group):,.0f} "
             f"| {statistics.median(r['seconds'] for r in group) / 60:.1f} |"
         )
 
@@ -108,12 +131,18 @@ def main() -> None:
     print("| Model | Daily free ceiling | Runs affordable per day |")
     print("|---|---|---|")
     if per_run:
-        print(f"| Gemini 2.5 Flash | 250 requests | {250 // per_run} |")
+        print(f"| Gemini (current Flash) | 250 requests | {250 // per_run} |")
         print("| Mistral Experiment | no daily cap | clock-limited |")
     else:
         print("| — | — | no requests counted; check REQUEST_SUBTYPE below |")
 
-    print("\n## Message subtypes seen (sanity check for REQUEST_SUBTYPE)\n")
+    harness_errors = Counter(e for run in runs for e in run["errors"])
+    if harness_errors:
+        print("\n## Harness errors\n")
+        for e, c in harness_errors.most_common(10):
+            print(f"- ({c}x) {e}")
+
+    print("\n## Message subtypes seen (schema sanity check)\n")
     combined: Counter = Counter()
     for run in runs:
         combined.update(run["subtypes"])

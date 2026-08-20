@@ -108,8 +108,8 @@ is the forcing function that makes the discipline stick. Framed for students:
 | **Environment** | GitHub Codespaces (browser VS Code) | Nothing to install on lab PCs; every student gets a byte-identical pre-built environment |
 | **Harness** | Cline (VS Code extension, open source, free) | Shows every file change as an approve/reject diff — the best available teaching surface for human-in-the-loop review |
 | **Agent model (primary)** | Mistral free "Experiment" tier (Codestral / Devstral) | Highest free token allowance by a wide margin; coding-tuned |
-| **Agent model (backup)** | Google AI Studio — Gemini 2.5 Flash | Stronger reasoning for hard steps; students switch providers in three clicks |
-| **App model** (Session 3) | Gemini 2.5 Flash, Groq as fallback | Different job, different budget — see note below |
+| **Agent model (backup)** | Google AI Studio — current Flash alias | Stronger reasoning for hard steps; students switch providers in three clicks. **Unverified — see the note below** |
+| **App model** (Session 3) | Gemini Flash, Groq as fallback | Different job, different budget — see note below |
 | **Language** | Python 3.11 | Their only language; EE-adjacent library ecosystem |
 | **UI** | Streamlit | A web app from pure Python; `pages/` gives one-file-per-feature for free |
 | **Deploy** | Streamlit Community Cloud | Free, deploys straight from the GitHub repo they already have |
@@ -139,8 +139,8 @@ Three different limits can bite:
 | Route | Free limits | Verdict |
 |---|---|---|
 | **Antigravity free** | ~20 requests/day (down from ~250 at launch); lockouts of up to **7 days** reported after 20–30 min of use | ❌ **Disqualified** — a student who overspends in Session 1 walks into Session 2 with a dead tool |
-| Gemini 2.5 Flash | 250 RPD, 10 RPM, 250K TPM | ⚠️ Usable but no margin; 10 RPM means ~6s of dead air between agent steps |
-| Gemini 2.5 Flash-Lite | 1,000 RPD, 15 RPM | ⚠️ Request budget fine, model too weak for multi-file edits |
+| Gemini Flash | 250 RPD, 10 RPM, 250K TPM | ⚠️ Usable but no margin; 10 RPM means ~6s of dead air. **Blocked on our test account — see below** |
+| Gemini Flash-Lite | 1,000 RPD, 15 RPM | ⚠️ Request budget fine, model too weak for multi-file edits |
 | **Mistral Experiment tier** | ~1B tokens/month, 500K TPM, ~1 req/sec | ✅ **Primary** — effectively unlimited for this class |
 | Groq | 100K tokens/**day** | ❌ agent / ✅ small app calls in Session 3 |
 | Cerebras | ~1M tokens/day | ❌ agent / ✅ small app calls in Session 3 |
@@ -152,6 +152,33 @@ Two facts that matter for a computer lab:
   NAT is fine.
 - **Codespaces compute is not the constraint.** The free tier is 120 core-hours/month;
   three 3-hour sessions on a 2-core machine consume ~18.
+
+### Gemini is currently unusable on our test account — 20 Aug 2026
+
+Both keys were created and tested. **Mistral works**; `codestral-latest`,
+`devstral-medium-latest` and `mistral-medium-latest` all answered. **Gemini
+failed two different ways:**
+
+1. `gemini-2.5-flash`, the version this spec originally named, returns *"no
+   longer available to new users."* It has been retired for new accounts.
+2. Every current model — `gemini-3.6-flash`, `gemini-3.7-flash`,
+   `gemini-flash-latest` — returns *"Your prepayment credits are depleted"* on a
+   fresh free-tier project with zero usage. Google's own developer forum carries
+   several threads reporting exactly this since early August, fallout from the
+   Prepay/Postpay billing rollout of March 2026.
+
+Neither is a bad key, and neither is fixable from our side.
+
+**What this changes.** Mistral becomes the primary agent model in practice, not
+just for Phase C tuning. Gemini stays in the design as the backup and as
+Session 3's app model, but is marked **unverified** until it answers a request.
+Every hard-coded model name has been replaced with the `gemini-flash-latest`
+alias, since pinning a version is what broke first.
+
+**What it does not change.** The workshop still runs. That is the entire return
+on the two-provider decision: the obvious single choice on paper was Gemini, and
+it is the one that failed six weeks out. Tell the students this story — it is
+the vendor-risk lecture, with a real example they can check.
 
 ### Known-fragile assumptions
 
@@ -442,8 +469,8 @@ excerpts. Four checkpoints, each independently useful:
 Checkpoint 4 is the honesty checkpoint: students see the same prompt give different answers
 and learn to design for that rather than pretend it away.
 
-Model for the app: Gemini 2.5 Flash via `google-genai` (small prompts, well within free
-limits), with Groq as fallback. Keep the retrieval corpus tiny to stay inside the token budget.
+Model for the app: a Gemini Flash model via `google-genai` (small prompts, well within
+free limits), with Groq as fallback. Substitute Mistral if Gemini is still blocked. Keep the retrieval corpus tiny to stay inside the token budget.
 
 #### Demo format — science fair, then a final
 

@@ -568,7 +568,7 @@ def check_live_call() -> tuple[bool, str]:
 
         client = genai.Client(api_key=key)
         client.models.generate_content(
-            model="gemini-2.5-flash", contents="Reply with the single word: ok"
+            model=GEMINI_MODEL, contents="Reply with the single word: ok"
         )
         return True, "Live API call succeeded"
     except Exception as error:  # noqa: BLE001 - we want to show students the raw reason
@@ -2099,7 +2099,7 @@ candidate models before going further:
 
 | | Measured requests/run | Daily free ceiling | Runs affordable per day | Iterations in 24 h |
 |---|---|---|---|---|
-| Gemini 2.5 Flash | ? | 250 RPD | ? | ? |
+| Gemini (current Flash) | ? | 250 RPD, if the account is not credit-flagged | ? | ? |
 | Mistral Experiment | ? | ~1B tokens/month, no daily cap | clock-limited | ? |
 
 At the estimated ~60 requests per run this comes out as **4 runs/day on Gemini
@@ -3122,7 +3122,7 @@ Reading prose with code is guesswork; reading a known shape is not.
 import json
 import os
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-flash-latest"   # alias: pinned versions get retired
 
 
 def _default_client():
