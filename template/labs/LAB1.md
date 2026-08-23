@@ -56,7 +56,11 @@ The maths belongs in `core/spectrum.py`; the screen belongs in
 `pages/2_Spectrum_Analyzer.py`. Approve.
 
 **Gate 4 — Build (40 min).** One task at a time. Your goal is simple: make
-`pytest tests/test_spectrum.py` go green. After each task, run the tests and
+`pytest tests/test_spectrum.py` go green.
+
+Run `pytest` now, before you build anything. You should see **7 failed, 18
+passed**. That is correct, not broken: the eighteen are the template's own
+tests, and the seven are your specification. Watch that seven fall. After each task, run the tests and
 look at the app. Commit every time the tests pass:
 
 ```

@@ -258,7 +258,7 @@ ai-workshop-template/
 │   └── tasks.md           (Gate 3 — has an OWNER column, one file per owner)
 ├── app.py                 ← nav + shared layout. Rarely edited; nobody's "own" file.
 ├── pages/                 ← ONE FILE PER FEATURE = one owner = one branch
-│   └── 1_Home.py
+│   └── 1_Example.py
 ├── core/
 │   ├── models.py          ← shared data shapes (dataclasses); single owner
 │   ├── storage.py         ← save/load (CSV or SQLite); single owner

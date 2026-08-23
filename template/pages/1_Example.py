@@ -1,5 +1,7 @@
 """Example feature page. Copy this file as the starting point for your own.
 
+The sidebar tab is named after this file, so renaming the file renames the tab.
+
 The number at the front of the filename sets the order in the sidebar.
 """
 

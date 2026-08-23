@@ -51,7 +51,13 @@ go rather than editing it.
 ## The app
 
 **`streamlit run app.py` shows "command not found"**
-Run `pip install -r requirements.txt` first.
+Two causes, and the first is more common than you would think.
+
+1. **Check the spelling.** It is `streamlit`, not `steamlit`. The missing "r"
+   is the single most frequent typo in this workshop.
+2. If the spelling is right, the packages did not install. Run
+   `pip install -r requirements.txt`, watch for errors, and if it fails, tell
+   your instructor what the error said.
 
 **The preview is blank or will not open**
 Open the **Ports** tab next to the terminal, find port 8501, click the globe
@@ -68,6 +74,10 @@ The file must be inside `pages/` and end in `.py`. Restart Streamlit.
 
 **My teammate's changes are not showing up**
 `git pull` first, then keep working.
+
+**`git pull` says "no tracking information for the current branch"**
+Your copy has lost track of where it came from. Fix it once with:
+`git branch --set-upstream-to=origin/main main`
 
 **Git says there is a merge conflict**
 Two people edited the same file, which the one-file-per-owner rule exists to

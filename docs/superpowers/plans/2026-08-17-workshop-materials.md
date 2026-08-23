@@ -36,7 +36,7 @@
 | `requirements.txt` | The six pinned dependencies |
 | `check_setup.py` | Pre-work verification: Python version, imports, keys, live API call |
 | `app.py` | Streamlit entry point: title and navigation. Nobody's "own" file |
-| `pages/1_Home.py` | Example feature page showing the one-file-per-feature pattern |
+| `pages/1_Example.py` | Example feature page showing the one-file-per-feature pattern |
 | `core/models.py` | Example dataclass with `to_dict`/`from_dict` round trip |
 | `core/storage.py` | CSV persistence: `load`, `save`, `append` |
 | `core/llm.py` | Stub in `main`; implemented on `solution/lab3` |
@@ -633,7 +633,7 @@ git commit -m "feat: add pre-work setup verification script"
 ## Task 5: `core/llm.py` stub and the Streamlit skeleton
 
 **Files:**
-- Create: `template/core/llm.py`, `template/app.py`, `template/pages/1_Home.py`
+- Create: `template/core/llm.py`, `template/app.py`, `template/pages/1_Example.py`
 - Test: `template/tests/test_llm.py`
 
 **Interfaces:**
@@ -719,7 +719,7 @@ st.info("Each feature lives in its own file in the pages/ folder.")
 
 - [ ] **Step 6: Write the example page**
 
-`template/pages/1_Home.py`:
+`template/pages/1_Example.py`:
 ```python
 """Example feature page. Copy this file as the starting point for your own.
 
@@ -758,7 +758,7 @@ Expected: starts without error and prints a local URL. Open it, add an item on t
 - [ ] **Step 8: Commit**
 
 ```bash
-git add template/core/llm.py template/tests/test_llm.py template/app.py template/pages/1_Home.py
+git add template/core/llm.py template/tests/test_llm.py template/app.py template/pages/1_Example.py
 git commit -m "feat: add Streamlit skeleton and LLM stub"
 ```
 
@@ -3857,7 +3857,7 @@ that way in Task 13. In Task 9, `make_signal` returns `(times, signal)` and
 `spectrum` returns `(freqs, magnitudes)`; both are unpacked in that order on
 the solution page and in every test. Storage's
 `load`/`save`/`append` signatures match between Task 3 and their use in
-Task 5's `pages/1_Home.py`.
+Task 5's `pages/1_Example.py`.
 
 **Verification coverage.** Three tiers, matched to how automatable each lab is:
 
