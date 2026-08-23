@@ -9,8 +9,10 @@
       ]
     }
   },
-  "postCreateCommand": "pip install --no-cache-dir -r requirements.txt && cp -n .env.example .env",
-  "forwardPorts": [8501],
+  "postCreateCommand": "cp -n .env.example .env; pip install --no-cache-dir -r requirements.txt",
+  "forwardPorts": [
+    8501
+  ],
   "portsAttributes": {
     "8501": {
       "label": "Streamlit app",

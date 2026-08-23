@@ -112,6 +112,25 @@ overlap. Prefer the harmless failure.
 
 ---
 
+## Changing the student template
+
+**After any change to `template/requirements.txt` or `.devcontainer/devcontainer.json`,
+run `./scripts/verify-container.sh`.** It installs the pinned requirements inside the
+exact image the devcontainer names and runs the tests there.
+
+This is not optional caution. `numpy` was pinned to `2.5.2`, which has no Python
+3.11 build — the local venv is 3.12, so every local test passed while every
+student Codespace would have failed at `postCreateCommand`. Nothing caught it
+until a Codespace was opened by hand.
+
+Two rules that follow:
+
+- **Never pin from "latest on PyPI" without checking the target Python.** Latest
+  often means "latest for the newest interpreter".
+- **`postCreateCommand` must not be an `&&` chain.** When pip failed, the `cp -n
+  .env.example .env` after it never ran, so students lost `.env` as well. Put the
+  cheap reliable step first and separate with `;`.
+
 ## Writing for students
 
 The audience has completed one introductory Python course and has weak-to-basic
