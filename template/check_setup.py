@@ -8,9 +8,11 @@ import os
 import sys
 
 PLACEHOLDER = "paste-your-key-here"
-# Model names go stale. Gemini 2.5 Flash was retired for new accounts in
-# August 2026; the alias below tracks whatever the current Flash is.
-GEMINI_MODEL = "gemini-flash-latest"
+# Model names go stale and models get busy, so try several. Both failure modes
+# were seen within three days in August 2026: gemini-2.5-flash was retired for
+# new accounts, and gemini-flash-latest returned "high demand" while a pinned
+# version answered fine. A list survives both.
+GEMINI_MODELS = ["gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash"]
 MISTRAL_MODEL = "mistral-medium-latest"
 REQUIRED_PACKAGES = ["streamlit", "numpy", "matplotlib", "google.genai", "dotenv", "pytest"]
 
@@ -94,10 +96,16 @@ def _try_gemini(key: str) -> tuple[bool, str]:
     from google import genai
 
     client = genai.Client(api_key=key)
-    client.models.generate_content(
-        model=GEMINI_MODEL, contents="Reply with the single word: ok"
-    )
-    return True, f"Gemini replied ({GEMINI_MODEL})"
+    last = None
+    for model in GEMINI_MODELS:
+        try:
+            client.models.generate_content(
+                model=model, contents="Reply with the single word: ok"
+            )
+            return True, f"Gemini replied ({model})"
+        except Exception as error:  # noqa: BLE001 - try the next model, keep the reason
+            last = error
+    raise last
 
 
 def _try_mistral(key: str) -> tuple[bool, str]:

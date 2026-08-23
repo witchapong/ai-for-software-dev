@@ -153,7 +153,45 @@ Two facts that matter for a computer lab:
 - **Codespaces compute is not the constraint.** The free tier is 120 core-hours/month;
   three 3-hour sessions on a 2-core machine consume ~18.
 
-### Gemini is currently unusable on our test account — 20 Aug 2026
+### Provider status — measured, 23 Aug 2026
+
+Both providers work. Gemini's outage cleared on its own after three days,
+confirming it was the transient Google-side billing flag described below rather
+than anything we could fix.
+
+**Mistral is the better agent model, and by a wide margin.** Same gate, same
+prompt, one run each:
+
+| Provider | Model | Iterations | Input tokens | Wall clock |
+|---|---|---|---|---|
+| **Mistral** | `devstral-medium-latest` | **6** | **47,091** | **81s** |
+| Gemini | `gemini-3.6-flash` | 10 | 115,659 | 228s |
+
+Mistral used 2.5× fewer tokens and finished 2.8× faster. N=1 each, so treat it
+as a strong hint rather than a settled fact — Phase C measures it properly.
+
+**Mistral's throttle is the binding constraint**, taken from the API's own
+response headers rather than documentation:
+
+```
+x-ratelimit-limit-tokens-minute: 25000
+x-ratelimit-limit-req-minute:    50
+```
+
+At ~8,200 tokens per agentic request that is **about three requests per
+minute** — the token ceiling binds long before the request ceiling. A full
+scripted Lab 1 run takes 16 minutes, of which most is waiting. Students will
+see roughly 20 seconds between agent steps. Say so in Session 1, or it reads as
+breakage.
+
+**Pin nothing; try a list.** Two different model-level failures appeared within
+three days: `gemini-2.5-flash` was retired for new accounts, and
+`gemini-flash-latest` — the alias adopted to survive exactly that — returned
+"high demand" while a pinned version answered fine. `check_setup.py` now tries
+`gemini-flash-latest`, then `gemini-3.6-flash`, then `gemini-3.5-flash`, and
+passes if any answers.
+
+### What the Gemini outage looked like — 20 Aug 2026, now resolved
 
 Both keys were created and tested. **Mistral works**; `codestral-latest`,
 `devstral-medium-latest` and `mistral-medium-latest` all answered. **Gemini
@@ -167,7 +205,8 @@ failed two different ways:**
    several threads reporting exactly this since early August, fallout from the
    Prepay/Postpay billing rollout of March 2026.
 
-Neither is a bad key, and neither is fixable from our side.
+Neither was a bad key, and neither was fixable from our side. It cleared
+without intervention on 23 August.
 
 **What this changes.** Mistral becomes the primary agent model in practice, not
 just for Phase C tuning. Gemini stays in the design as the backup and as
