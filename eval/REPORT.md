@@ -118,3 +118,37 @@ already written a valid page, so the gate passed, but a timeout that overruns by
 1. Re-measure gate 3 with the hardened prompt.
 2. Raise `GATE_TIMEOUT` above 420s, or accept that gate 4 needs ~10 minutes.
 3. Then, and only then, run 3× for an actual rate.
+
+
+---
+
+# Phase C spot-check — the pytest fix, 23 Aug 2026
+
+Gate 3 only, `mistral` / `devstral-medium-latest`, starting from the golden
+plan and the shipped stub.
+
+| | Original prompt | Hardened prompt |
+|---|---|---|
+| Tests passing | **5/7** | **7/7** |
+| Ran the supplied suite | No — wrote its own | **Yes** |
+| Iterations | 11 | 16 |
+| Input tokens | 85,356 | 207,041 |
+
+Naming the exact command, demanding the output verbatim, and forbidding a
+self-written substitute changed the outcome completely. The agent now iterates
+until the supplied tests pass instead of stopping at its own. It costs 2.4× the
+tokens because it is doing the work it previously skipped.
+
+**A second change was needed and is easy to miss.** Shipping the stub means
+`core/spectrum.py` now exists, so gate 3 is a *replace*, not a *create* — which
+is exactly the operation that triggers Cline's diff-edit failures. The prompt
+now says the stub exists and to overwrite the whole file in one go. Without
+that line the fix is only half made.
+
+**Pedagogical note, deliberately not "fixed".** 7/7 is the right target for the
+eval, which measures whether the toolchain can do the job. It is not obviously
+the right student experience: the 5/7 run left a doubled DC term and a missing
+input guard, both instructive, both invisible on the chart. A student whose
+agent scores 7/7 first time learns less about verification than one who debugs
+those two. The prompts shipped to students are the hardened ones — but expect,
+and welcome, runs that land short.

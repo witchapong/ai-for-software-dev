@@ -1,6 +1,8 @@
 aidlc/design.md and aidlc/tasks.md are approved. Implement task 1 only.
 
-Use your file-writing tool to CREATE core/spectrum.py with exactly these three
+core/spectrum.py already exists as a stub whose functions raise
+NotImplementedError. Use your file-writing tool to OVERWRITE that whole file in
+one go — do not edit it line by line. It must end up with exactly these three
 functions:
 
   make_signal(components, fs, duration) -> (times, signal)
