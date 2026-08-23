@@ -1,2 +1,4 @@
 {"gate": 1, "passed": true, "problems": []}
 {"gate": 2, "passed": true, "problems": []}
+{"gate": 3, "passed": false, "problems": ["5/7 tests pass"]}
+{"gate": 4, "passed": true, "problems": []}

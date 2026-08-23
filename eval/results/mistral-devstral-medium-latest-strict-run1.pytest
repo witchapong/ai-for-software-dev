@@ -1,0 +1,27 @@
+...F..F                                                                  [100%]
+=================================== FAILURES ===================================
+__________________ test_a_constant_offset_appears_at_zero_hz ___________________
+
+    def test_a_constant_offset_appears_at_zero_hz():
+        _, signal = make_signal([(50.0, 1.0)], FS, DURATION)
+        freqs, magnitudes = spectrum(signal + 2.0, FS)
+>       assert magnitudes[0] == pytest.approx(2.0, abs=0.001)
+E       assert np.float64(3.999999999999999) == 2.0 ± 0.001
+E         
+E         comparison failed
+E         Obtained: 3.999999999999999
+E         Expected: 2.0 ± 0.001
+
+tests/test_spectrum.py:32: AssertionError
+__________________ test_a_negative_sampling_rate_is_rejected ___________________
+
+    def test_a_negative_sampling_rate_is_rejected():
+>       with pytest.raises(ValueError, match="positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_spectrum.py:49: Failed
+=========================== short test summary info ============================
+FAILED tests/test_spectrum.py::test_a_constant_offset_appears_at_zero_hz - as...
+FAILED tests/test_spectrum.py::test_a_negative_sampling_rate_is_rejected - Fa...
+2 failed, 5 passed in 0.09s

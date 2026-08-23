@@ -11,7 +11,7 @@ Task 9A. Five phases: author, calibrate, improve, certify, reference path.
 | Phase | State |
 |---|---|
 | A — Author the prompts and harness | **Done.** Everything below is built and self-tested |
-| B — Calibrate (1 run) | Not run. Needs API keys and the Cline CLI |
+| B — Calibrate (1 run) | **Done, 21 Aug 2026.** 38 requests, 311k input tokens, 16 min per run. See `REPORT.md` |
 | C — Improve (24 h budget) | Not started |
 | D — Certify (2 hand-runs) | Not started |
 | E — Reference path | Done — `template/labs/EXPLAIN.md` shipped with Session 1 |
