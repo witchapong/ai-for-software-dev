@@ -60,6 +60,11 @@ working and four people waiting.
 **Before you leave this part**, every person should be able to say out loud:
 "I own `pages/N_Something.py`, and when I am done it will do X."
 
+Five people? Then one of you owns `core/rules.py` instead of a page — agree its
+exact function signature now, write it into `design.md`, and the page owners
+code against it before it exists. That is the same trick `tests/test_spectrum.py`
+played on you in Lab 1: the contract comes first.
+
 ## Part 2 — Build in parallel (50 minutes)
 
 **Back to your own machines. Everyone builds at the same time.**
@@ -145,7 +150,12 @@ protocol that keeps four people from trampling each other:
 - [ ] The app is live at a public URL
 - [ ] The next week's tasks are written down with owners
 
-## If your team is three people
+## If your team is not four people
 
-Cut a page. Do not have two people share one file — that is the one thing this
-whole structure exists to prevent.
+See "Scaling to your team size" in `briefs/README.md`. The short version: two
+people build the core loop only; three cut a page; five extract the hard-part
+rule into `core/rules.py` owned by the fifth person, who writes its tests while
+the page owners build against the agreed signature.
+
+Whatever you do, never have two people share one file — that is the one thing
+this whole structure exists to prevent.
