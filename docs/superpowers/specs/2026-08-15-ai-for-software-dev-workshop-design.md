@@ -456,6 +456,10 @@ write is the actual job**, and pull requests are the cheapest way to teach it.
 
 #### Project brief menu (pre-vetted to fit the skeleton and the time budget)
 
+Each brief's hard-part rule has a reference implementation with tests on the
+template's `solution/lab2` branch — a stuck team recovers one rule file, never
+a whole app, so the rescue cannot replace the project.
+
 Themed around student life rather than the EE curriculum — Lab 1 already provides the
 EE anchor, and Lab 2's original scaffold called for a *product or service*. Each brief
 has a natural slot for the Session 3 LLM feature, and each hard part exercises a

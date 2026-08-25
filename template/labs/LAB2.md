@@ -20,9 +20,19 @@ owns exactly one file.
 Yours will describe something completely different. It should have the same
 shape.
 
-**There is no reference version of your project to fall back on.** Lab 1 had
-one because everyone built the same app. Yours is unique, so what transfers is
-the shape, not the content.
+**There is no reference version of your app to fall back on** — yours is
+unique, and that is the point. But the *hard part* of every brief has a
+reference rule with its test, on the `solution/lab2` branch. If the rule has
+beaten you and your agent for fifteen minutes:
+
+```
+git checkout origin/solution/lab2 -- core/rules_sessions.py tests/test_rules_sessions.py
+```
+
+(swap `sessions` for `carpool`, `tutoring`, `roommates` or `bills`). Then wire
+it into **your** pages and **your** data model — the reference rescues the
+rule, not the project. Read what you took: it is one defensible answer, and
+defending a different one is worth marks, not penalties.
 
 ## Part 0 — Set up the team repository (10 minutes)
 

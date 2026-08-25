@@ -7,6 +7,8 @@
 #                    each file Lab 1 asks them to build. No solutions.
 #   solution/lab1    core/spectrum.py, the analyser page, and the golden
 #                    gate documents a stuck student restores.
+#   solution/lab2    the five briefs' hard-part rule modules + tests. A stuck
+#                    team takes ONE rule and its test, never a whole app.
 #
 # History is preserved across runs, so an existing clone or Codespace can
 # `git pull` an update instead of being recreated. An earlier version of this
@@ -48,6 +50,9 @@ rm -rf .venv data .env
 # list is their specification.
 cp "$REPO_ROOT/scripts/stubs/spectrum.py" core/spectrum.py
 rm -f pages/2_Spectrum_Analyzer.py
+# Lab 2's hard-part reference rules live on solution/lab2, not main - a stuck
+# team recovers one rule and its test, not an answer key for the project.
+rm -f core/rules_*.py tests/test_rules_*.py
 
 git add -A
 git commit -q -m "Workshop project template" 2>/dev/null || echo "  (main unchanged)"
@@ -65,6 +70,18 @@ git add -A
 git commit -q -m "Lab 1 reference solution and golden gate documents" 2>/dev/null || echo "  (solution/lab1 unchanged)"
 git checkout -q main
 
+# --- solution/lab2: the five hard-part rule modules and their tests ---------
+git checkout -q -B solution/lab2
+if compgen -G "$REPO_ROOT/template/core/rules_*.py" > /dev/null; then
+  cp "$REPO_ROOT"/template/core/rules_*.py core/
+  cp "$REPO_ROOT"/template/tests/test_rules_*.py tests/
+  git add -A
+  git commit -q -m "Lab 2 hard-part reference rules and their tests" 2>/dev/null || echo "  (solution/lab2 unchanged)"
+else
+  echo "  WARNING: no rules modules in template/core - solution/lab2 will be empty."
+fi
+git checkout -q main
+
 if ! git remote get-url origin >/dev/null 2>&1; then
   gh repo create "$OWNER/$REPO" --public \
     --description "Student project template for the AI for Software Development workshop"
@@ -75,7 +92,7 @@ fi
 # pull. solution/lab1 is regenerated from main on every publish and nobody
 # commits to it, so forcing that one is both safe and necessary.
 git push -q origin main
-git push -q --force origin solution/lab1
+git push -q --force origin solution/lab1 solution/lab2
 gh repo edit "$OWNER/$REPO" --enable-issues=false --template
 cd "$REPO_ROOT" && rm -rf "$WORK"
 echo "Published: https://github.com/$OWNER/$REPO"
