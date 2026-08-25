@@ -5,11 +5,11 @@ free tools we are using.
 
 | # | Project | In one sentence |
 |---|---|---|
-| 1 | Lab Equipment Booking | Book benches and instruments so two people never turn up for the same oscilloscope |
-| 2 | Component Inventory and BOM Helper | Track what parts are in stock and check whether a project can be built from them |
-| 3 | Energy Usage and Tariff Tracker | Log appliance usage, work out the monthly bill, compare tariffs |
-| 4 | Capstone Project Matcher | Post project ideas and find teammates with the skills you need |
-| 5 | Solar Panel Sizing Service | Enter a site and a load, get a panel and battery recommendation you can save |
+| 1 | Campus Carpool Board | Post and book seats on rides to the remote campus, without overselling a car |
+| 2 | Study Session Finder | Post group study sessions and join them, without double-booking yourself |
+| 3 | Tutoring Matcher | Offer and request help by subject, and match them even when people name subjects differently |
+| 4 | Dorm Roommate Matcher | Fill in a lifestyle profile and get compatibility scores with other students |
+| 5 | Dorm Bill Splitter | Track shared expenses and split them so every satang is accounted for |
 
 **Want to build your own idea?** Allowed, with one condition: get the instructor
 to confirm it fits the template — pages, a data shape, saved records, and
@@ -34,3 +34,8 @@ you choose.
 
 The briefs suggest four pages because a team is three or four people. Fewer
 people, fewer pages — cut a page rather than sharing a file.
+
+The hard parts are deliberately different from each other: a capacity rule, a
+time-overlap rule, a fuzzy-matching rule, a symmetry rule, and a rounding rule.
+Whichever you pick, you meet one real class of bug that looks fine on screen
+and only a test catches.

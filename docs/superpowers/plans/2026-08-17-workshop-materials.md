@@ -2504,7 +2504,14 @@ It is a bonus, not a requirement — a working project without it beats a
 broken project with it.
 ```
 
-- [ ] **Step 2: Write `template/briefs/1-equipment-booking.md`**
+> **Superseded, 25 Aug 2026:** the briefs shipped are student-life themed
+> (carpool board, study session finder, tutoring matcher, roommate matcher,
+> bill splitter) rather than the EE-themed drafts below — Lab 1 already
+> anchors the EE content, and the original scaffold asked Lab 2 for a
+> *product or service*. The drafts below are kept for the record; the live
+> versions are in `template/briefs/`.
+
+- [ ] **Step 2: Write `template/briefs/1-equipment-booking.md`** *(superseded)*
 
 ```markdown
 # Brief 1 — Lab Equipment Booking
@@ -2797,9 +2804,9 @@ Deploy at https://share.streamlit.io. Then agree, in writing in
 
 Lab 2 cannot be scored automatically — each team builds something different, so
 there is no fixed acceptance test to check against. It gets a lighter version of
-the Task 9A loop instead: run it yourself, three times, against **Brief 1 (Lab
-Equipment Booking)** specifically, because its no-overlapping-bookings rule is
-the hardest thing any brief asks for. If the agent handles that, the other four
+the Task 9A loop instead: run it yourself, three times, against **Brief 2 (Study Session
+Finder)** specifically, because its time-overlap rule is the hardest thing any
+brief asks for. If the agent handles that, the other four
 are safe.
 
 Use the model Task 9A chose and the prompt discipline from
@@ -2816,7 +2823,7 @@ Record for each run:
 | Model requests used | Four students share a group repo but each has their own quota |
 | Anything that took more than 15 minutes | Needs a timebox and a recovery line in `LAB2.md` |
 
-Fold every fix back into `briefs/1-equipment-booking.md` and `labs/LAB2.md`.
+Fold every fix back into that brief and `labs/LAB2.md`.
 
 - [ ] **Step 9: Point students at Lab 1's golden set as the worked example**
 

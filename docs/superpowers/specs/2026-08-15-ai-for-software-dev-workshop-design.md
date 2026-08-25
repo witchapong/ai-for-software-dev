@@ -456,15 +456,19 @@ write is the actual job**, and pull requests are the cheapest way to teach it.
 
 #### Project brief menu (pre-vetted to fit the skeleton and the time budget)
 
-Each has a natural slot for the Session 3 LLM feature, so the transfer is obvious later.
+Themed around student life rather than the EE curriculum — Lab 1 already provides the
+EE anchor, and Lab 2's original scaffold called for a *product or service*. Each brief
+has a natural slot for the Session 3 LLM feature, and each hard part exercises a
+different class of correctness bug: capacity, time overlap, fuzzy matching, symmetry,
+and rounding.
 
 | # | Brief | Pages | Model | LLM slot (Session 3) |
 |---|---|---|---|---|
-| 1 | **Lab Equipment Booking** | browse, book, my bookings, admin | Equipment, Booking | "I need a scope Friday afternoon" → structured booking |
-| 2 | **Component Inventory & BOM Helper** | stock, build BOM, shortages | Part, BOM | Paste a free-text parts list → structured BOM |
-| 3 | **Energy Usage & Tariff Tracker** | log usage, kWh/cost, compare tariffs | Appliance, Reading | Grounded advice on reducing the bill |
-| 4 | **Capstone / Study Group Finder** | post idea, browse, match | Student, Project | Extract skills from free text; explain matches |
-| 5 | **Solar PV Sizing Service** | inputs, recommendation, saved quotes | Site, Quote | Plain-language explanation + Q&A over a sizing guide |
+| 1 | **Campus Carpool Board** | post ride, browse, book seat, my rides | Ride, Booking | "anyone driving Friday morning?" → structured search |
+| 2 | **Study Session Finder** | post, browse, join, my schedule | Session, Signup | Paste a messy chat message → filled-in session form |
+| 3 | **Tutoring Matcher** | offer, request, matches, browse | Offer, Request | Normalise free-text subjects; explain each match |
+| 4 | **Dorm Roommate Matcher** | profile, browse, compatibility, best matches | Profile | Extract a profile from a free-text bio; explain a match |
+| 5 | **Dorm Bill Splitter** | add expense, history, balances, settle up | Expense, Settlement | Paste a delivery receipt → itemised structured expense |
 | 6 | **Own idea** | — | — | Requires instructor approval that it maps to the skeleton |
 
 ---
