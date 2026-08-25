@@ -41,6 +41,13 @@ The test to write first:
 The second sentence matters as much as the first. A common bug is a booking
 counter that only goes up, so a cancelled seat is lost forever.
 
+## If your team is fast
+
+- **Recurring rides.** "Every Tuesday 8:00" posts itself weekly.
+- **A waitlist.** A full ride queues the next passenger; a cancellation
+  promotes them automatically — and your capacity test still has to hold.
+- **Pickup-point map.** Streamlit has `st.map`; coordinates are enough.
+
 ## AI feature for Session 3
 
 Let a student type *"anyone driving to the remote campus Friday morning?"* and

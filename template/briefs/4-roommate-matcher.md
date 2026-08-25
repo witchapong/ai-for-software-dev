@@ -42,6 +42,15 @@ That second test is different from every other test you have written: it
 checks a *property* of the formula, not one example. Ask your agent what a
 property-based test is.
 
+## If your team is fast
+
+- **Weighted questions.** Let each student mark which answers matter most to
+  them — and now keeping the score symmetric gets genuinely tricky. Think
+  before you code this one.
+- **Dealbreakers.** Some clashes are not a low score, they are a no. Model
+  the difference.
+- **Mutual top-3.** Show pairs who each rank the other in their top three.
+
 ## AI feature for Session 3
 
 Let a student write a free-text bio — *"night owl, pretty tidy, headphones

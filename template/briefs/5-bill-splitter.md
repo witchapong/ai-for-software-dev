@@ -43,6 +43,18 @@ That second one is the accountant's invariant: money never appears or
 disappears, it only moves. It will catch rounding bugs your eyes never will —
 a balance sheet that is off by one satang looks completely fine on screen.
 
+## If your team is fast
+
+The core app is the quickest of the five briefs to get working — the ceiling is
+where this one gets interesting:
+
+- **Uneven splits.** "I had the expensive dish" — split by shares or exact
+  amounts, not just equally. The sum-to-total invariant must still hold.
+- **Simplify debts.** If A owes B 50 and B owes C 50, one transfer settles it,
+  not two. Computing the *minimum* set of transfers that zeroes every balance
+  is a genuine algorithm problem. Ask your agent — then check its answer.
+- **A monthly chart.** Who actually pays for this household, over time?
+
 ## AI feature for Session 3
 
 Let a roommate paste a food delivery receipt — the messy text kind — and turn

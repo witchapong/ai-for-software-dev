@@ -44,6 +44,14 @@ can overlap and it is easy to code only three of them. The agent will get this
 subtly wrong more often than you expect — that is why the boundary case is in
 the test.
 
+## If your team is fast
+
+- **A capacity cap.** Sessions can set a max size — now you have the carpool
+  brief's invariant too.
+- **A weekly calendar view.** My schedule as a grid, not a list.
+- **Clash-aware suggestions.** "You can't join this one, but the same subject
+  runs Thursday" — recommendation from data you already have.
+
 ## AI feature for Session 3
 
 Let a student paste a messy chat message — *"physics cramming thurs after lab,

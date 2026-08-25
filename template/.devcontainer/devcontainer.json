@@ -5,7 +5,8 @@
     "vscode": {
       "extensions": [
         "saoudrizwan.claude-dev",
-        "ms-python.python"
+        "ms-python.python",
+        "github.vscode-pull-request-github"
       ]
     }
   },

@@ -43,6 +43,11 @@ Work through Gates 1, 2 and 3 as a group, using the prompts in `PROMPTS.md`
 adapted to your project. Argue about the requirements now. It is a hundred
 times cheaper than arguing about them after the code exists.
 
+**Your intent must include one twist** — a feature or variation of your own
+invention that is not in the brief. Small is fine. If another team picks the
+same brief, your twist and your hard-part rule are what make your project
+yours.
+
 When you fill in `aidlc/tasks.md`, obey the one rule:
 
 > **Every task names exactly ONE owner and touches exactly ONE file that no
@@ -72,8 +77,17 @@ git commit -m "what you did"
 git push -u origin your-name-feature-name
 ```
 
-Then open a pull request on GitHub — a request to merge your work into the
-team's main copy.
+Then open a pull request — a request to merge your work into the team's main
+copy. The **GitHub Pull Requests** icon in the sidebar does this with clicks:
+publish your branch, create the pull request, done. No terminal needed. You can
+also ask Cline to run the git commands for you — that is a legitimate use of
+your agent.
+
+**If your team is drowning in git**, here is the sanctioned fallback: everyone
+works directly on `main`, runs `git pull` before starting and pushes when tests
+pass. The one-file-per-owner rule means you will almost never conflict even
+there. Review still happens — read your partner's commits on GitHub instead of
+a pull request. You lose the ceremony, not the lesson.
 
 **The agent will be slow.** Roughly twenty seconds between steps, because the
 free allowance is 25,000 tokens a minute and each step spends about eight
@@ -106,6 +120,21 @@ repository, set the main file to `app.py`, click Deploy.
 
 Then agree, in writing in `aidlc/tasks.md`, who does what before Session 3.
 Anything not written down did not get agreed.
+
+## Working during the week
+
+The project continues between sessions, mostly not in the same room. The
+protocol that keeps four people from trampling each other:
+
+- **`aidlc/tasks.md` is the coordination board.** Before touching anything,
+  check it. When you claim or finish a task, edit it and push.
+- **Pull before you start. Push when your tests pass.** Every time.
+- **Never leave `main` broken overnight.** If your tests fail, do not push to
+  main — push your branch instead and say so in the group chat.
+- **Stuck for fifteen minutes? Post the error in the group chat.** A teammate
+  who solved it yesterday beats an agent guessing today.
+- The agent is not shared: everyone has their own allowance in their own
+  Codespace. Your teammate's quota does not pay for your session.
 
 ## You are done when
 

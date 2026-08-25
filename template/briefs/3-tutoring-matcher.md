@@ -40,6 +40,14 @@ write it in `design.md`, and test it:
 There is no perfect answer here, which is the point. Pick a rule you can defend
 and that your test can check. A rule you cannot test is not a rule.
 
+## If your team is fast
+
+- **Trade balance.** Track hours given against hours received per student, so
+  the same three people do not do all the tutoring.
+- **Availability overlap.** Match only when tutor and student share a free
+  slot — the study-session brief's interval logic, coming to you.
+- **A leaderboard.** Most generous tutors this month.
+
 ## AI feature for Session 3
 
 This is the brief where the AI genuinely solves the hard part rather than

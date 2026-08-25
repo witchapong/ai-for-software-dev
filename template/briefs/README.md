@@ -39,3 +39,39 @@ The hard parts are deliberately different from each other: a capacity rule, a
 time-overlap rule, a fuzzy-matching rule, a symmetry rule, and a rounding rule.
 Whichever you pick, you meet one real class of bug that looks fine on screen
 and only a test catches.
+
+## What "finished" looks like
+
+The bar is a **working prototype a stranger can click through** — not a
+product. Concretely, by demo day:
+
+- Every page works end to end: enter data, see it again, act on it.
+- **The hard part is enforced, visibly.** You can trigger the refusal live —
+  book the fourth seat, join the clashing session — and the message says why.
+- `pytest` is green, and at least one test is the hard-part test.
+- The app is live at a public URL, and every teammate can explain their page.
+
+Expect roughly 300–600 lines of Python across the whole team. If you are far
+past that, you are probably building out of scope.
+
+**Deliberately out of scope, for every brief:** login and accounts, payments,
+notifications, a real database, mobile layout, and custom styling — Streamlit's
+default look is the expected look. Time spent on any of these is time taken
+from the hard part.
+
+One honest limitation to know about: Streamlit Cloud's storage is temporary,
+so CSV data can reset when the app redeploys. That is fine at this bar — your
+demo runs live anyway — and worth one sentence if anyone asks.
+
+## Two teams, same brief?
+
+Fine — expected, even. Three things keep you distinct:
+
+1. **Your twist.** Gate 1 requires your `intent.md` to name one feature or
+   variation of your own invention that is not in the brief. Small is fine;
+   yours is the point.
+2. **The hard parts have no single right answer.** Two matchers with different
+   rules are different products. Defend yours.
+3. **Demo day is side by side.** Same problem, different decisions, is the
+   most interesting comparison in the room. The peer form asks what each team
+   *added* — that is where you win it.
