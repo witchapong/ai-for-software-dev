@@ -32,8 +32,27 @@ you choose.
 | **Storage** | `core/storage.py` already saves and loads CSV. You should not need to change it |
 | **The hard part** | Every brief has one genuinely tricky rule. That is where your tests go |
 
-The briefs suggest four pages because a team is three or four people. Fewer
-people, fewer pages — cut a page rather than sharing a file.
+## Scaling to your team size
+
+The unit of ownership is a **file**, not a page — pages are just the most
+obvious files. `core/models.py`, the hard-part logic, and test files are all
+ownable too. That is what makes the structure stretch:
+
+| Team | Structure |
+|---|---|
+| 2 | The core loop only: one person owns the "create" page, one owns the "consume" page where the hard part lives. Cut the rest |
+| 3 | Cut the brief's most cuttable page — usually the history or admin one |
+| 4 | The four suggested pages, as written |
+| 5 | Four pages **plus a rules owner**: the hard-part logic moves into `core/rules.py` with `tests/test_rules.py`, owned by the fifth person. The team agrees the function signature at Gate 3 and page owners build against it |
+| 6 | Ask the instructor to split you into two teams of three. If you must stay six: the five-person shape plus one stretch-menu page |
+
+Never solve a size mismatch by sharing a file — that is the one thing this
+structure exists to prevent. And never invent non-code roles ("documentation
+owner") to occupy a spare person; ownership stays tied to files that `pytest`
+or the browser can vouch for.
+
+Whatever your size, one rule holds: **the hard-part logic lives in one file,
+with one owner, and a test.**
 
 The hard parts are deliberately different from each other: a capacity rule, a
 time-overlap rule, a fuzzy-matching rule, a symmetry rule, and a rounding rule.
