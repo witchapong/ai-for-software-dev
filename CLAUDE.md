@@ -131,6 +131,17 @@ Two rules that follow:
   .env.example .env` after it never ran, so students lost `.env` as well. Put the
   cheap reliable step first and separate with `;`.
 
+## Diagrams
+
+The `excalidraw-diagram` skill (installed at `~/.claude/skills/excalidraw-diagram`)
+generates `.excalidraw` JSON; PNG rendering needs a one-time
+`uv sync && uv run playwright install chromium` in its `references/` folder.
+
+**Lane assignment:** Excalidraw's hand-drawn aesthetic is welcome in repo docs,
+lab handouts and READMEs — and forbidden in decks, because `SLIDE-STYLE.md`'s
+Never list bans hand-drawn SVG illustrations. Deck figures follow the slide
+spec's figure-and-caption rules instead.
+
 ## Writing for students
 
 The audience has completed one introductory Python course and has weak-to-basic
