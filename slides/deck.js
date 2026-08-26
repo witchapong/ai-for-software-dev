@@ -210,9 +210,16 @@ export const figureSlide = ({ eyebrow: eb, title, paras, figSource, image, foote
   } else {
     placeholder(s, M_X, BODY_Y, figW, figH, "Drop figure — aspect-fit, no crop");
   }
+  // Same deliberate deviation as bodySlide: fixed 210px slots collide when the
+  // first caption paragraph wraps to four lines. Step by wrapped height.
+  // 40 chars/line is deliberately conservative for the ~714px column.
+  const FIG_CHARS = 40, FIG_LINE = 32 * 1.45;
+  let py = BODY_Y;
   paras.slice(0, 2).forEach((p, i) => {
-    text(s, tx, BODY_Y + i * 210, tw, 200, p, 32,
+    const rows = Math.max(1, Math.ceil(p.length / FIG_CHARS));
+    text(s, tx, py, tw, rows * FIG_LINE + 20, p, 32,
          { color: i === 0 ? INK : INK_MUTED, line: 1.45 });
+    py += rows * FIG_LINE + 40;
   });
   text(s, tx, FOOTER_Y - 60, tw, 34, figSource, 24, { color: FOOTER_C, font: MONO });
   return s;
@@ -234,9 +241,14 @@ export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft,
     lineSpacingMultiple: 1.6, margin: 0, valign: "top", shadow: { type: "none" },
   });
   const tx = M_X + codeW + 56, tw = W - codeW - 56;
+  // Wrapped-height flow, as figureSlide. 34 chars/line for the ~662px column.
+  const CODE_CHARS = 34, CODE_LINE = 32 * 1.45;
+  let py = BODY_Y;
   paras.slice(0, 2).forEach((p, i) => {
-    text(s, tx, BODY_Y + i * 200, tw, 200, p, 32,
+    const rows = Math.max(1, Math.ceil(p.length / CODE_CHARS));
+    text(s, tx, py, tw, rows * CODE_LINE + 20, p, 32,
          { color: i === 0 ? INK : INK_MUTED, line: 1.45 });
+    py += rows * CODE_LINE + 40;
   });
   rule(s, tx, FOOTER_Y - 150, 2, ACCENT, 110);          // accent left rule
   text(s, tx + 26, FOOTER_Y - 145, tw - 26, 110, prompt, 30, { line: 1.4 });

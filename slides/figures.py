@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Figures for the Session 1 deck.
+"""Figures for the lecture decks — figs 1-4 for Session 1, figs 5-8 for Session 2.
 
-Writes four PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
+Writes eight PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
 paper, paper-2, ink, ink-muted, hairline, and ochre used sparingly as the one
 accent per figure.
 
@@ -293,6 +293,178 @@ def fig_spectrum():
     save(fig, "fig-spectrum.png")
 
 
+# ------------------------------------------------ primitives for the session 2 set
+
+def qbez(x0, y0, cx, cy, x1, y1, n=240):
+    """Points along a quadratic Bezier — the branch curves in fig 6."""
+    t = np.linspace(0.0, 1.0, n)
+    bx = (1 - t) ** 2 * x0 + 2 * t * (1 - t) * cx + t ** 2 * x1
+    by = (1 - t) ** 2 * y0 + 2 * t * (1 - t) * cy + t ** 2 * y1
+    return bx, by
+
+
+def curve(ax, x0, y0, cx, cy, x1, y1, color=INK, lw=1.8, zorder=2):
+    bx, by = qbez(x0, y0, cx, cy, x1, y1)
+    ax.plot(bx, by, color=color, lw=lw, solid_capstyle="round", zorder=zorder)
+
+
+def bez_at(x0, y0, cx, cy, x1, y1, t):
+    return ((1 - t) ** 2 * x0 + 2 * t * (1 - t) * cx + t ** 2 * x1,
+            (1 - t) ** 2 * y0 + 2 * t * (1 - t) * cy + t ** 2 * y1)
+
+
+# ------------------------------------------------------- fig 5 — the ownership map
+
+def fig_ownership_map():
+    fig, ax = canvas(9.66, 7.2)
+
+    # the file nobody owns
+    box(ax, 50.0, 66.0, 36.0, 8.0)
+    txt(ax, 50.0, 66.0, "app.py", 15)
+    txt(ax, 50.0, 58.5, "nobody's file — rarely edited", 11.5, color=MUTED)
+
+    # one page per person: the tags are this figure's single accent
+    pages = [(14.0, "pages/1_A.py", "OWNER A"),
+             (38.0, "pages/2_B.py", "OWNER B"),
+             (62.0, "pages/3_C.py", "OWNER C"),
+             (86.0, "pages/4_D.py", "OWNER D")]
+    for cx, name, owner in pages:
+        box(ax, cx, 45.0, 21.0, 9.0)
+        txt(ax, cx, 45.0, name, 12.5)
+        txt(ax, cx + 10.5, 51.5, owner, 11.5, color=OCHRE, ha="right")
+
+    # the shared core, and the tests every task adds to
+    for cx, name, gloss in ((19.0, "core/models.py", "one owner"),
+                            (50.0, "core/storage.py", "already written — leave it"),
+                            (81.0, "tests/", "every task adds one")):
+        box(ax, cx, 25.0, 28.0, 9.0)
+        txt(ax, cx, 25.0, name, 12.5)
+        txt(ax, cx, 17.0, gloss, 11.5, color=MUTED)
+
+    # pages read the core — drawn thin so the boxes stay the subject
+    for x0, x1 in ((14.0, 16.0), (38.0, 24.0), (62.0, 44.0), (86.0, 58.0)):
+        arrow(ax, (x0, 40.5), (x1, 30.4), lw=1.2, scale=18)
+    txt(ax, 23.5, 36.0, "uses", 11.5, color=MUTED)
+
+    txt(ax, 3.0, 9.0, "one tag = one owner = no merge conflicts", 11.5,
+        color=MUTED, ha="left")
+
+    save(fig, "fig-ownership-map.png")
+
+
+# ------------------------------------------------------ fig 6 — the road to main
+
+def fig_branch_merge():
+    fig, ax = canvas(9.66, 7.2)
+
+    MAIN = 42.0
+
+    # main itself
+    ax.plot([11.0, 77.5], [MAIN, MAIN], color=INK, lw=4.5,
+            solid_capstyle="butt", zorder=1)
+    txt(ax, 3.0, MAIN, "MAIN", 16, ha="left")
+
+    branches = [
+        # x_out, ctrl_x, ctrl_y, x_in, label, label_y
+        (17.0, 27.5, 68.0, 38.0, "branch: a-booking-page", 60.5),
+        (22.0, 42.0, 14.0, 62.0, "branch: b-browse-page", 22.5),
+    ]
+    for x0, cx, cy, x1, label, ly in branches:
+        curve(ax, x0, MAIN, cx, cy, x1, MAIN)
+        for t in (0.25, 0.5, 0.75):
+            px_, py_ = bez_at(x0, MAIN, cx, cy, x1, MAIN, t)
+            dot(ax, px_, py_, color=INK, size=6)
+        txt(ax, (x0 + x1) / 2.0, ly, label, 12.5)
+
+    for x1 in (38.0, 62.0):
+        box(ax, x1, MAIN, 8.5, 5.2)
+        txt(ax, x1, MAIN, "PR", 13)
+        dot(ax, x1 + 6.75, MAIN, size=9)          # the accent: a human read it
+        txt(ax, x1 + 6.0, 37.0, "CI: pytest runs", 10.5, color=MUTED)
+
+    box(ax, 86.0, MAIN, 17.0, 8.0)
+    txt(ax, 86.0, MAIN, "DEPLOY", 15)
+
+    dot(ax, 4.0, 8.0, size=9)
+    txt(ax, 7.0, 8.0, "= a teammate reads every line before it merges", 11.5,
+        color=MUTED, ha="left")
+
+    save(fig, "fig-branch-merge.png")
+
+
+# --------------------------------------------------------- fig 7 — the shape of today
+
+def fig_mob_parallel():
+    fig, ax = canvas(9.66, 7.2)
+
+    # phase 1 — everyone on one screen
+    box(ax, 12.5, 45.5, 23.0, 30.0)
+    txt(ax, 12.5, 53.0, "ONE SCREEN", 14)
+    for x in (8.0, 11.0, 14.0, 17.0):
+        dot(ax, x, 46.0, color=INK, size=6.5)
+    txt(ax, 12.5, 38.0, "intent · spec · plan", 10, color=MUTED)
+
+    # phase 2 — one machine, one file, one branch each. The gloss sits inside
+    # its box: set below it, it reads as belonging to the box underneath.
+    rows = [(62.0, "CODESPACE A", 57.0), (51.0, "CODESPACE B", 55.0),
+            (40.0, "CODESPACE C", 53.0), (29.0, "CODESPACE D", 51.0)]
+    for cy, label, target in rows:
+        arrow(ax, (24.5, 45.5), (30.5, cy), lw=1.4, scale=20)
+        box(ax, 48.0, cy, 34.0, 9.0)
+        txt(ax, 48.0, cy + 1.7, label, 13)
+        txt(ax, 48.0, cy - 2.3, "own agent · own file · own branch", 10,
+            color=MUTED)
+        # each arrow lands on its own point of the PR box's edge, or four
+        # arrowheads stack into one black blob
+        arrow(ax, (65.5, cy), (73.0, target), lw=1.4, scale=20)
+
+    # phase 3 — converge through review, then main
+    box(ax, 85.0, 54.0, 23.0, 9.0)
+    dot(ax, 77.0, 54.0, size=10)                  # the accent: one review
+    txt(ax, 87.0, 54.0, "PULL REQUESTS", 12.5)
+    arrow(ax, (85.0, 49.5), (85.0, 41.0), lw=1.6, scale=22)
+    box(ax, 85.0, 36.0, 23.0, 9.0)
+    txt(ax, 85.0, 36.0, "MAIN → DEPLOY", 12.5)
+
+    for cx, caption in ((13.0, "argue together · 25 min"),
+                        (48.0, "build alone · 50 min"),
+                        (85.0, "converge · 25 min")):
+        txt(ax, cx, 13.0, caption, 10.5, color=MUTED)
+
+    save(fig, "fig-mob-parallel.png")
+
+
+# ------------------------------------------------------------ fig 8 — the brief menu
+
+def fig_brief_menu():
+    fig, ax = canvas(9.66, 7.2)
+
+    briefs = [
+        (12.0, "CARPOOL",   "seats never",     "oversold"),
+        (31.0, "SESSIONS",  "no overlapping",  "commitments"),
+        (50.0, "TUTORING",  "'calc 2' equals", "'Calculus II'"),
+        (69.0, "ROOMMATES", "score(A,B) =",    "score(B,A)"),
+        (88.0, "BILLS",     "every satang",    "accounted for"),
+    ]
+    for cx, name, g1, g2 in briefs:
+        box(ax, cx, 56.0, 16.0, 11.0)
+        txt(ax, cx, 56.0, name, 13)
+        txt(ax, cx, 46.5, g1, 10.5, color=MUTED)
+        txt(ax, cx, 42.8, g2, 10.5, color=MUTED)
+
+    ax.plot([4.0, 96.0], [35.0, 35.0], color=HAIRLINE, lw=1.6,
+            solid_capstyle="butt", zorder=1)
+
+    txt(ax, 50.0, 28.5,
+        "each hides one bug that looks fine on screen — only a test catches it",
+        13, color=OCHRE)
+
+    txt(ax, 96.0, 17.5, "your twist: one invented feature, named at Gate 1",
+        11, color=MUTED, ha="right")
+
+    save(fig, "fig-brief-menu.png")
+
+
 # ------------------------------------------------------------------------ main
 
 def save(fig, name):
@@ -309,3 +481,7 @@ if __name__ == "__main__":
     fig_agent_loop()
     fig_four_gates()
     fig_spectrum()
+    fig_ownership_map()
+    fig_branch_merge()
+    fig_mob_parallel()
+    fig_brief_menu()
