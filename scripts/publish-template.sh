@@ -9,6 +9,8 @@
 #                    gate documents a stuck student restores.
 #   solution/lab2    the five briefs' hard-part rule modules + tests. A stuck
 #                    team takes ONE rule and its test, never a whole app.
+#   solution/lab3    the implemented llm helpers, the intake extractor and its
+#                    page - recovered one checkpoint at a time.
 #
 # History is preserved across runs, so an existing clone or Codespace can
 # `git pull` an update instead of being recreated. An earlier version of this
@@ -50,6 +52,15 @@ rm -rf .venv data .env
 # list is their specification.
 cp "$REPO_ROOT/scripts/stubs/spectrum.py" core/spectrum.py
 rm -f pages/2_Spectrum_Analyzer.py
+# Lab 3: students get the naive parser working, the data, and stubs for the
+# pieces they build. core/llm.py has been a stub since Session 1 by design.
+if [ -f "$REPO_ROOT/scripts/stubs/intake.py" ]; then
+  cp "$REPO_ROOT/scripts/stubs/intake.py" core/intake.py
+fi
+if [ -f "$REPO_ROOT/scripts/stubs/llm.py" ]; then
+  cp "$REPO_ROOT/scripts/stubs/llm.py" core/llm.py
+fi
+rm -f pages/9_Intake_Desk.py
 # Lab 2's hard-part reference rules live on solution/lab2, not main - a stuck
 # team recovers one rule and its test, not an answer key for the project.
 rm -f core/rules_*.py tests/test_rules_*.py
@@ -82,6 +93,15 @@ else
 fi
 git checkout -q main
 
+# --- solution/lab3: the implemented LLM helpers, extractor and page ---------
+git checkout -q -B solution/lab3
+for f in core/llm.py core/intake.py pages/9_Intake_Desk.py; do
+  [ -f "$REPO_ROOT/template/$f" ] && cp "$REPO_ROOT/template/$f" "$f"
+done
+git add -A
+git commit -q -m "Lab 3 reference: llm helpers, intake extractor and page" 2>/dev/null || echo "  (solution/lab3 unchanged)"
+git checkout -q main
+
 if ! git remote get-url origin >/dev/null 2>&1; then
   gh repo create "$OWNER/$REPO" --public \
     --description "Student project template for the AI for Software Development workshop"
@@ -92,7 +112,7 @@ fi
 # pull. solution/lab1 is regenerated from main on every publish and nobody
 # commits to it, so forcing that one is both safe and necessary.
 git push -q origin main
-git push -q --force origin solution/lab1 solution/lab2
+git push -q --force origin solution/lab1 solution/lab2 solution/lab3
 gh repo edit "$OWNER/$REPO" --enable-issues=false --template
 cd "$REPO_ROOT" && rm -rf "$WORK"
 echo "Published: https://github.com/$OWNER/$REPO"

@@ -124,3 +124,72 @@ gate and carry on — it costs you nothing:
 | Gate 3 | `git checkout origin/solution/lab1 -- aidlc/design.md aidlc/tasks.md` |
 | Gate 4 task 1 | `git checkout origin/solution/lab1 -- core/spectrum.py` |
 | Gate 4 task 2 | `git checkout origin/solution/lab1 -- pages/2_Spectrum_Analyzer.py` |
+
+
+---
+
+# Lab 3 prompts
+
+Same rules as Lab 1: name the tool, ask for a whole file, forbid the reply that
+talks instead of writing.
+
+## Checkpoint 2 — the plain call
+
+```
+Read core/llm.py. It is a stub whose functions raise NotImplementedError.
+
+Use your file-writing tool to OVERWRITE the whole file in one go, implementing
+ask() so it sends a question to Gemini and returns the reply text. Read the
+GEMINI_MODELS list at the top of check_setup.py and use the same
+try-each-in-turn approach: pinned models get retired and busy ones return
+"high demand".
+
+Leave ask_structured() raising NotImplementedError for now. Write the file now;
+do not print it in your reply instead.
+```
+
+## Checkpoint 3a — the schema call
+
+```
+Now implement ask_structured() in core/llm.py, overwriting the whole file
+again. It takes a question and a JSON schema, asks the model to reply as JSON
+matching that schema, and returns it as a Python dictionary. If the reply is
+not valid JSON, raise ValueError saying so and showing what came back.
+
+Keep ask() exactly as it is. Write the file now.
+```
+
+## Checkpoint 3b — the extractor
+
+```
+core/intake.py is a stub. Read session3/menu.md and session3/inbox.json first,
+then overwrite core/intake.py in one go so that:
+
+  load_menu and order_total are plain Python with no model call
+  extract_one sends ONE message and returns the ORDER_SCHEMA shape
+  extract_batch sends ALL messages in a SINGLE request and returns a list
+
+Item names must come from the menu — pass the menu names into the prompt and
+say they are the only permitted values. Do NOT ask the model to compute any
+total; order_total does that in Python.
+
+Then run: python -m pytest tests/test_intake.py -q
+and paste the output verbatim. Do not write your own test script.
+```
+
+## Checkpoint 4 — the review queue
+
+```
+Implement needs_review() in core/intake.py: return the ids of records the model
+flagged with needs_review true, plus any record with an empty required field or
+a quantity of zero or less. Plain Python, no model call.
+
+Then run: python -m pytest tests/test_intake.py -q
+and paste the output verbatim.
+```
+
+## If it argues instead of writing
+
+An agent that replies "I don't have the ability to create files" or hands you
+the code in chat has been told to, somewhere in your wording. Say **"use your
+file-writing tool to write the file now"** and it will.
