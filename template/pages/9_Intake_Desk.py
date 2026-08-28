@@ -66,11 +66,22 @@ if way == "The old way (rules)":
 else:
     st.write("One request, every message. Five lines replace the whole rules file.")
     if st.button("Read the inbox", type="primary"):
-        with st.spinner("Asking the model to read all ten messages..."):
-            orders = extract_batch([m["text"] for m in inbox], sorted(menu))
-        for order, message in zip(orders, inbox):
-            order["id"] = message["id"]
-        st.session_state["orders"] = orders
+        try:
+            with st.spinner("Asking the model to read all ten messages..."):
+                orders = extract_batch([m["text"] for m in inbox], sorted(menu))
+            for order, message in zip(orders, inbox):
+                order["id"] = message["id"]
+            st.session_state["orders"] = orders
+        except RuntimeError as error:
+            # No key, or no key the app can see. Say so plainly - a traceback
+            # here tells a student nothing they can act on.
+            st.error(str(error))
+        except Exception as error:  # noqa: BLE001 - students must see the real reason
+            st.error(f"The model call failed: {error}")
+            st.caption(
+                "Rate limit? Wait a minute and try again. Anything else, check "
+                "TROUBLESHOOTING.md."
+            )
 
     orders = st.session_state.get("orders")
     if orders:

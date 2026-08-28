@@ -11,6 +11,7 @@ Reading prose with code is guesswork; reading a known shape is not.
 
 import json
 import os
+from pathlib import Path
 
 # Model names go stale and busy models refuse to answer, so try several rather
 # than pinning one. Both failure modes were seen within three days in August
@@ -27,7 +28,13 @@ def _default_client():
     get this one. Pass your own - a fake, in a test - and no network call
     happens at all.
     """
+    from dotenv import load_dotenv
     from google import genai
+
+    # Streamlit does not read .env by itself. Without this the app reports
+    # "no key" while .env sits right there with the key in it - which is
+    # exactly what happened the first time this page was run.
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key:

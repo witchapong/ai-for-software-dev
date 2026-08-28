@@ -109,6 +109,26 @@ decides how sure it feels, and that decision moves between runs. A flagged
 order that turns out fine costs somebody one glance. A wrong order that sails
 through costs a customer. Which error would you rather your queue made?
 
+**Read the reasons, not just the count.** When we ran this while writing the
+lab, the model scored ten out of ten and still stopped three orders:
+
+| order | why it stopped |
+|---|---|
+| msg-04 | "Assumed *iced choc* refers to Iced Chocolate" |
+| msg-06 | "Customer requested **no sugar** for the cappuccino" |
+| msg-07 | "Customer specified **hot** for Americano" |
+
+Look at what those last two actually are. Nothing was got wrong — "no sugar"
+and "hot" are real things the customer asked for, and **your schema has nowhere
+to put them.** They were silently dropped, and the only reason you know is that
+the model said so.
+
+That is the sharpest thing in this lab, so sit with it: **your schema decides
+what your business is able to remember.** Anything outside it disappears
+without a trace. Add a `notes` field for the customer's own words and you keep
+it; leave it out and every "no sugar" in your inbox is lost, quietly, forever.
+Real intake systems are mostly arguments about exactly this.
+
 **Run the live tests twice.** The wording moves between runs though your code
 did not change. That is why you assert on the customer and the quantities, never
 on the sentence.
@@ -163,5 +183,8 @@ skill you practised in Lab 1, and it is most of the job.
 - **Break it on purpose.** Write a message so ambiguous that a human would have
   to ask. Does the model flag it, or guess confidently? Which would you rather
   ship?
+- **Fix the dropped information.** Add a field for the customer's own words -
+  "no sugar", "hot", "extra shot" - and rerun. Does the review queue shrink?
+  You have just had the argument every real intake system has.
 - **Count the cost.** Ten messages in one request: how many tokens? What would
   ten thousand messages cost? That number is why businesses care.

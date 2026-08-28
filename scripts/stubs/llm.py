@@ -18,6 +18,11 @@ Reading prose with code is guesswork; reading a known shape is not.
 
 TODO = "You build this in Lab 3. See labs/LAB3.md and labs/PROMPTS.md."
 
+# Whatever you build here must call load_dotenv() before reading the key.
+# check_setup.py does it for you; Streamlit does not, so an app that skips it
+# reports "no key" even though .env is sitting right there. That exact bug hit
+# us while writing this lab.
+
 # Model names go stale and busy models refuse. Both happened within three days
 # in August 2026: one model was retired for new accounts, and the alias adopted
 # to survive that returned "high demand" while a pinned version answered fine.
