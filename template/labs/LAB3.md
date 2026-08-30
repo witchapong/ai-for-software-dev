@@ -198,8 +198,14 @@ skill you practised in Lab 1, and it is most of the job.
 - **Break it on purpose.** Write a message so ambiguous that a human would have
   to ask. Does the model flag it, or guess confidently? Which would you rather
   ship?
-- **Fix the dropped information.** Add a field for the customer's own words -
-  "no sugar", "hot", "extra shot" - and rerun. Does the review queue shrink?
-  You have just had the argument every real intake system has.
+- **Fix the dropped information.** The system currently drops anything it
+  cannot match and mentions it only in `note`, as a sentence. Add an
+  `unmatched` field to `ORDER_SCHEMA` - a list of the customer's own words for
+  whatever did not make it - and instruct the model to fill it. Now ask for a
+  flat white with oat milk and read the row. Two things change: staff can ring
+  the customer back and offer a Latte, and you can count how often people ask
+  for mocha, which is the number that tells you what to add to the menu. You
+  have just had the argument every real intake system has, and it cost you one
+  field.
 - **Count the cost.** Ten messages in one request: how many tokens? What would
   ten thousand messages cost? That number is why businesses care.

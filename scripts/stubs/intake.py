@@ -19,6 +19,18 @@ TODO = "You build this in Lab 3. See labs/LAB3.md."
 # The shape every extracted order comes back in. `name` must be one of the
 # menu items, spelled exactly as menu.md spells it - that is what lets
 # order_total() price the order without any guessing.
+# What to do with something that is not on the menu is a policy decision, and
+# this is ours: drop the line we cannot fulfil, keep the rest of the order, and
+# flag it. We do NOT substitute a different product - twenty hot lattes turning
+# into twenty iced ones is the kind of "helpful" a business cannot afford - and
+# we do NOT reject the whole order, because "one flat white and one croissant"
+# should still sell a croissant.
+#
+# It has a cost, and Lab 3 asks you to find it: the customer's own words are
+# kept only in `note`, as prose. Nothing structured survives, so nobody can
+# ring them back to offer a Latte, and nobody can count how often people ask
+# for mocha - which is exactly the number that tells you what to put on the
+# menu. The fix is a field, not a better prompt.
 ORDER_SCHEMA = {
     "type": "object",
     "properties": {
