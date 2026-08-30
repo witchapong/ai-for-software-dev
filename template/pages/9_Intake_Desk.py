@@ -17,6 +17,8 @@ from core.naive_parser import parse, parse_all
 
 SESSION3 = Path(__file__).resolve().parent.parent / "session3"
 
+st.set_page_config(page_title="Intake Desk", layout="wide")
+
 st.title("Intake Desk")
 st.caption("Ten messy messages in. Ten clean rows out.")
 
@@ -42,6 +44,9 @@ def show(orders: list[dict], with_totals: bool) -> dict:
         row = {
             "": "✗" if message["id"] in result["wrong_ids"] else "✓",
             "id": message["id"],
+            # The message sits beside what was read out of it, so the failures
+            # are legible without cross-referencing a separate list.
+            "the message": message["text"],
             "customer": order.get("customer", ""),
             "items": ", ".join(f"{i.get('qty')} x {i.get('name')}" for i in items),
             "pickup": order.get("pickup", ""),
@@ -49,7 +54,21 @@ def show(orders: list[dict], with_totals: bool) -> dict:
         if with_totals:
             row["total (baht)"] = price(order)
         rows.append(row)
-    st.dataframe(rows, hide_index=True, width="stretch")
+
+    # Without explicit widths the message column eats the table and pushes the
+    # extracted fields off the right edge - which hides the very comparison
+    # this table exists to make.
+    columns_config = {
+        "": st.column_config.TextColumn(width="small"),
+        "id": st.column_config.TextColumn(width="small"),
+        "the message": st.column_config.TextColumn(width="large"),
+        "customer": st.column_config.TextColumn(width="small"),
+        "items": st.column_config.TextColumn(width="medium"),
+        "pickup": st.column_config.TextColumn(width="small"),
+    }
+    if with_totals:
+        columns_config["total (baht)"] = st.column_config.TextColumn(width="small")
+    st.dataframe(rows, hide_index=True, width="stretch", column_config=columns_config)
 
     columns = st.columns(4)
     columns[0].metric("Fully correct", f"{result['exact']} / {result['total']}")
@@ -109,10 +128,6 @@ else:
                 hide_index=True,
                 width="stretch",
             )
-
-with st.expander("Show the raw messages"):
-    for message in inbox:
-        st.text(f"{message['id']}  {message['text']}")
 
 st.divider()
 
