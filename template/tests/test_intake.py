@@ -62,14 +62,18 @@ class FakeClient:
 # --- the menu, read with plain Python ---------------------------------------
 
 
-def test_the_menu_has_twelve_items():
+def test_the_menu_has_thirteen_items():
     menu = load_menu(MENU_PATH)
-    assert len(menu) == 12
+    assert len(menu) == 13
 
 
 def test_an_iced_latte_costs_sixty_five_baht():
     menu = load_menu(MENU_PATH)
     assert menu["Iced Latte"] == 65.0
+    # Hot and iced are different products at different prices. A cafe that
+    # sells one sells the other, and a menu missing the hot one forces the
+    # model to substitute.
+    assert menu["Latte"] == 60.0
 
 
 # --- the arithmetic, which the model never touches --------------------------

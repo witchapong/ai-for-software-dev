@@ -9,6 +9,7 @@ before it can be priced.
 | Espresso | 45 |
 | Americano | 50 |
 | Cappuccino | 60 |
+| Latte | 60 |
 | Iced Latte | 65 |
 | Green Tea Latte | 70 |
 | Matcha | 70 |

@@ -53,6 +53,10 @@ def show(orders: list[dict], with_totals: bool) -> dict:
         }
         if with_totals:
             row["total (baht)"] = price(order)
+            # A flagged row used to look identical to a clean one here, with the
+            # warning only in the section below. A twenty-cup substitution is
+            # exactly the row you must not miss at a glance.
+            row["?"] = "!" if order.get("needs_review") else ""
         rows.append(row)
 
     # Without explicit widths the message column eats the table and pushes the
@@ -68,6 +72,9 @@ def show(orders: list[dict], with_totals: bool) -> dict:
     }
     if with_totals:
         columns_config["total (baht)"] = st.column_config.TextColumn(width="small")
+        columns_config["?"] = st.column_config.TextColumn(
+            "?", width="small", help="! means the model wants a human to look"
+        )
     st.dataframe(rows, hide_index=True, width="stretch", column_config=columns_config)
 
     columns = st.columns(4)

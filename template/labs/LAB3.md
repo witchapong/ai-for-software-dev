@@ -186,6 +186,15 @@ skill you practised in Lab 1, and it is most of the job.
   and a brownie?" — the model does not know your prices. Retrieve `menu.md`,
   put it in the prompt, and answer with the real number. That is retrieval, and
   it is how models are made to answer about things they were never trained on.
+- **Order in Thai.** The messages in the inbox are English, and the model was
+  never told to expect anything else. Try `ลาเต้ร้อน 20 แก้ว, มิค, 1pm` and see
+  how far it gets - name, quantity and time included.
+- **Order something the menu nearly has.** When we first wrote this lab the
+  menu had Iced Latte but no hot Latte, so a hot latte came back as `Iced
+  Latte` - the right word, the wrong drink, twenty times over. The model did
+  flag it, but the row in the table looked like any other. Two lessons in one
+  bug: your vocabulary list is a product decision, and a warning nobody sees is
+  not a warning.
 - **Break it on purpose.** Write a message so ambiguous that a human would have
   to ask. Does the model flag it, or guess confidently? Which would you rather
   ship?
