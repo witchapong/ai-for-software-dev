@@ -31,8 +31,8 @@ const p = n => String(n).padStart(2, "0");
   items: [
     "Software with a model inside",
     "How to ask for what you want",
-    "Examples, and when they pay",
-    "Making a prompt better on purpose",
+    "Knowing if it works",
+    "Examples, and making it better",
     "Lab 3 — the Intake Desk",
     "Transfer, then demos",
   ],
@@ -159,13 +159,41 @@ const p = n => String(n).padStart(2, "0");
 
 /* 11 */ dividerSlide({
   n: 3,
-  name: "Examples, and when they pay",
-  framing: "Showing beats telling — at a price you should know before you pay it.",
+  name: "Knowing if it works",
+  framing: "Measure first. Then change one thing, and measure again.",
 }).addNotes(
-  "Few-shot prompting: simultaneously the most useful trick in the box and the most over-used. Both halves get said here."
+  "The order here is the lesson. Most people reach for a clever prompting trick before they have any way to tell whether it helped — so evaluation comes first, and few-shot arrives afterwards as one intervention among several."
 );
 
-/* 12 */ codeSlide({
+/* 12 */ bodySlide({
+  eyebrow: "Section 03",
+  title: "How do you know it worked?",
+  bullets: [
+    ["An eval is two things.", "Cases whose right answer you already know, and a rule that turns what came back into a number."],
+    ["You already have one.", "answer_key.json is ten known answers; score() is the rule. The rules parser gets four out of ten."],
+    ["Eyeballing does not scale, and it flatters you.", "Ten you can check by hand; ten thousand you cannot — and you look hardest where you expect to pass."],
+    ["Some answers cannot be keyed.", "\u201cExplain this match\u201d has no one right output. Grade properties: short, real reason, nothing invented."],
+  ],
+  footerLeft: FOOT, page: p(12),
+}).addNotes(
+  "Give them the word for something they have already done. They ran score() in checkpoint 4 without being told it was an evaluation. The fourth bullet is the one that reaches their own projects: the roommate and carpool briefs all want an explanation back, and an explanation cannot be marked against a key \u2014 so you mark properties instead. That idea has a name, a rubric, and they will meet it again."
+);
+
+/* 13 */ figureSlide({
+  eyebrow: "Section 03",
+  title: "Two ways to be wrong",
+  image: "figures/fig-two-ways-wrong.png",
+  paras: [
+    "Our score only marks the order \u2014 customer, items, time. Whether the parser flagged a doubtful one is a separate question, and four out of ten never asks it.",
+    "The two mistakes cost different amounts. A false alarm costs a human one glance; an escape costs a customer. A checker that never cries wolf is one that misses things.",
+  ],
+  figSource: "Fig. 12 \u2014 the rules parser on the real inbox, both axes at once",
+  footerLeft: FOOT, page: p(13),
+}).addNotes(
+  "Every number on this slide is measured, not invented \u2014 run naive_parser over inbox.json and you get exactly this. Spend the time on msg-07: the parser dropped both hot americanos because \u201c(hot)\u201d broke its pattern, kept the croissants, filled every field and flagged nothing. Ryan pays for three croissants and gets no coffee. Then make the point about the zero: no false alarms sounds like good news and is not, because it came with an escape. If you never cry wolf you are not looking hard enough. Ask which cell they would rather be in, and why a caf\u00e9 should choose differently from a hospital or a bank."
+);
+
+/* 14 */ codeSlide({
   eyebrow: "Section 03",
   title: "Few-shot: show, do not describe",
   code: [
@@ -185,12 +213,12 @@ const p = n => String(n).padStart(2, "0");
     "Notice the second one: an example of getting it right by refusing. Examples teach behaviour, not just shape.",
   ],
   prompt: "Show the model the case you keep failing, done correctly.",
-  footerLeft: FOOT, page: p(12),
+  footerLeft: FOOT, page: p(14),
 }).addNotes(
   "The second example is the important one and it is the one nobody writes. Most people show the model three successes and then wonder why it never admits defeat."
 );
 
-/* 13 */ bodySlide({
+/* 15 */ bodySlide({
   eyebrow: "Section 03",
   title: "What examples cost",
   bullets: [
@@ -199,12 +227,12 @@ const p = n => String(n).padStart(2, "0");
     ["Our café prompt has none.", "It scores ten out of ten on the inbox without a single example — so adding some would be cost with no gain."],
     "Reach for examples when a rule keeps failing, not by default.",
   ],
-  footerLeft: FOOT, page: p(13),
+  footerLeft: FOOT, page: p(15),
 }).addNotes(
   "The honest position, and the one that separates people who have shipped from people who have read a blog post. Few-shot is a fix for a measured problem, not a default ingredient you sprinkle on everything."
 );
 
-/* 14 */ figureSlide({
+/* 16 */ figureSlide({
   eyebrow: "Section 03",
   title: "Making it better on purpose",
   image: "figures/fig-prompt-loop.png",
@@ -213,12 +241,12 @@ const p = n => String(n).padStart(2, "0");
     "Never judge a prompt by one run. The same prompt on the same message answers differently on different days, which is why you measure many and never one.",
   ],
   figSource: "Fig. 11 — the loop that actually improves prompts",
-  footerLeft: FOOT, page: p(14),
+  footerLeft: FOOT, page: p(16),
 }).addNotes(
   "This is how the prompts in PROMPTS.md were written, including the ones they will paste today. Hammer the one-change-at-a-time rule: change three lines and a better score tells you nothing about which one earned it."
 );
 
-/* 15 */ dividerSlide({
+/* 17 */ dividerSlide({
   n: 4,
   name: "Lab 3 — the Intake Desk",
   framing: "Sixty-five minutes. A regex parser, a model, and a queue for a human.",
@@ -226,7 +254,7 @@ const p = n => String(n).padStart(2, "0");
   "Fresh copy of the template, called lab3-practice — not their group project. A failed experiment here must not touch the app they demo in two hours. Full brief is in labs/LAB3.md."
 );
 
-/* 16 */ bodySlide({
+/* 18 */ bodySlide({
   eyebrow: "Section 04",
   title: "Four checkpoints",
   bullets: [
@@ -235,12 +263,12 @@ const p = n => String(n).padStart(2, "0");
     ["Ask for a shape.", "One argument later, ten messy messages become ten rows. No regular expressions."],
     ["Score it, then plan for being wrong.", "Grade yourself against the answer key, and send what the model was unsure about to a human."],
   ],
-  footerLeft: FOOT, page: p(16),
+  footerLeft: FOOT, page: p(18),
 }).addNotes(
   "Checkpoint 1 is the one to protect when time gets tight. They must feel the old way fail before the new way means anything — skip it and the rest is just typing someone else's code."
 );
 
-/* 17 */ codeSlide({
+/* 19 */ codeSlide({
   eyebrow: "Section 04",
   title: "Your job: attack the prompt",
   code: [
@@ -249,7 +277,8 @@ const p = n => String(n).padStart(2, "0");
     "",
     "2. Write the correct answer for each.",
     "",
-    "3. Score the current prompt on them.",
+    "3. Score it. Check what it flagged,",
+    "   and what it should have.",
     "",
     "4. Change ONE line. Score again.",
     "",
@@ -260,12 +289,12 @@ const p = n => String(n).padStart(2, "0");
     "Order in Thai. Order something the menu nearly has. Change your mind mid-sentence. Then make the prompt handle it — and prove that you did.",
   ],
   prompt: "A prompt you cannot score is a prompt you cannot improve.",
-  footerLeft: FOOT, page: p(17),
+  footerLeft: FOOT, page: p(19),
 }).addNotes(
   "This is the real assignment of the lecture, and it is what separates a good log entry from a weak one. Winning looks like a measured before-and-after, not a prompt that sounds more impressive."
 );
 
-/* 18 */ dividerSlide({
+/* 20 */ dividerSlide({
   n: 5,
   name: "Then put it in your project",
   framing: "Twenty minutes. Every brief has an AI feature waiting, and it is this lab wearing different clothes.",
@@ -273,7 +302,7 @@ const p = n => String(n).padStart(2, "0");
   "Optional but strongly encouraged. Say the stop rule out loud before they start: when the clock runs out they stop and demo what works, and nobody is penalised for it."
 );
 
-/* 19 */ twoColumnSlide({
+/* 21 */ twoColumnSlide({
   eyebrow: "Section 05",
   title: "Your brief already has the slot",
   left: {
@@ -286,12 +315,12 @@ const p = n => String(n).padStart(2, "0");
     lead: "Carpool: a date and a time window. Sessions: subject, date, start, end, place. Bills: items, amounts, who shares.",
     secondary: "core/llm.py has been an empty slot in your project since Session 1, for exactly this.",
   },
-  footerLeft: FOOT, page: p(19),
+  footerLeft: FOOT, page: p(21),
 }).addNotes(
   "Copy llm.py across, write their own schema, wire it to one page. Repeat the rule: a working project without the feature beats a broken one with it, and it always will."
 );
 
-/* 20 */ dividerSlide({
+/* 22 */ dividerSlide({
   n: 6,
   name: "Demos",
   framing: "Two rounds. Half of you present, half of you walk around and score. Then swap.",
@@ -299,25 +328,25 @@ const p = n => String(n).padStart(2, "0");
   "Science fair, not lectures — this is why fifteen groups fit in forty-five minutes. The peer form asks what each team ADDED, which is where the twist and the stretch goals earn their marks."
 );
 
-/* 21 */ takeawaysSlide({
+/* 23 */ takeawaysSlide({
   eyebrow: "Session 03",
   lines: [
     "A model is an adapter between language and data, not the application.",
     "A prompt is source code: role, vocabulary, format, defaults, escalation.",
     "A prompt you cannot score is a prompt you cannot improve.",
   ],
-  footerLeft: FOOT, page: p(21),
+  footerLeft: FOOT, page: p(23),
 }).addNotes(
   "The photograph slide. Pause on it, and let the room actually take the picture before moving to the closing."
 );
 
-/* 22 */ closingSlide({
+/* 24 */ closingSlide({
   question: "What will you build next?",
   reading: "Your app is live, and the repository is yours to keep",
   deadline: "AI collaboration log due — three things it got wrong, and how you caught them",
   office: "everything today runs on free tiers you already have",
   contact: "Your Name · you@university.ac.th",
-  page: p(22),
+  page: p(24),
 }).addNotes(
   "Leave it up through the demos and questions. The last line is the one to say out loud: none of this needed a budget, an approval, or a licence — which means nothing is stopping them building the next one on Monday."
 );

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Figures for the lecture decks — figs 1-4 Session 1, 5-8 Session 2, 9-11 Session 3.
+"""Figures for the lecture decks — figs 1-4 Session 1, 5-8 Session 2, 9-12 Session 3.
 
-Writes eleven PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
+Writes twelve PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
 paper, paper-2, ink, ink-muted, hairline, and ochre used sparingly as the one
 accent per figure.
 
@@ -65,9 +65,9 @@ def canvas(w_in, h_in):
     return fig, ax
 
 
-def box(ax, cx, cy, w, h, lw=1.8):
+def box(ax, cx, cy, w, h, lw=1.8, edge=INK):
     ax.add_patch(Rectangle((cx - w / 2.0, cy - h / 2.0), w, h,
-                           facecolor=PAPER_2, edgecolor=INK,
+                           facecolor=PAPER_2, edgecolor=edge,
                            linewidth=lw, joinstyle="miter", zorder=2))
 
 
@@ -634,6 +634,58 @@ def fig_prompt_loop():
     save(fig, "fig-prompt-loop.png")
 
 
+
+def fig_two_ways_wrong():
+    """The rules parser's real confusion matrix on the ten-message inbox.
+
+    Every number here is measured, not illustrative. Reproduce it with:
+
+        from core.naive_parser import parse_all
+        from core.intake import score, needs_review
+
+    against session3/inbox.json and session3/answer_key.json. The parser gets
+    4/10 exact; six are wrong; five of those six are flagged. The sixth is
+    msg-07, and it is the whole point of the figure.
+    """
+    fig, ax = canvas(10.4, 7.0)
+
+    CX = (48.0, 79.0)     # col 0 = really wrong, col 1 = really right
+    CY = (44.0, 26.5)     # row 0 = flagged,      row 1 = said nothing
+    BW, BH = 27.0, 13.0
+
+    # what was actually true, across the top
+    for i, head in enumerate(("WAS WRONG", "WAS RIGHT")):
+        txt(ax, CX[i], 58.8, "the order really", 10.5, color=MUTED)
+        txt(ax, CX[i], 55.2, head, 12.5)
+
+    # what the parser said, down the side
+    for j, side in enumerate(("FLAGGED IT", "SAID NOTHING")):
+        txt(ax, 31.5, CY[j] + 2.0, "the parser", 10.5, color=MUTED, ha="right")
+        txt(ax, 31.5, CY[j] - 1.6, side, 12.5, ha="right")
+
+    cells = [
+        (0, 0, "5", "caught it", "a human fixes it first", INK),
+        (1, 0, "0", "false alarm", "costs one glance", INK),
+        (0, 1, "1", "GOT THROUGH", "costs a customer", OCHRE),
+        (1, 1, "4", "fine", "the common case", INK),
+    ]
+    for col, row, n, label, cost, colour in cells:
+        cx, cy = CX[col], CY[row]
+        box(ax, cx, cy, BW, BH, lw=2.2 if colour is OCHRE else 1.8, edge=colour)
+        txt(ax, cx - 8.0, cy + 0.4, n, 22, color=colour)
+        txt(ax, cx + 3.4, cy + 2.6, label, 12, color=colour)
+        txt(ax, cx + 3.4, cy - 2.4, cost, 10, color=MUTED)
+
+    # the one that matters, quoted verbatim from inbox.json
+    txt(ax, 21.0, 13.2, "msg-07", 11, color=OCHRE, ha="left")
+    txt(ax, 32.0, 13.2,
+        '"americano (hot) 2, croissant 3. name Ryan, 11am"', 11, ha="left")
+    txt(ax, 50.0, 8.8,
+        "kept the croissants, lost both coffees, filled every field, said nothing",
+        10.5, color=MUTED)
+
+    save(fig, "fig-two-ways-wrong.png")
+
 # ------------------------------------------------------------------------ main
 
 def _trim(path, margin=28):
@@ -684,3 +736,4 @@ if __name__ == "__main__":
     fig_llm_software()
     fig_prompt_anatomy()
     fig_prompt_loop()
+    fig_two_ways_wrong()

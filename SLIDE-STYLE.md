@@ -493,9 +493,18 @@ export const closingSlide = ({ question, reading, deadline, office, contact, pag
        { color: ACCENT, font: MONO, space: 0.14, caps: true });
   const colW = (W - 80) / 2, rx = M_X + colW + 80;
   text(s, M_X, 480, colW, 240, question, 80, { bold: true, line: 1.08 });
-  [reading, deadline].forEach((ln, i) =>
-    text(s, rx, 560 + i * 66, colW, 60, ln, 32, { line: 1.45 }));
-  text(s, rx, 710, colW, 40, office, 26, { color: INK_MUTED, font: MONO });
+  // Wrapped-height flow, as in bodySlide. A fixed 66px step assumes every line
+  // is one line; a deadline long enough to wrap then runs underneath `office`.
+  // 66px is preserved exactly for the single-line case.
+  const C_CPL = 47;                   // 32px sans in an 832px column, measured
+  const C_LINE_H = 32 * 1.45;
+  let cy = 560;
+  [reading, deadline].forEach(ln => {
+    const rows = Math.max(1, Math.ceil(ln.length / C_CPL));
+    text(s, rx, cy, colW, rows * C_LINE_H + 16, ln, 32, { line: 1.45 });
+    cy += rows === 1 ? 66 : rows * C_LINE_H + 20;
+  });
+  text(s, rx, cy + 18, colW, 40, office, 26, { color: INK_MUTED, font: MONO });
   rule(s, M_X, 1080 - M_BOT - 60, W);
   text(s, M_X, FOOTER_Y, 1200, 34, contact, 24, { color: INK_MUTED, font: MONO });
   text(s, 1920 - M_X - 200, FOOTER_Y, 200, 34, page, 24,
