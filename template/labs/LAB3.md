@@ -123,6 +123,12 @@ and "hot" are real things the customer asked for, and **your schema has nowhere
 to put them.** They were silently dropped, and the only reason you know is that
 the model said so.
 
+And the note does not catch everything. Ask it for *"two flat whites and a
+brownie for Nok, 4pm, oat milk if you have it"* and it correctly refuses to
+invent a menu item — `needs_review: true`, *"Flat white is not on the menu"* —
+but says nothing at all about the oat milk. Two things were dropped and one was
+reported. **The flag is a courtesy, not a guarantee.**
+
 That is the sharpest thing in this lab, so sit with it: **your schema decides
 what your business is able to remember.** Anything outside it disappears
 without a trace. Add a `notes` field for the customer's own words and you keep
