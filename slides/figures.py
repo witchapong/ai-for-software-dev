@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Figures for the lecture decks — figs 1-4 for Session 1, figs 5-8 for Session 2.
+"""Figures for the lecture decks — figs 1-4 Session 1, 5-8 Session 2, 9-11 Session 3.
 
-Writes eight PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
+Writes eleven PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
 paper, paper-2, ink, ink-muted, hairline, and ochre used sparingly as the one
 accent per figure.
 
@@ -465,14 +465,210 @@ def fig_brief_menu():
     save(fig, "fig-brief-menu.png")
 
 
+# ---------------------------------------- primitives for the session 3 set
+
+# Menlo has no Thai glyphs, and one example line in fig 9 is a Thai order.
+# Matplotlib falls back glyph by glyph when it is handed a list of families,
+# so the Latin text still sets in Menlo and only the Thai borrows Thonburi.
+THAI_STACK = ["Menlo", "Thonburi", "DejaVu Sans Mono"]
+
+
+def txt_mixed(ax, x, y, s, size, color=INK, ha="center", va="center"):
+    """txt(), but with a font stack that covers Thai."""
+    ax.text(x, y, s, fontsize=size, color=color, ha=ha, va=va, zorder=5,
+            family=THAI_STACK)
+
+
+def ghost_box(ax, cx, cy, w, h, lw=1.4):
+    """A box drawn in muted outline — something outside the main flow."""
+    ax.add_patch(Rectangle((cx - w / 2.0, cy - h / 2.0), w, h,
+                           facecolor=PAPER, edgecolor=MUTED,
+                           linewidth=lw, joinstyle="miter", zorder=2))
+
+
+def leader(ax, x0, x1, y, color=INK, lw=1.0):
+    """A hairline pointing from an annotation back into the thing annotated."""
+    ax.plot([x0, x1], [y, y], color=color, lw=lw, solid_capstyle="butt",
+            zorder=4)
+
+
+# ------------------------------------------- fig 9 — software with a model inside
+
+def fig_llm_software():
+    fig, ax = canvas(9.66, 7.2)
+
+    BOX_W, BOX_H, ROW = 18.0, 9.0, 58.0
+    XS = [12.0, 37.33, 62.67, 88.0]          # 4 boxes, 3 gaps, 3-unit margins
+    GLOSS = [49.6, 46.4, 43.2]               # three slots beneath every box
+
+    for cx, label in zip(XS, ("MESSY INPUT", "THE MODEL",
+                              "STRUCTURED DATA", "YOUR CODE")):
+        box(ax, cx, ROW, BOX_W, BOX_H)
+        txt(ax, cx, ROW, label, 12.5)
+
+    for i in range(3):                        # the pipeline itself
+        arrow(ax, (XS[i] + BOX_W / 2 + 0.6, ROW),
+              (XS[i + 1] - BOX_W / 2 - 0.6, ROW), lw=1.8, scale=24)
+
+    # 1 — what the customers actually send
+    for line, y in zip(("2 iced lattes 3pm — Ploy",
+                        "ลาเต้ร้อน 20 แก้ว",
+                        "a black coffee thanks"), GLOSS):
+        txt_mixed(ax, XS[0], y, line, 9.5, color=MUTED)
+
+    # 2 — the model, and 4 — your code
+    for cx, lines in ((XS[1], ("reads language,", "fills a shape")),
+                      (XS[3], ("totals, storage,", "rules, screens"))):
+        for line, y in zip(lines, GLOSS):
+            txt(ax, cx, y, line, 10, color=MUTED)
+
+    # 3 — the shape the model fills
+    for line, y in zip(("{ customer,", "  items[], pickup }"), GLOSS):
+        txt(ax, XS[2], y, line, 10, color=MUTED)
+
+    # the bracket under stages 2 and 3
+    bx0, bx1, by = XS[1] - BOX_W / 2, XS[2] + BOX_W / 2, 39.5
+    ax.plot([bx0, bx0, bx1, bx1], [by + 1.6, by, by, by + 1.6],
+            color=MUTED, lw=1.4, solid_capstyle="butt", zorder=2)
+    txt(ax, (bx0 + bx1) / 2, 35.5, "the adapter", 12, color=MUTED)
+
+    # the one accent: the half of the system that must never guess
+    for line, y in zip(("arithmetic, money", "and decisions", "stay here"),
+                       (39.5, 36.3, 33.1)):
+        txt(ax, XS[3], y, line, 10.5, color=OCHRE)
+
+    ax.plot([4.0, 96.0], [25.0, 25.0], color=HAIRLINE, lw=1.6,
+            solid_capstyle="butt", zorder=1)
+    txt(ax, 50.0, 18.0, "the model never touches the till", 13, color=MUTED)
+
+    save(fig, "fig-llm-software.png")
+
+
+# ------------------------------------------------- fig 10 — the parts of a prompt
+
+def fig_prompt_anatomy():
+    fig, ax = canvas(9.66, 7.2)
+
+    # the prompt, abbreviated to fit. The pickup rule is lifted above the qty
+    # rule so the five labels can run top to bottom without their leader lines
+    # crossing; core/intake.py has them the other way round.
+    LINES = [
+        "You are the order desk of a small café.",
+        "Turn each chat message into one order.",
+        "- name must be copied EXACTLY from",
+        "  this menu: Espresso, Americano, ...",
+        "  Never invent an item name.",
+        "- pickup is 24-hour HH:MM. 3pm is",
+        "  15:00, noon is 12:00.",
+        "- qty is a whole number. Use 1 when",
+        "  the customer names no number.",
+        "- needs_review is true when you had",
+        "  to guess. note says what.",
+    ]
+    TOP, STEP = 59.5, 3.6
+    box(ax, 29.5, 41.5, 53.0, 45.0)
+    for i, line in enumerate(LINES):
+        txt_mixed(ax, 6.5, TOP - i * STEP, line, 13, ha="left")
+
+    # one label per part, each pinned to the line it names
+    labels = [
+        (1, "ROLE", "who is reading this"),
+        (4, "VOCABULARY", "the only values allowed"),
+        (6, "FORMAT", "ambiguity resolved by example"),
+        (8, "DEFAULTS", "what to do when unsure"),
+        (10, "ESCALATION", "permission to say “not sure”"),
+    ]
+    for n, name, gloss in labels:
+        y = TOP - (n - 1) * STEP
+        leader(ax, 52.0, 60.5, y)
+        txt(ax, 62.0, y + 1.7, name, 12.5, ha="left")
+        txt(ax, 62.0, y - 1.7, gloss, 10.5, color=MUTED, ha="left")
+
+    txt(ax, 29.5, 13.5,
+        "notice what is missing: not one example of a finished order",
+        11, color=OCHRE)
+
+    save(fig, "fig-prompt-anatomy.png")
+
+
+# ------------------------------------------------ fig 11 — improving on purpose
+
+def fig_prompt_loop():
+    fig, ax = canvas(9.66, 7.2)
+
+    BW, BH = 27.0, 11.0
+    LX, RX, TY, BY = 16.0, 54.0, 58.0, 36.0
+    stages = [
+        (LX, TY, "WRITE A TEST SET", "messages with known answers"),
+        (RX, TY, "MEASURE", "score, do not eyeball"),
+        (RX, BY, "CHANGE ONE THING", "one line, one run"),
+        (LX, BY, "MEASURE AGAIN", "kept or reverted?"),
+    ]
+    for cx, cy, label, gloss in stages:
+        box(ax, cx, cy, BW, BH)
+        txt(ax, cx, cy + 2.4, label, 13)
+        txt(ax, cx, cy - 2.6, gloss, 10, color=MUTED)
+
+    # clockwise: write -> measure -> change -> measure again
+    arrow(ax, (LX + BW / 2 + 0.6, TY), (RX - BW / 2 - 0.6, TY), scale=24)
+    arrow(ax, (RX, TY - BH / 2 - 0.6), (RX, BY + BH / 2 + 0.6), scale=24)
+    arrow(ax, (RX - BW / 2 - 0.6, BY + 2.8), (LX + BW / 2 + 0.6, BY + 2.8),
+          scale=24)
+
+    # the one accent: the edge you travel over and over
+    arrow(ax, (LX + BW / 2 + 0.6, BY - 2.8), (RX - BW / 2 - 0.6, BY - 2.8),
+          color=OCHRE, lw=1.9, scale=24)
+    txt(ax, (LX + RX) / 2, 27.5, "keep looping", 10.5, color=OCHRE)
+
+    # and the way out, off to one side
+    ghost_box(ax, 85.0, 17.0, 20.0, 9.0)
+    txt(ax, 85.0, 17.0, "SHIP IT", 13, color=MUTED)
+    dashed_arc(ax, (LX, BY - BH / 2 - 0.4), (74.6, 17.2), 0.16,
+               color=MUTED, lw=1.5)
+    txt(ax, 57.0, 21.5, "when it stops improving", 10.5, color=MUTED)
+
+    txt(ax, 50.0, 6.5,
+        "same prompt, two runs, two answers — so measure many, never one",
+        11, color=MUTED)
+
+    save(fig, "fig-prompt-loop.png")
+
+
 # ------------------------------------------------------------------------ main
+
+def _trim(path, margin=28):
+    """Crop the saved PNG to what was actually drawn, plus a small margin.
+
+    figureSlide aspect-fits the image inside a fixed frame, so any blank band
+    a figure leaves around its content is paid for twice: once as empty pixels
+    and again as a smaller rendering of everything else. Trimming to the ink
+    lets the content fill the frame, which is the difference between annotation
+    labels that read from the back row and labels that do not.
+    """
+    from PIL import Image
+
+    image = Image.open(path).convert("RGB")
+    grey = np.array(image.convert("L"))
+    rows = np.where((grey < 235).any(axis=1))[0]
+    columns = np.where((grey < 235).any(axis=0))[0]
+    if rows.size == 0 or columns.size == 0:
+        return
+    top = max(0, rows.min() - margin)
+    bottom = min(grey.shape[0], rows.max() + margin)
+    left = max(0, columns.min() - margin)
+    right = min(grey.shape[1], columns.max() + margin)
+    image.crop((left, top, right, bottom)).save(path)
+
 
 def save(fig, name):
     path = os.path.join(OUT, name)
     fig.savefig(path, dpi=DPI, facecolor=PAPER)
     plt.close(fig)
-    print("%-28s %d x %d" % (name, fig.get_size_inches()[0] * DPI,
-                             fig.get_size_inches()[1] * DPI))
+    _trim(path)
+    from PIL import Image
+
+    with Image.open(path) as trimmed:
+        print("%-28s %d x %d" % (name, trimmed.width, trimmed.height))
 
 
 if __name__ == "__main__":
@@ -485,3 +681,6 @@ if __name__ == "__main__":
     fig_branch_merge()
     fig_mob_parallel()
     fig_brief_menu()
+    fig_llm_software()
+    fig_prompt_anatomy()
+    fig_prompt_loop()

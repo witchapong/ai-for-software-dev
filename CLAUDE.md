@@ -83,6 +83,12 @@ path. Fig 4 imports the template's real `core.spectrum` — its spikes are
 computed, not drawn. Figures 1–3 are cut to the 1.342 aspect of `figureSlide`'s
 image box so they fill the hairline frame without letterboxing.
 
+`save()` trims every PNG to its drawn content before writing. `figureSlide`
+aspect-fits into a fixed frame, so any blank band a figure leaves is paid for
+twice — as empty pixels, and again as a smaller rendering of everything else.
+Untrimmed, Fig 10's annotation labels were borderline unreadable from a back
+row; trimmed, they are fine.
+
 Note: the QA venv at `/tmp/pptxqa` is swept by the macOS tmp cleaner every few
 days. If `validate.py` fails with ModuleNotFoundError, rebuild it:
 `python3.12 -m venv /tmp/pptxqa && /tmp/pptxqa/bin/pip install defusedxml lxml python-pptx "markitdown[pptx]"`
