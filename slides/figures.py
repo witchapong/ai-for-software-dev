@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Figures for the lecture decks — figs 1-4 Session 1, 5-8 Session 2, 9-12 Session 3.
 
-Writes twelve PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
+Writes thirteen PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
 paper, paper-2, ink, ink-muted, hairline, and ochre used sparingly as the one
 accent per figure.
 
@@ -686,6 +686,47 @@ def fig_two_ways_wrong():
 
     save(fig, "fig-two-ways-wrong.png")
 
+
+def fig_language_model():
+    """What a language model is and, at arm's length, how it got that way.
+
+    Session 1 needs "model" to mean something before harness-versus-model can
+    land. Four stages, then the one behaviour everything else follows from:
+    it predicts, it does not look up.
+
+    Cut to roughly the 1.342 aspect of figureSlide's image box - a wider strip
+    aspect-fits to a fraction of the frame and the labels go unreadable.
+    """
+    fig, ax = canvas(9.0, 7.6)
+
+    BW, BH, CY = 21.0, 14.0, 69.0
+    # Glosses wrap to two lines: at this box width a single line of monospace
+    # runs into the border, which reads as a mistake from the back of a room.
+    stages = [
+        (14.0, "TEXT", "books, code,\nthe web"),
+        (38.0, "TRAINING", "once, by a\nbig company"),
+        (62.0, "A PREDICTOR", "guesses the\nnext word"),
+        (86.0, "TUNING", "to follow\ninstructions"),
+    ]
+    for cx, label, gloss in stages:
+        box(ax, cx, CY, BW, BH)
+        txt(ax, cx, CY + 4.0, label, 12.5)
+        txt(ax, cx, CY - 3.2, gloss, 9.5, color=MUTED)
+    for cx, _, _ in stages[:-1]:
+        arrow(ax, (cx + BW / 2 + 0.6, CY), (cx + 24 - BW / 2 - 0.6, CY), scale=22)
+
+    # the behaviour the rest of the session depends on
+    txt(ax, 50.0, 46.0, '"the capital of France is ..."', 13.5, color=MUTED)
+    arrow(ax, (50.0, 41.5), (50.0, 35.0), color=OCHRE, lw=2.0, scale=24)
+    txt(ax, 50.0, 29.0, "Paris", 18, color=OCHRE)
+
+    txt(ax, 50.0, 13.0, "not looked up anywhere - rebuilt from patterns,", 11,
+        color=MUTED)
+    txt(ax, 50.0, 7.0, "which is how it can be fluent and wrong", 11,
+        color=MUTED)
+
+    save(fig, "fig-language-model.png")
+
 # ------------------------------------------------------------------------ main
 
 def _trim(path, margin=28):
@@ -737,3 +778,4 @@ if __name__ == "__main__":
     fig_prompt_anatomy()
     fig_prompt_loop()
     fig_two_ways_wrong()
+    fig_language_model()
