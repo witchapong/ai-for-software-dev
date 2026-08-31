@@ -30,6 +30,9 @@ class FakeModels:
 class FakeClient:
     def __init__(self, text: str):
         self.models = FakeModels(text)
+# Hidden until Session 3: see pytest.ini. Run these with `pytest -m lab3`.
+pytestmark = pytest.mark.lab3
+
 
 
 def test_ask_returns_the_plain_text_the_model_sent():

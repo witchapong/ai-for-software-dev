@@ -93,7 +93,15 @@ def _diagnose(error: Exception, provider: str) -> str:
 
 
 def _try_gemini(key: str) -> tuple[bool, str]:
+    import logging
+
     from google import genai
+
+    # The SDK logs an "automatic function calling is not recommended" warning on
+    # every generate_content call. It is advice for a feature we do not use, but
+    # it prints above the PASS/FAIL list, and a student in minute five reads any
+    # unexplained red text as a broken setup. Quiet it.
+    logging.getLogger("google_genai").setLevel(logging.ERROR)
 
     client = genai.Client(api_key=key)
     last = None

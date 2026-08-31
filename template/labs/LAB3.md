@@ -10,9 +10,11 @@ Work in a **fresh copy of the template** — click "Use this template" again and
 call it `lab3-practice`. Not in your group project: a failed experiment here
 must not touch the app you demo in two hours.
 
-**One note before you start.** In a fresh copy, a bare `pytest` also reports
-Lab 1's spectrum tests failing — you never built that module in *this* copy.
-Ignore them. Every command below names the tests that matter.
+**Two notes before you start.** Lab 3's tests have been hidden since Session 1
+so that each lab shows you only its own red. Switch them on with `-m lab3`,
+which every command below already does. And in a fresh copy a bare `pytest`
+also reports Lab 1's spectrum tests failing — you never built that module in
+*this* copy. Ignore those; every command below names the tests that matter.
 
 ## Checkpoint 1 — The way it used to be (10 minutes)
 

@@ -23,6 +23,12 @@ docker run --rm -v "$PWD/template:/w" -w /w "$IMAGE" bash -c '
   cp -n .env.example .env
   test -f .env && echo ".env created"
   echo "--- tests ---"
+  # Deliberately overrides the default marker deselection in pytest.ini: this
+  # script asks whether the pinned dependencies resolve and import in the real
+  # image, so it runs every offline test, including ones hidden until Lab 3.
+  # NB: no single quotes anywhere in this block. It is the body of a quoted
+  # bash -c string, so one stray quote closes it early and the remainder runs
+  # on the host instead of in the container - which looks like a test failure.
   python -m pytest -m "not live" -q
 '
 echo

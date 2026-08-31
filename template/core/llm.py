@@ -28,8 +28,14 @@ def _default_client():
     get this one. Pass your own - a fake, in a test - and no network call
     happens at all.
     """
+    import logging
+
     from dotenv import load_dotenv
     from google import genai
+
+    # Same SDK advice-warning check_setup.py silences; it clutters the terminal
+    # students watch while Streamlit runs.
+    logging.getLogger("google_genai").setLevel(logging.ERROR)
 
     # Streamlit does not read .env by itself. Without this the app reports
     # "no key" while .env sits right there with the key in it - which is

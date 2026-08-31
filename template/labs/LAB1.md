@@ -23,7 +23,16 @@ When time is up, answer these in your AI collaboration log:
   tell from the chart, that is itself an answer.
 - If a classmate asked "is this correct", could you show them why?
 
-Now delete it: `git checkout -- .` and `rm -f pages/2_*.py`
+Now delete it — all of it. Round 2 is only a fair comparison if it starts from
+the same place you did, and `rm` on one filename misses whatever else the agent
+decided to create.
+
+```
+git checkout -- .    # undo its edits to files that were already here
+git clean -fd        # delete the new files it made
+```
+
+Your `.env` survives both: it is git-ignored, so your key is safe.
 
 ## Round 2: the Four Gates (70 minutes)
 
@@ -58,9 +67,10 @@ The maths belongs in `core/spectrum.py`; the screen belongs in
 **Gate 4 — Build (40 min).** One task at a time. Your goal is simple: make
 `pytest tests/test_spectrum.py` go green.
 
-Run `pytest` now, before you build anything. You should see **7 failed, 18
-passed**. That is correct, not broken: the eighteen are the template's own
-tests, and the seven are your specification. Watch that seven fall. After each task, run the tests and
+Run `pytest` now, before you build anything. You should see **7 failed, 22
+passed, 25 deselected**. That is correct, not broken: the twenty-two are the
+template's own tests, the twenty-five belong to Session 3 and are hidden until
+you get there, and the seven are your specification. Watch that seven fall. After each task, run the tests and
 look at the app. Commit every time the tests pass:
 
 ```

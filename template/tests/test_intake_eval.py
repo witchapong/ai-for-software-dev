@@ -36,6 +36,9 @@ def extracted():
     for order, message in zip(orders, INBOX):
         order["id"] = message["id"]
     return orders
+# Hidden until Session 3: see pytest.ini. Run these with `pytest -m lab3`.
+pytestmark = pytest.mark.lab3
+
 
 
 @pytest.mark.live

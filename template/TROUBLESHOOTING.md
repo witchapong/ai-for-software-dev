@@ -17,6 +17,11 @@ https://aistudio.google.com/apikey, paste it into `.env`, save, try again.
 **There is no `.env` file**
 Run `cp .env.example .env` in the terminal, then paste your key in.
 
+**`pytest` says some tests were "deselected"**
+Deliberate, not broken. Later sessions' tests are hidden until you reach them,
+so each lab shows you only its own failures. Session 3 switches its own on
+with `pytest -m lab3`.
+
 **My Codespace will not start, or is stuck**
 Go to https://github.com/codespaces, find yours, click the three dots, choose
 **Stop**, then open it again. If that fails, delete it and create a new one —

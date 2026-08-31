@@ -57,6 +57,9 @@ class FakeClient:
 
     def __init__(self, text: str):
         self.models = FakeModels(text)
+# Hidden until Session 3: see pytest.ini. Run these with `pytest -m lab3`.
+pytestmark = pytest.mark.lab3
+
 
 
 # --- the menu, read with plain Python ---------------------------------------

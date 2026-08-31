@@ -48,7 +48,7 @@ rm -rf .venv data .env
 # --- main: the tests, but stubs where the answers would be -------------------
 # A stub matters more than an absence: without core/spectrum.py, pytest fails
 # at collection and runs ZERO tests, so a student's first `pytest` looks like a
-# broken template. With the stub they get "7 failed, 18 passed" and the failing
+# broken template. With the stub they get "7 failed, 22 passed" and the failing
 # list is their specification.
 cp "$REPO_ROOT/scripts/stubs/spectrum.py" core/spectrum.py
 rm -f pages/2_Spectrum_Analyzer.py
