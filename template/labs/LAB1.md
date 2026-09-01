@@ -1,107 +1,356 @@
 # Lab 1 — Build a spectrum analyser, twice
 
-You will build the same app two ways. The comparison is the whole point.
+You will build the same app two ways, and the comparison between them is the
+whole point of the lab. Round 1 you just ask for it. Round 2 you go through
+four checkpoints where a person decides before the agent is allowed to carry
+on. Same app, same agent, same model.
 
-A spectrum analyser takes a signal and tells you which frequencies it is made
-of. You will build one that adds two sine waves together and then shows you
-that it can find both of them again.
+Everything below is written so you can follow it on your own. If you get
+stuck for more than ten minutes on any step, ask a neighbour before you ask
+the instructor — there are sixty of you and one of them.
+
+---
+
+## What you are building
+
+A **spectrum analyser** takes a signal and tells you which frequencies it is
+made of.
+
+**What you type in:**
+
+| Input | Meaning | Use this |
+|---|---|---|
+| Frequency 1 | how fast the first tone oscillates, in hertz | **50** |
+| Amplitude 1 | how tall that tone is | **1.0** |
+| Frequency 2 | the second tone, in hertz | **120** |
+| Amplitude 2 | how tall the second tone is | **0.5** |
+| Sampling rate | samples taken per second | **1000** |
+| Duration | how many seconds of signal | **1.0** |
+
+**What must come out:** two charts.
+
+1. **Time domain** — the two sine waves added together. A messy wiggle. This
+   is what an oscilloscope would show you.
+2. **Frequency domain** — the spectrum. Two spikes: one **at 50 Hz reaching
+   1.0**, one **at 120 Hz reaching 0.5**.
+
+Read that last line again. The spike heights are not decoration — they are
+the numbers you typed in, handed back to you. A spectrum can put every spike
+in exactly the right place and still be wrong by a factor of five hundred,
+and it will look completely convincing while it does.
+
+---
+
+## What is in this repository
+
+Before you build anything, spend three minutes looking at what you already
+have. Open the file explorer on the left and follow along.
+
+```
+your-repo/
+├── app.py                  the front page. Run this to start the app.
+├── pages/                  ONE FILE PER FEATURE. This matters in Session 2:
+│   └── 1_Example.py        four people each own a file and never collide.
+├── core/                   shared code the pages import.
+│   ├── spectrum.py         <- YOU BUILD THIS in Lab 1. Currently every
+│   │                          function raises NotImplementedError.
+│   ├── llm.py              the AI slot. Empty until Session 3, on purpose.
+│   ├── models.py           the shapes your data takes.
+│   └── storage.py          saving and loading.
+├── tests/                  automated checks.
+│   └── test_spectrum.py    <- YOUR SPECIFICATION. Seven checks. The app is
+│                              finished when all seven pass.
+├── aidlc/                  the four planning documents. You fill these in
+│   ├── intent.md           before any code exists. This is Round 2.
+│   ├── requirements.md
+│   ├── design.md
+│   └── tasks.md
+├── labs/                   these instructions, and the prompts to paste.
+├── briefs/                 project ideas for Session 2.
+├── .clinerules             the rules your agent obeys on EVERY request.
+├── .clinerules.gates       the stricter version. Round 2 switches to it.
+├── .env                    YOUR API KEYS. Never commit this file.
+└── requirements.txt        the approved library list. It is closed.
+```
+
+Two of these deserve a proper look right now.
+
+**Open `tests/test_spectrum.py`.** Do not worry about the Python. Read the
+test *names*:
+
+```
+test_a_50_hz_sine_peaks_at_50_hz
+test_a_one_volt_sine_shows_an_amplitude_of_one
+test_two_tones_each_show_their_own_amplitude
+test_a_constant_offset_appears_at_zero_hz
+test_the_frequency_axis_stops_at_half_the_sampling_rate
+test_one_second_of_signal_gives_one_hertz_resolution
+test_a_negative_sampling_rate_is_rejected
+```
+
+Those seven sentences are your customer's requirements. You did not write
+them; somebody handed them to you, which is what happens at work.
+
+**Open `.clinerules`.** Plain English, in a plain file. Your agent reads it
+before every single request. Right now it contains safety rules only — no
+process, no approvals. That is deliberate, and Round 1 is why.
+
+Now run the tests, before you have built anything:
+
+```
+pytest
+```
+
+You should see exactly this:
+
+```
+7 failed, 22 passed, 25 deselected
+```
+
+**That is correct, not broken.** The 22 passing are the template's own
+checks. The 25 deselected belong to Session 3 and stay hidden until you get
+there. The 7 failing are your specification. Your job today is to watch
+those seven turn green.
+
+---
+
+## Before you start: point Cline at a model
+
+Your key in `.env` is for the **app**. Cline is a separate extension with
+its own settings and its own copy of the key. Passing `check_setup.py` tells
+you nothing about whether your agent can talk to anything.
+
+1. Click the **Cline icon** in the left sidebar.
+2. It asks for an **API provider**. Choose **Google Gemini**.
+3. Paste your Gemini key.
+4. Choose a **model**. The names in Cline's list are Cline's own — they will
+   not all match the names in `.env` or in `core/llm.py`. Pick any current
+   **Flash** model.
+5. **Add Mistral as a second provider**, with your Mistral key, and pick
+   **`devstral-medium-latest`**. This is not optional. You will need it.
+6. Type "hello" into Cline and check that you get a reply.
+
+**Then close the `.env` tab.** Your keys are passwords and they are sitting
+on screen. Get in the habit now — you will be sharing this screen later.
+
+### Switching providers is a two-minute skill you need today
+
+Do it once now, deliberately, while nothing is at stake: open the model
+selector, switch from Gemini to Mistral, ask "hello", switch back. That way
+when it happens under pressure you already know where the button is.
+
+You will hit one of two failures today, and they need opposite responses:
+
+| What you see | What it means | What to do |
+|---|---|---|
+| `429` / "rate limit exceeded" | You are asking too fast. Your quota is fine. | **Wait.** About a minute. Switching wastes your other key. |
+| `503` / "high demand" / "unavailable" | That model is refusing everyone. | **Switch provider.** Waiting will not help. |
+
+Free tiers are genuinely flaky. Both of these happened repeatedly while this
+lab was being written, on an ordinary weekday, with one user.
+
+---
 
 ## Round 1: just ask for it (25 minutes)
 
-Open Cline. Type:
+### Step 1 — Put Round 1 on its own branch
 
-> Build me a spectrum analyser in Streamlit. I set two sine waves — a frequency
-> and an amplitude for each — and it adds them together and plots the
-> time-domain waveform and the frequency spectrum.
-
-Accept whatever it does. Do not plan. Do not write a spec. Try to get it
-working. Note what happens.
-
-When time is up, answer these in your AI collaboration log:
-
-- Did it run first time?
-- Set tone A to 1.0 amplitude. **Does the spike reach 1.0?** If you cannot
-  tell from the chart, that is itself an answer.
-- If a classmate asked "is this correct", could you show them why?
-
-Now delete it — all of it. Round 2 is only a fair comparison if it starts from
-the same place you did, and `rm` on one filename misses whatever else the agent
-decided to create.
+You are going to throw this work away, but keeping it lets you compare the
+two rounds at the end.
 
 ```
-git checkout -- .    # undo its edits to files that were already here
-git clean -fd        # delete the new files it made
+git checkout -b round1
 ```
 
-Your `.env` survives both: it is git-ignored, so your key is safe.
+### Step 2 — Ask for the app
+
+Open Cline, start a **new task**, and paste exactly this:
+
+```
+Build me a spectrum analyser in Streamlit. I set two sine waves - a frequency
+and an amplitude for each - and it adds them together and plots the
+time-domain waveform and the frequency spectrum.
+```
+
+### Step 3 — Accept whatever it does
+
+No spec. No plan. No corrections beyond getting it to run. When it asks to
+create or edit a file, click **Save**. If it crashes, paste the error back to
+it and let it try again. Your only goal is something on screen.
+
+### Step 4 — Run it
+
+```
+streamlit run app.py
+```
+
+A preview opens. If it does not, open the **Ports** tab and click the globe
+icon next to port 8501. Find your new page in the sidebar.
+
+### Step 5 — Interrogate it
+
+Set **tone 1 to 50 Hz at amplitude 1.0** and **tone 2 to 120 Hz at amplitude
+0.5**. Then answer these in your AI collaboration log. Answer whichever set
+applies:
+
+**If it never ran:**
+- What was the error, in full?
+- How many attempts did it take, and how many minutes?
+- Did the agent understand its own error, or did it guess?
+
+**If it ran:**
+- **Does the 50 Hz spike reach 1.0?** Read the number off the chart.
+- Does the 120 Hz spike reach 0.5?
+- If a classmate asked "is this correct?", could you show them why? Not
+  "it looks right" — *show* them.
+
+Whatever you find, write down the number you actually saw. It is the most
+useful line in your log.
+
+### Step 6 — Put it away
+
+```
+git add -A
+git commit -m "Round 1 - just asked for it"
+git checkout main
+```
+
+Your Round 1 app is safe on the `round1` branch, and `main` is clean again.
+Your `.env` survives — it is git-ignored.
+
+---
 
 ## Round 2: the Four Gates (70 minutes)
 
-Same app. Different route. The exact prompts to paste are in `labs/PROMPTS.md`.
+Same app. Different route. Every prompt you need is in `labs/PROMPTS.md` —
+copy them exactly on your first run.
 
-**First, turn the gates on.** In Round 1 your agent had no process rules at
-all — that is why it went straight to code. The rules that change this are
-sitting in the repository already. Switch them on:
+### Step 0 — Turn the gates on
+
+In Round 1 your agent had no process rules, which is why it went straight to
+code. The rules that change that are already in your repository:
 
 ```
 cp .clinerules.gates .clinerules
 git add .clinerules && git commit -m "turn the gates on"
 ```
 
-Commit it. Otherwise the next `git checkout -- .` you run quietly puts the
-ungated file back and your agent stops asking for approval, which is a
-confusing thing to debug at speed.
+**Commit it.** Otherwise the next `git checkout -- .` you run quietly puts
+the old file back, your agent stops asking for approval, and you will not
+know why.
 
-Then **start a new Cline task**, because Cline reads the rules when a task
-begins and the open one is still running under the old set.
+Open `.clinerules` and read it. Then **start a new Cline task** — it reads
+the rules when a task begins, so the one already open is still using the old
+set.
 
-Open `.clinerules` and read it before you carry on. It is plain English in a
-plain file, it is four paragraphs long, and it is about to refuse you things.
-Nothing else about your setup has changed — same agent, same model, same
-request. Only this file.
+Nothing else has changed. Same agent, same model, same request. Only this
+file.
 
-**Gate 1 — Intent (5 min).** Fill in `aidlc/intent.md` yourself. The agent
-will not proceed until you do.
+> ### ⚠ Two things that will cost you work if you skip them
+>
+> **1. Click Save before starting a new task.** When Cline writes a file it
+> shows you a diff with **Save** and **Reject** buttons. Until you click
+> Save, that work exists only in the preview. **If you start a new task
+> while a diff is open, the edit is silently thrown away** — the code you
+> just watched it write disappears and your tests go back to failing. This is
+> the single easiest way to lose twenty minutes today.
+>
+> **2. `git checkout -- <file>` is your undo.** Pasted into the wrong pane?
+> Agent mangled a file? One command puts that file back to your last commit:
+> ```
+> git checkout -- core/spectrum.py
+> ```
+> This is why you commit every time the tests pass.
 
-**Gate 2 — Spec (10 min).** Ask Cline to draft `aidlc/requirements.md`.
-Read every line and fix what is wrong.
+### Gate 1 — Intent (5 minutes). You write this one.
 
-Now write, in your own words, how you would *check* that the spectrum your app
-draws is correct. Write it down before reading on.
+Open `aidlc/intent.md`. Replace every `PLACEHOLDER` line with your own
+answer. Four questions:
 
-Then open `tests/test_spectrum.py`. Those tests were written for you — they are
-the acceptance criteria your "customer" is handing over, and your app is
-finished when they pass. Compare them to what you just wrote.
+- **Who is this for?** One real person, one sentence.
+- **What problem does it solve?** What is slow or annoying for them today?
+- **What does "done" look like?** Be concrete. If you enter 1.0, say that the
+  chart must show 1.0.
+- **What is deliberately NOT included?** This is the one that saves you.
+  No file loading, no saving, no more than two tones.
 
-Most people write something like "the peaks should be in the right places".
-The tests check that too — but they also check that a tone entered at amplitude
-1.0 reads back as 1.0, because a spectrum can have every peak in exactly the
-right place and still be wrong by a factor of five hundred. The gap between
-those two sentences is the whole skill. Note it in your log.
+Your agent will refuse to write code while the placeholder text is still
+there. That refusal is the file working.
 
-Reply "approved" once `requirements.md` reflects what the tests actually
-demand.
+### Gate 2 — Spec (10 minutes). The agent drafts, you approve.
 
-**Gate 3 — Plan (10 min).** Ask for `aidlc/design.md` and `aidlc/tasks.md`.
-The maths belongs in `core/spectrum.py`; the screen belongs in
-`pages/2_Spectrum_Analyzer.py`. Approve.
+**Before you prompt anything**, write down in your own words how you would
+*check* that the spectrum your app draws is correct. Do it now, on paper.
 
-**Gate 4 — Build (40 min).** One task at a time. Your goal is simple: make
-`pytest tests/test_spectrum.py` go green.
+Now paste the **Gate 2** prompt from `labs/PROMPTS.md`. The agent writes
+`aidlc/requirements.md` — a numbered table where every requirement carries an
+acceptance criterion you can run.
 
-Run `pytest` now, before you build anything. You should see **7 failed, 22
-passed, 25 deselected**. That is correct, not broken: the twenty-two are the
-template's own tests, the twenty-five belong to Session 3 and are hidden until
-you get there, and the seven are your specification. Watch that seven fall. After each task, run the tests and
-look at the app. Commit every time the tests pass:
+Read every line. Compare it to what you wrote on paper.
+
+Most people write "the peaks should be in the right places". The tests check
+that too — but they also check that **a tone entered at 1.0 reads back as
+1.0**. The gap between those two sentences is the entire skill this lab is
+teaching. Note it in your log.
+
+Reply `approved` once the file reflects what `tests/test_spectrum.py`
+actually demands.
+
+### Gate 3 — Plan (10 minutes). The agent drafts, you approve.
+
+Paste the **Gate 3** prompt. You get two files:
+
+- `aidlc/design.md` — what the app computes and which screen shows it.
+- `aidlc/tasks.md` — a table of exactly two tasks. Task 1 owns
+  `core/spectrum.py`. Task 2 owns `pages/2_Spectrum_Analyzer.py`. One task,
+  one owner, one file.
+
+Working alone that looks like bookkeeping. In Session 2 it is the whole
+trick: four people build at once and never touch the same file, so there is
+nothing to merge.
+
+Check that no task touches two files, then approve.
+
+### Gate 4 — Build (40 minutes). One task at a time.
+
+**Task 1, the maths.** Paste the **Gate 4 task 1** prompt. Then run:
 
 ```
-git add -A && git commit -m "what you just did"
+pytest tests/test_spectrum.py -q
 ```
 
-**If a task is not working after 15 minutes, stop.** Do not keep prompting —
-a long conversation makes the agent worse, not better. Restore the reference
-version of whatever gate you are stuck at, read it, and carry on:
+You are aiming for `7 passed`. You may well not get it first time — the
+common failure is `test_a_constant_offset_appears_at_zero_hz`, because a
+constant offset must not be doubled the way the tones are. If a test fails,
+paste the failure back to the agent and let it fix that one thing.
+
+**You will not all get the same result.** The same prompt on the same model
+gives different answers on different runs. That is normal and it is worth
+noting in your log.
+
+When it is green:
+
+```
+git add -A && git commit -m "task 1: the maths"
+```
+
+**Task 2, the screen.** Paste the **Gate 4 task 2** prompt. Then run the app
+and check it with your own eyes:
+
+```
+streamlit run app.py
+```
+
+Set 50 Hz at 1.0 and 120 Hz at 0.5. **The spike must reach 1.0.** Compare it
+with what you wrote down in Round 1, Step 5.
+
+Commit again.
+
+### If a gate is not working after 15 minutes, stop
+
+Do not keep prompting. A long conversation makes an agent worse, not better.
+Restore the reference version of whatever gate you are stuck at, read it, and
+carry on:
 
 | Stuck at | Run this |
 |---|---|
@@ -110,45 +359,71 @@ version of whatever gate you are stuck at, read it, and carry on:
 | Gate 4 task 1 | `git checkout origin/solution/lab1 -- core/spectrum.py` |
 | Gate 4 task 2 | `git checkout origin/solution/lab1 -- pages/2_Spectrum_Analyzer.py` |
 
-Those files are a reference run — one time the agent did the job well, saved so
-you can pick it up rather than starting again. This is not cheating and it does
-not cost you marks. Recognising a dead end and recovering from it is the skill
-being assessed. Write down in your log what the agent was doing wrong and what
+Those files are a reference run — one time the agent did the job well, saved
+so you can pick it up rather than start again. **This is not cheating and it
+does not cost you marks.** Recognising a dead end and recovering from it is
+the skill being assessed. Write down what the agent was doing wrong and what
 you tried.
 
-**Gate 5 — Ship (10 min).** Push, then deploy at https://share.streamlit.io —
-sign in with GitHub, pick your repository, set the main file to `app.py`, click
-Deploy. Post your public URL.
+### Gate 5 — Ship (10 minutes)
 
-## Part 3 — Understand the reference (everyone, 15 minutes)
+```
+git push
+```
 
-Whether or not your own version worked, finish by studying the reference
-implementation with your agent. Follow `labs/EXPLAIN.md`.
+Then deploy at https://share.streamlit.io — sign in with GitHub, pick your
+repository, set the main file to `app.py`, click **Deploy**. Post your public
+URL to the class channel.
 
-If your app works: compare it to the reference and find one thing each version
-does better.
+---
+
+## Part 3 — Compare the two rounds, and read the reference (15 minutes)
+
+**Everyone does this**, whether your own version worked or not.
+
+First, put your two rounds side by side:
+
+```
+git diff round1 main -- core/ pages/
+```
+
+Look for two things specifically:
+
+- **Where does the maths live?** Round 1 usually puts it inside the page
+  file. Round 2's plan forced it into `core/spectrum.py`, where a test can
+  reach it.
+- **How many tones can it handle?** Round 1 often hardcodes exactly two.
+
+Then study the reference implementation with your agent, following
+`labs/EXPLAIN.md`.
+
+If your app works: find one thing each version does better.
 
 If it does not: this is where you get the content. Understanding code you did
 not write, with an AI explaining it, is a real skill and the most common way
-these tools get used at work.
+these tools are used at work.
 
-Either way, put one thing you learned here into your AI collaboration log.
+Either way, put one thing you learned into your log.
+
+---
 
 ## You are done when
 
 - [ ] Two tones at 50 Hz and 120 Hz produce exactly two spikes, in those places
-- [ ] A tone you set to amplitude 1.0 produces a spike that reaches 1.0
-- [ ] `pytest` passes all seven tests
+- [ ] A tone you set to amplitude 1.0 produces a spike that reaches **1.0**
+- [ ] `pytest tests/test_spectrum.py` reports **7 passed**
 - [ ] Your app is live at a public URL
+- [ ] You have run `git diff round1 main` and looked at it
 - [ ] You have worked through `labs/EXPLAIN.md`
+- [ ] Your log has the Round 1 number and the Round 2 number in it
 
 ## If you finish early
 
-- Add a third tone.
-- Add random noise to the signal and watch a noise floor appear underneath the
-  spikes. How much noise before you can no longer see the smaller tone?
-- **Aliasing:** allow tone A above half the sampling rate. Set the sampling
-  rate to 500 and tone A to 300 Hz. The spike appears at 200 Hz, not 300 —
+- Add a third tone. Notice whether your Round 2 code makes that easy.
+- Add random noise to the signal and watch a noise floor appear underneath
+  the spikes. How much noise before you can no longer see the smaller tone?
+- **Aliasing:** allow tone 1 above half the sampling rate. Set the sampling
+  rate to 500 and tone 1 to 300 Hz. The spike appears at 200 Hz, not 300 —
   the frequency has "folded back". This is why sampling rate matters, and it
   is the single most important idea in digital signal processing.
 - Export the spectrum as a CSV file.

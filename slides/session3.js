@@ -57,7 +57,7 @@ const p = n => String(n).padStart(2, "0");
     "Messy human input goes in. The model reads it and fills a shape you defined. From there it is ordinary software: your code totals it, stores it, decides what to do.",
     "The model is an adapter between language and data. It is not the application, and it never touches the money.",
   ],
-  figSource: "Fig. 10 — an adapter, not an oracle",
+  figSource: "Fig. 11 — an adapter, not an oracle",
   footerLeft: FOOT, page: p(4),
 }).addNotes(
   "The single most useful mental model of the day. Ask the room what the model is NOT doing in this picture: no arithmetic, no storage, no decisions. Everything that must be right every time lives to the right of it."
@@ -137,7 +137,7 @@ const p = n => String(n).padStart(2, "0");
     "Role, vocabulary, format, defaults, escalation. Every prompt that survives contact with real input has these five, and most bad prompts are missing three of them.",
     "The most-skipped is the last: telling the model it is allowed to say it does not know.",
   ],
-  figSource: "Fig. 11 — the same prompt, labelled",
+  figSource: "Fig. 12 — the same prompt, labelled",
   footerLeft: FOOT, page: p(9),
 }).addNotes(
   "Walk the five in order. Then ask which ones they would have thought to write unprompted — escalation is the one nobody writes, and it is the one that turns a guessing machine into a system you can operate."
@@ -187,7 +187,7 @@ const p = n => String(n).padStart(2, "0");
     "Our score only marks the order \u2014 customer, items, time. Whether the parser flagged a doubtful one is a separate question, and four out of ten never asks it.",
     "The two mistakes cost different amounts. A false alarm costs a human one glance; an escape costs a customer. A checker that never cries wolf is one that misses things.",
   ],
-  figSource: "Fig. 12 — the rules parser on the real inbox, both axes at once",
+  figSource: "Fig. 13 — the rules parser on the real inbox, both axes at once",
   footerLeft: FOOT, page: p(13),
 }).addNotes(
   "Every number on this slide is measured, not invented \u2014 run naive_parser over inbox.json and you get exactly this. Spend the time on msg-07: the parser dropped both hot americanos because \u201c(hot)\u201d broke its pattern, kept the croissants, filled every field and flagged nothing. Ryan pays for three croissants and gets no coffee. Then make the point about the zero: no false alarms sounds like good news and is not, because it came with an escape. If you never cry wolf you are not looking hard enough. Ask which cell they would rather be in, and why a caf\u00e9 should choose differently from a hospital or a bank."
@@ -240,7 +240,7 @@ const p = n => String(n).padStart(2, "0");
     "Write messages whose answers you already know. Score the prompt against them. Change exactly one line, and score it again — kept if it helped, reverted if it did not.",
     "Never judge a prompt by one run. The same prompt on the same message answers differently on different days, which is why you measure many and never one.",
   ],
-  figSource: "Fig. 13 — the loop that actually improves prompts",
+  figSource: "Fig. 14 — the loop that actually improves prompts",
   footerLeft: FOOT, page: p(16),
 }).addNotes(
   "This is how the prompts in PROMPTS.md were written, including the ones they will paste today. Hammer the one-change-at-a-time rule: change three lines and a better score tells you nothing about which one earned it."

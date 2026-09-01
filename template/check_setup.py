@@ -66,6 +66,34 @@ def check_env(environ: dict[str, str]) -> tuple[bool, str]:
     )
 
 
+def check_second_provider(environ: dict[str, str]) -> tuple[bool, str]:
+    """Both keys, or you lose the lab the first time a free tier says no.
+
+    One working provider is enough to pass setup, so this is deliberately the
+    only check that can fail while everything else is green. It is a warning
+    with teeth: free tiers return 503 "high demand" without notice, and a
+    student with one key has nothing to switch to.
+    """
+    configured = [
+        name
+        for name in ("GEMINI_API_KEY", "MISTRAL_API_KEY")
+        if (environ.get(name) or "").strip() not in ("", PLACEHOLDER)
+    ]
+    if len(configured) >= 2:
+        return True, "both providers configured - you can switch if one refuses"
+    missing = "MISTRAL_API_KEY" if "MISTRAL_API_KEY" not in configured else "GEMINI_API_KEY"
+    where = (
+        "https://console.mistral.ai"
+        if missing == "MISTRAL_API_KEY"
+        else "https://aistudio.google.com/apikey"
+    )
+    return False, (
+        f"only one provider is set. Add {missing} to .env - free at {where}. "
+        "When a provider refuses service mid-lab, the second key is how you "
+        "carry on instead of stopping."
+    )
+
+
 def _diagnose(error: Exception, provider: str) -> str:
     """Turn a provider error into advice that is actually actionable.
 
@@ -166,6 +194,7 @@ def main() -> int:
         ("Packages", check_imports()),
         ("API key present", check_env(dict(os.environ))),
         ("API key works", check_live_call()),
+        ("Backup provider", check_second_provider(dict(os.environ))),
     ]
 
     print()

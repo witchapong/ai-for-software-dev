@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Figures for the lecture decks — figs 1-4 Session 1, 5-8 Session 2, 9-12 Session 3.
 
-Writes thirteen PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
+Writes fourteen PNGs into slides/figures/, in the deck palette (SLIDE-STYLE.md):
 paper, paper-2, ink, ink-muted, hairline, and ochre used sparingly as the one
 accent per figure.
 
@@ -727,6 +727,57 @@ def fig_language_model():
 
     save(fig, "fig-language-model.png")
 
+def fig_round1_vs_round2():
+    """The same app, the same inputs, built two ways. Measured, not drawn.
+
+    Both panels are real screenshots from the 1 Sep 2026 dry run: tone 1 at
+    50 Hz amplitude 1.0, tone 2 at 120 Hz amplitude 0.5, sampled at 1000 for
+    one second. Round 1 was asked for in one sentence; Round 2 went through
+    the gates. Sources live in figures/src/, regenerable from
+    eval/findings/2026-09-01-session1-dryrun/.
+    """
+    import matplotlib.image as mpimg
+
+    fig = plt.figure(figsize=(10.0, 6.4), dpi=DPI)
+    fig.patch.set_facecolor(PAPER)
+
+    panels = [
+        ("src/round1-spectrum.png", "ROUND 1", "one sentence, no spec",
+         "reads 0.5 and 0.25", OCHRE),
+        ("src/round2-spectrum.png", "ROUND 2", "through the four gates",
+         "reads 1.0 and 0.5", INK),
+    ]
+
+    # Size each box to its own image so both render at the SAME HEIGHT. Two
+    # equal boxes would fit the wide left screenshot to width, leaving it a
+    # third shorter than the right one and the comparison harder to read.
+    images = [mpimg.imread(os.path.join(OUT, src)) for src, *_ in panels]
+    aspects = [im.shape[1] / im.shape[0] for im in images]
+    W_IN, H_IN, GAP, LEFT = 10.0, 6.4, 0.06, 0.045
+    box_h = (1.0 - 2 * LEFT - GAP) / sum(a * H_IN / W_IN for a in aspects)
+    box_h = min(box_h, 0.62)          # keep the panels clear of the labels
+    widths = [a * box_h * H_IN / W_IN for a in aspects]
+
+    x = LEFT
+    for (src, title, gloss, verdict, colour), image, w in zip(panels, images, widths):
+        ax = fig.add_axes([x, 0.200, w, box_h])
+        ax.imshow(image)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for side in ax.spines.values():
+            side.set_edgecolor(HAIRLINE)
+        fig.text(x, 0.945, title, fontsize=15, color=colour, ha="left")
+        fig.text(x, 0.887, gloss, fontsize=11, color=MUTED, ha="left")
+        fig.text(x, 0.125, verdict, fontsize=13, color=colour, ha="left")
+        x += w + GAP
+
+    fig.text(0.5, 0.045,
+             "same app, same agent, same model - you typed 1.0 into both",
+             fontsize=11.5, color=MUTED, ha="center")
+
+    save(fig, "fig-round1-vs-round2.png")
+
+
 # ------------------------------------------------------------------------ main
 
 def _trim(path, margin=28):
@@ -779,3 +830,4 @@ if __name__ == "__main__":
     fig_prompt_loop()
     fig_two_ways_wrong()
     fig_language_model()
+    fig_round1_vs_round2()

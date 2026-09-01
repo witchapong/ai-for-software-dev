@@ -29,10 +29,26 @@ your work is safe as long as you have pushed it.
 
 ## The agent
 
-**Cline says I am rate limited, or requests keep failing**
-You have hit the free limit for that model. Open Cline's settings (gear icon),
-switch the provider from Mistral to Google Gemini (or back), and continue.
-This is why you set up two keys.
+**Cline says `429` or "rate limit exceeded"**
+You are asking too fast. Your quota is fine and switching providers wastes
+your other key. **Wait about a minute** and let it retry.
+
+**Cline says `503`, "high demand", or "unavailable"**
+Different problem: that model is refusing everyone, and waiting will not help.
+Open the model selector at the bottom of the Cline panel and **switch to your
+other provider**. This is why you set up two keys.
+
+**I clicked "Start New Task" and my code vanished**
+When Cline writes a file it shows a diff with **Save** and **Reject** buttons.
+Until you click Save, that work only exists in the preview — and starting a new
+task throws it away silently. Your tests will go back to failing with no
+explanation. Always click **Save** first. If you lost work this way, the agent
+has to redo it; there is no undo.
+
+**I pasted into the wrong pane and wrecked a file**
+`git checkout -- path/to/the/file.py` puts that one file back to your last
+commit. This works for anything: your mistakes, the agent's, a bad paste. It
+is why you commit every time the tests pass.
 
 **Cline refuses to write code and keeps asking for `requirements.md`**
 In Round 2 of Lab 1, and in your group project, that is correct behaviour and

@@ -113,7 +113,7 @@ const p = n => String(n).padStart(2, "0");
     "Every task in your plan names one owner and one file no other task touches. Streamlit makes this natural: each file in pages/ is a tab in the app.",
     "Merge conflicts — two people editing the same lines — are how beginners drown in git. This rule does not manage that risk. It deletes it.",
   ],
-  figSource: "Fig. 6 — the ownership map",
+  figSource: "Fig. 7 — the ownership map",
   footerLeft: FOOT, page: p(7),
 }).addNotes(
   "The sentence to land: conflicts are prevented by structure, not by git skill. Point at the four tags and say that if two of them ever sit on the same box, the plan is wrong and no amount of careful merging will save it. This is the slide they should picture while writing tasks.md."
@@ -127,7 +127,7 @@ const p = n => String(n).padStart(2, "0");
     "A branch is your private copy of the project; your work cannot break anyone until it merges. A pull request asks the team to take it — and a teammate reads every line first.",
     "CI — continuous integration — runs pytest automatically on every push. A robot referee that never gets tired and never says “looks fine to me”.",
   ],
-  figSource: "Fig. 7 — the road your code travels",
+  figSource: "Fig. 8 — the road your code travels",
   footerLeft: FOOT, page: p(8),
 }).addNotes(
   "Resist teaching commands here — the sidebar buttons in the editor do all of this, and a terminal demo will eat ten minutes. Teach the shape instead: private copy, request to merge, human read, robot check, then main. If anyone asks for the commands, point them at the lab sheet."
@@ -149,7 +149,7 @@ const p = n => String(n).padStart(2, "0");
     "Argue together where arguing is cheap: intent, spec, plan, on one screen. Build alone where building is fast: your file, your agent, your branch.",
     "Then converge through review. Nothing reaches main unread, and the app deploys from main.",
   ],
-  figSource: "Fig. 8 — mob the thinking, parallelise the building",
+  figSource: "Fig. 9 — mob the thinking, parallelise the building",
   footerLeft: FOOT, page: p(10),
 }).addNotes(
   "This is the map of the whole day, so leave it up longer than it seems to need. Point at the left panel and say that is the next twenty-five minutes; point at the middle and say that is the fifty after it. Anyone who wanders off during the mob session has already lost the parallel part."
@@ -163,7 +163,7 @@ const p = n => String(n).padStart(2, "0");
     "Five briefs in briefs/, each themed on student life, each with one genuinely hard rule. Read the hard part before you choose — it is where your tests and your marks live.",
     "Two teams on the same brief is fine. Your twist — one invented feature, named in your intent — is what makes the project yours.",
   ],
-  figSource: "Fig. 9 — five briefs, five traps",
+  figSource: "Fig. 10 — five briefs, five traps",
   footerLeft: FOOT, page: p(11),
 }).addNotes(
   "Push them to choose by the hard part rather than the theme; the theme is a week of fun and the hard part is the mark. Say plainly that two teams on one brief makes demo day more interesting, not less, because the twists will diverge. Give them three minutes to pick and then move on."

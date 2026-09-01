@@ -9,17 +9,24 @@ class, because 60 people cannot be unblocked at once.
 
 1. **Create a GitHub account** at https://github.com/signup using a personal
    email address.
-2. **Get a free AI key.** Go to https://aistudio.google.com/apikey, sign in
-   with a Google account, click "Create API key", and copy it somewhere safe.
-   A key is a password — do not share it or paste it into a chat.
+2. **Get TWO free AI keys.** You need both, and here is why: free tiers refuse
+   service without warning, and when one does you switch to the other and keep
+   working instead of losing the session.
+   - Gemini: https://aistudio.google.com/apikey → "Create API key"
+   - Mistral: https://console.mistral.ai → API keys → create one
+
+   A key is a password. Do not share it, do not paste it into a chat, and do
+   not put it in a `.py` file.
 3. **Make your own copy of this project.** Click the green **Use this
    template** button at the top of this page, then **Create a new
    repository**. Give it any name. Set it to **Public**.
 4. **Open it in a Codespace.** On your new repository, click **Code** >
    **Codespaces** > **Create codespace on main**. A full code editor opens in
    your browser. First launch takes two to three minutes.
-5. **Paste your key in.** Open the file called `.env` in the editor. Replace
-   `paste-your-key-here` with the key you copied. Save with Ctrl+S.
+5. **Paste your keys in.** Open the file called `.env` in the editor. Replace
+   the placeholder text on both lines with your two keys. Save with Ctrl+S,
+   then **close the `.env` tab** — you will be sharing this screen later, and
+   a key on screen is a key shared.
 6. **Check everything works.** In the terminal at the bottom, run:
 
    ```
@@ -27,7 +34,16 @@ class, because 60 people cannot be unblocked at once.
    ```
 
    Keep fixing what it reports until it prints `ALL CHECKS PASSED`.
-7. **Post "setup done" in the class channel.**
+7. **Point Cline at a model.** This is a separate step, and skipping it is the
+   most common way to arrive unable to work. `.env` holds keys for the *app*;
+   Cline is an extension with its own settings and its own copy of the key.
+   - Click the **Cline icon** in the left sidebar
+   - Choose provider **Google Gemini**, paste your Gemini key, pick any
+     current **Flash** model
+   - Add **Mistral** as a second provider, with model
+     **`devstral-medium-latest`**
+   - Type "hello" into Cline and confirm you get a reply
+8. **Post "setup done" in the class channel.**
 
 ## What is in here
 
