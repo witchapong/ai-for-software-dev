@@ -10,8 +10,9 @@ that it can find both of them again.
 
 Open Cline. Type:
 
-> Build me a spectrum analyser in Streamlit that adds two sine waves together
-> and plots the frequency spectrum.
+> Build me a spectrum analyser in Streamlit. I set two sine waves — a frequency
+> and an amplitude for each — and it adds them together and plots the
+> time-domain waveform and the frequency spectrum.
 
 Accept whatever it does. Do not plan. Do not write a spec. Try to get it
 working. Note what happens.

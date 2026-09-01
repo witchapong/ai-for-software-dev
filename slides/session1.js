@@ -221,10 +221,13 @@ const p = n => String(n).padStart(2, "0");
   eyebrow: "Workshop 03",
   title: "Paste this, then watch",
   code: [
-    "Build me a spectrum analyser",
-    "in Streamlit that adds two",
-    "sine waves together and plots",
-    "the frequency spectrum.",
+    "Build me a spectrum analyser in",
+    "Streamlit. I set two sine waves",
+    "- a frequency and an amplitude",
+    "for each - and it adds them",
+    "together and plots the",
+    "time-domain waveform and the",
+    "frequency spectrum.",
   ].join("\n"),
   paras: [
     "Accept whatever it gives you. Do not plan, do not correct it, do not write anything down first.",
