@@ -382,8 +382,10 @@ const p = n => String(n).padStart(2, "0");
 
 /* 23 */ codeSlide({
   eyebrow: "Section 04",
-  title: "The gates live in a file",
+  title: "One command turns them on",
   code: [
+    "$ cp .clinerules.gates .clinerules",
+    "",
     "# .clinerules",
     "",
     "Gate 2 - Spec. Before any code",
@@ -395,13 +397,13 @@ const p = n => String(n).padStart(2, "0");
     "and ask for approval.",
   ].join("\n"),
   paras: [
-    "Your agent reads this file before every single request, and obeys it.",
-    "Ask it to skip ahead today and it will refuse. That refusal is the file working.",
+    "In Round 1 your agent had no process rules, which is why it went straight to code. This file is the difference, and it was in your repository the whole time.",
+    "Same agent, same model, same request. Copy it into place, start a new task, and watch it refuse you.",
   ],
-  prompt: "Open it now. It is plain English, and by Session 2 you will be editing it.",
+  prompt: "Plain English, in a plain file. By Session 2 you will be editing it.",
   footerLeft: FOOT, page: p(23),
 }).addNotes(
-  "Open the real .clinerules in the editor here, not just the slide. The point that surprises them: the rules are plain English in a plain file, and they can edit them. Sixty of you and one of me, so the tool holds the line."
+  "Do the copy live, on the projector, and re-ask the Round 1 question so they watch the same agent refuse it. That before-and-after is the argument of the whole session, and it costs thirty seconds. Then open the file: the rules are plain English and they can edit them. Sixty of you and one of me, so the file holds the line rather than me."
 );
 
 /* 24 */ twoColumnSlide({

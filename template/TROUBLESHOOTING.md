@@ -35,8 +35,18 @@ switch the provider from Mistral to Google Gemini (or back), and continue.
 This is why you set up two keys.
 
 **Cline refuses to write code and keeps asking for `requirements.md`**
-That is correct behaviour, not a bug. Fill in `aidlc/intent.md`, let it draft
-`aidlc/requirements.md`, read it, then reply "approved".
+In Round 2 of Lab 1, and in your group project, that is correct behaviour and
+not a bug. Fill in `aidlc/intent.md`, let it draft `aidlc/requirements.md`,
+read it, then reply "approved".
+
+If it happens in **Round 1** of Lab 1, the gates are on when they should be
+off. Run `mv .clinerules .clinerules.off` and start a new task.
+
+**Cline writes code immediately and never asks me to approve anything**
+The gates are off. You either skipped `cp .clinerules.gates .clinerules`, or
+you ran it and a later `git checkout -- .` undid it because you did not
+commit. Copy it again, commit it, and start a NEW Cline task — the rules are
+read when a task begins, so the one already open is still using the old set.
 
 **Cline rewrote a file and broke everything**
 Do not panic and do not try to fix it by prompting. In the terminal:

@@ -41,6 +41,16 @@ defending a different one is worth marks, not penalties.
 2. **One person** clicks "Use this template" to create the team repository,
    then adds the others: Settings > Collaborators > Add people.
 3. **Everyone else** opens their own Codespace on that shared repository.
+4. **Turn the gates on**, once, by whoever made the repository:
+
+   ```
+   cp .clinerules.gates .clinerules
+   git add .clinerules && git commit -m "turn the gates on" && git push
+   ```
+
+   A fresh copy of the template ships without process rules, because Lab 1
+   needed one ungated round. Your project is not that round. Everyone else
+   pulls before they start.
 
 Everyone codes at the same time, on their own machine, with their own agent and
 their own free allowance. Four accounts means four times the quota.

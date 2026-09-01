@@ -16,6 +16,12 @@ which every command below already does. And in a fresh copy a bare `pytest`
 also reports Lab 1's spectrum tests failing — you never built that module in
 *this* copy. Ignore those; every command below names the tests that matter.
 
+**Leave the gates off here.** A fresh copy of the template ships without the
+Four Gates rules, and for this lab that is what you want: today is four short
+checkpoints against code that already exists, not a project being designed
+from nothing. Do not copy `.clinerules.gates` into place — your group project
+is where the gates belong.
+
 ## Checkpoint 1 — The way it used to be (10 minutes)
 
 `core/naive_parser.py` is already written for you. It is regular expressions and

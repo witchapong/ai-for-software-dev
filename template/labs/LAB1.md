@@ -39,6 +39,27 @@ Your `.env` survives both: it is git-ignored, so your key is safe.
 
 Same app. Different route. The exact prompts to paste are in `labs/PROMPTS.md`.
 
+**First, turn the gates on.** In Round 1 your agent had no process rules at
+all — that is why it went straight to code. The rules that change this are
+sitting in the repository already. Switch them on:
+
+```
+cp .clinerules.gates .clinerules
+git add .clinerules && git commit -m "turn the gates on"
+```
+
+Commit it. Otherwise the next `git checkout -- .` you run quietly puts the
+ungated file back and your agent stops asking for approval, which is a
+confusing thing to debug at speed.
+
+Then **start a new Cline task**, because Cline reads the rules when a task
+begins and the open one is still running under the old set.
+
+Open `.clinerules` and read it before you carry on. It is plain English in a
+plain file, it is four paragraphs long, and it is about to refuse you things.
+Nothing else about your setup has changed — same agent, same model, same
+request. Only this file.
+
 **Gate 1 — Intent (5 min).** Fill in `aidlc/intent.md` yourself. The agent
 will not proceed until you do.
 
