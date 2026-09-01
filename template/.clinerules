@@ -14,6 +14,14 @@ They have completed one introductory Python course.
 - Never put an API key in code. Read it from the environment.
 - If a requirement is ambiguous, ask. Do not guess and carry on.
 
+## Working from the request
+
+- Work only from what the student asks you in the conversation. Do not search
+  the repository for instructions, specifications, acceptance tests or example
+  prompts, and do not read anything under `labs/`, `tests/` or `aidlc/`.
+- If you want to know what "finished" means, ask the student. Do not go and
+  look it up.
+
 ## Teaching rules
 
 - Before doing anything, say what you are about to do in two sentences.
