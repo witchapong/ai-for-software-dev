@@ -207,7 +207,26 @@ Your `.env` survives — it is git-ignored.
 Same app. Different route. Every prompt you need is in `labs/PROMPTS.md` —
 copy them exactly on your first run.
 
-### Step 0 — See where you are starting from
+### Step 0 — Check you are on `main`, and see where you start from
+
+Round 2 belongs on `main`. If you are still on the `round1` branch, everything
+below happens in the wrong place: the gate swap, every commit, and the Round 1
+files are still sitting there for your agent to find.
+
+```
+git branch --show-current
+```
+
+**It must say `main`.** If it says `round1`, you have not finished Round 1 —
+go back and do Step 6:
+
+```
+git add -A
+git commit -m "Round 1 - just asked for it"
+git checkout main
+```
+
+Now look at where you are starting from:
 
 ```
 pytest
