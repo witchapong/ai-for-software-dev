@@ -310,6 +310,33 @@ const p = n => String(n).padStart(2, "0");
 
 /* 21 */ codeSlide({
   eyebrow: "Section 04",
+  title: "What you actually type",
+  code: [
+    "Read tests/test_spectrum.py.",
+    "Those tests are the acceptance",
+    "criteria. aidlc/intent.md says",
+    "what we are building.",
+    "",
+    "Use your file-writing tool to",
+    "WRITE aidlc/requirements.md ...",
+    "",
+    "Write the file now. Do not ask",
+    "permission first. Do not print",
+    "the table in your reply instead",
+    "of writing it.",
+  ].join("\n"),
+  paras: [
+    "All four gate prompts are in labs/PROMPTS.md. Copy them exactly today; improvise next week, once you have seen what a good one looks like.",
+    "Every sentence in that last paragraph fixes a failure we watched happen: it asked permission and stopped, or it printed the table in the chat and called that done.",
+  ],
+  prompt: "Name the tool. Say where the output goes. Then forbid the near-miss.",
+  footerLeft: FOOT, page: p(21),
+}).addNotes(
+  "The slide that stops the gates being magic. A gate is not a feature of Cline - it is a paragraph of English you paste, plus a rules file that makes refusing possible. Read the last three sentences aloud and say where each came from: an agent that asked permission and sat waiting, and an agent that printed a beautiful table in the chat and wrote no file at all. Both cost us a scored run during development."
+);
+
+/* 22 */ codeSlide({
+  eyebrow: "Section 04",
   title: "Gate 1 — Intent, and you write it",
   code: [
     "# aidlc/intent.md",
@@ -325,16 +352,16 @@ const p = n => String(n).padStart(2, "0");
     "  amplitudes I chose.",
   ].join("\n"),
   paras: [
-    "The only gate you write yourself, in your own words: who it is for, what problem it solves, what done looks like, and what is deliberately left out.",
+    "The only gate with no prompt to paste — you write it yourself, in your own words: who it is for, what problem it solves, what done looks like, and what is deliberately left out.",
     "The agent will not start without it. A vague intent does not produce a vague app — it produces a confident, wrong one.",
   ],
   prompt: "The question that saves you is the one about scope: what is deliberately NOT included.",
-  footerLeft: FOOT, page: p(21),
+  footerLeft: FOOT, page: p(22),
 }).addNotes(
   "Show the real file. The NOT-included question is worth dwelling on: their warm-up agent invented file loading, windowing and saving because nothing told it to stop. Scope is a decision, and it is theirs."
 );
 
-/* 22 */ codeSlide({
+/* 23 */ codeSlide({
   eyebrow: "Section 04",
   title: "Gate 2 — Spec, and you approve it",
   code: [
@@ -350,16 +377,16 @@ const p = n => String(n).padStart(2, "0");
     "   not 4.0",
   ].join("\n"),
   paras: [
-    "The agent drafts these; you read every line and fix what is wrong. It is far better at the requirement than at the check beside it.",
+    "Paste the Gate 2 prompt from labs/PROMPTS.md. The agent drafts these; you read every line and fix what is wrong — it is far better at the requirement than at the check beside it.",
     "Every requirement carries something you can run. A requirement you cannot check by running something is not a requirement yet.",
   ],
   prompt: "Reply “approved” only when every check on the slide could actually fail.",
-  footerLeft: FOOT, page: p(22),
+  footerLeft: FOOT, page: p(23),
 }).addNotes(
   "Requirement 5 is the trap that catches everyone, including the agent: the DC term must not be doubled. Ask the room how they would have written the check for requirement 3 — most say “the peak is in the right place”, which is exactly the check that misses a factor of five hundred."
 );
 
-/* 23 */ codeSlide({
+/* 24 */ codeSlide({
   eyebrow: "Section 04",
   title: "Gate 3 — Plan, one file per task",
   code: [
@@ -375,16 +402,16 @@ const p = n => String(n).padStart(2, "0");
     "   -> pages/2_Spectrum_...py",
   ].join("\n"),
   paras: [
-    "Design and a task list, and every task names the ONE file it is allowed to touch. Working alone today that looks like bookkeeping.",
+    "Paste the Gate 3 prompt. Design and a task list, and every task names the ONE file it is allowed to touch. Working alone today that looks like bookkeeping.",
     "In Session 2 it is the whole trick: four people build at once and never touch the same file, so there is nothing to merge.",
   ],
   prompt: "One task, one owner, one file.",
-  footerLeft: FOOT, page: p(23),
+  footerLeft: FOOT, page: p(24),
 }).addNotes(
   "Approve the plan, not the code — no code exists yet. Flag forward to Session 2 explicitly: this is the rule that makes group work survivable without anyone having to learn git branching in an afternoon."
 );
 
-/* 24 */ codeSlide({
+/* 25 */ codeSlide({
   eyebrow: "Section 04",
   title: "Gate 4 — Build, one task at a time",
   code: [
@@ -400,16 +427,16 @@ const p = n => String(n).padStart(2, "0");
     "$ git add -A && git commit",
   ].join("\n"),
   paras: [
-    "The only gate with no document. One task: the agent edits a single file, you run the tests, you read the diff, you commit.",
+    "Two prompts, one per task. The only gate with no document: the agent edits a single file, you run the tests, you read the diff, you commit.",
     "Never let it run three tasks at once. When something breaks you want one small change in front of you, not three.",
   ],
   prompt: "Green tests and a diff you have actually read. Then the next task.",
-  footerLeft: FOOT, page: p(24),
+  footerLeft: FOOT, page: p(25),
 }).addNotes(
   "Commit every time the tests go green — that is what makes “git checkout the file” a safe escape hatch when the agent later mangles something. The failure mode to name now: approving a diff without reading it, which feels productive and is how the DC bug gets in."
 );
 
-/* 25 */ codeSlide({
+/* 26 */ codeSlide({
   eyebrow: "Section 04",
   title: "One command turns them on",
   code: [
@@ -430,12 +457,12 @@ const p = n => String(n).padStart(2, "0");
     "Same agent, same model, same request. Copy it into place, start a new task, and watch it refuse you.",
   ],
   prompt: "Plain English, in a plain file. By Session 2 you will be editing it.",
-  footerLeft: FOOT, page: p(25),
+  footerLeft: FOOT, page: p(26),
 }).addNotes(
   "Do the copy live, on the projector, and re-ask the Round 1 question so they watch the same agent refuse it. That before-and-after is the argument of the whole session, and it costs thirty seconds. Then open the file: the rules are plain English and they can edit them. Sixty of you and one of me, so the file holds the line rather than me."
 );
 
-/* 26 */ twoColumnSlide({
+/* 27 */ twoColumnSlide({
   eyebrow: "Section 04",
   title: "You have seen these gates before",
   left: {
@@ -448,12 +475,12 @@ const p = n => String(n).padStart(2, "0");
     lead: "Requirements, design, implementation, testing, deployment — the software lifecycle, taught since the 1970s.",
     secondary: "The agent needs these written down for the same reason a team of people does. Neither can read your mind.",
   },
-  footerLeft: FOOT, page: p(26),
+  footerLeft: FOOT, page: p(27),
 }).addNotes(
   "This is where the software engineering content enters, and it should feel like a reveal. They have not been given four arbitrary hoops; they have walked the standard lifecycle, which predates all of this by fifty years."
 );
 
-/* 27 */ bodySlide({
+/* 28 */ bodySlide({
   eyebrow: "Section 04",
   title: "The words used in industry",
   bullets: [
@@ -462,12 +489,12 @@ const p = n => String(n).padStart(2, "0");
     ["Bolts.", "Build cycles measured in hours rather than the two to six weeks of a sprint."],
     "From AI-DLC, published by AWS in 2025. Its one rule: the AI proposes, and a human approves.",
   ],
-  footerLeft: FOOT, page: p(27),
+  footerLeft: FOOT, page: p(28),
 }).addNotes(
   "Credit AWS explicitly; the paper is in the homework. Do not oversell it: AI-DLC targets large systems with many teams, and what they run today is a shrunk version. Say that plainly."
 );
 
-/* 28 */ dividerSlide({
+/* 29 */ dividerSlide({
   n: 5,
   name: "Lab 1 — the same app, done properly",
   framing: "Delete the warm-up and build it again through the gates. Instructions in labs/LAB1.md. 70 minutes.",
@@ -475,7 +502,7 @@ const p = n => String(n).padStart(2, "0");
   "Say the timebox rule out loud before they start: fifteen minutes stuck on one task, then restore the reference and move on. Nobody loses marks for that."
 );
 
-/* 29 */ codeSlide({
+/* 30 */ codeSlide({
   eyebrow: "Workshop 05",
   title: "What is already in your repository",
   code: [
@@ -494,12 +521,12 @@ const p = n => String(n).padStart(2, "0");
     "Leave tests/ shut for the moment. You meet it at Gate 2, which is the point where it does the most good.",
   ],
   prompt: "One feature, one file. In Session 2 that is what lets four people build at once.",
-  footerLeft: FOOT, page: p(29),
+  footerLeft: FOOT, page: p(30),
 }).addNotes(
   "Do this on the projector with the file tree open, not off the slide. Open tests/test_spectrum.py and read the seven test NAMES aloud - seven plain English sentences, and they are the customer's requirements. Then open .clinerules, so the file is already familiar when Round 2 swaps it."
 );
 
-/* 30 */ figureSlide({
+/* 31 */ figureSlide({
   eyebrow: "Workshop 05",
   title: "What you are building",
   image: "figures/fig-spectrum.png",
@@ -508,12 +535,12 @@ const p = n => String(n).padStart(2, "0");
     "The heights are the check. A spectrum can put every spike in the right place and still be wrong by a factor of five hundred.",
   ],
   figSource: "Fig. 6 — output of pages/2_Spectrum_Analyzer.py",
-  footerLeft: FOOT, page: p(30),
+  footerLeft: FOOT, page: p(31),
 }).addNotes(
   "The first sight of the thing they build all day. Point at the spike heights: 1.0 and 0.5 are the numbers they typed in - that equality is the entire lab. If it looks unimpressive, good: the point is that correctness, not spectacle, is what they are chasing."
 );
 
-/* 31 */ twoColumnSlide({
+/* 32 */ twoColumnSlide({
   eyebrow: "Workshop 05",
   title: "What goes in, what must come out",
   left: {
@@ -526,12 +553,12 @@ const p = n => String(n).padStart(2, "0");
     lead: "The combined waveform against time, and beside it the spectrum: one spike per tone, at the right frequency and at the right height.",
     secondary: "Plus the strongest frequency printed as a number. Seven tests in tests/test_spectrum.py decide whether any of it is right.",
   },
-  footerLeft: FOOT, page: p(31),
+  footerLeft: FOOT, page: p(32),
 }).addNotes(
   "Read this out as the acceptance criteria, because that is what it is. The height requirement is the one they will skip and the one the tests will catch: a chart with both spikes in the right place, five hundred times too short, looks entirely convincing."
 );
 
-/* 32 */ codeSlide({
+/* 33 */ codeSlide({
   eyebrow: "Workshop 05",
   title: "Your customer wrote the tests",
   code: [
@@ -550,12 +577,12 @@ const p = n => String(n).padStart(2, "0");
     "Before you read them, write down in your own words how you would check the chart is right. Then compare.",
   ],
   prompt: "A spectrum can have every peak in exactly the right place and still be wrong by a factor of five hundred.",
-  footerLeft: FOOT, page: p(32),
+  footerLeft: FOOT, page: p(33),
 }).addNotes(
   "Show the real test file on screen. Ask them to predict which of the seven tests would still pass if the scaling were wrong. Answer: all but two."
 );
 
-/* 33 */ bodySlide({
+/* 34 */ bodySlide({
   eyebrow: "Section 06",
   title: "Read the reference before you leave",
   bullets: [
@@ -564,12 +591,12 @@ const p = n => String(n).padStart(2, "0");
     ["Nothing here edits your work,", "so none of it can break your project. Explaining is the safest thing an agent does."],
     "Reading code you did not write, with an AI explaining it, is the most common way these tools are used at work.",
   ],
-  footerLeft: FOOT, page: p(33),
+  footerLeft: FOOT, page: p(34),
 }).addNotes(
   "Last fifteen minutes, everyone, whether or not their app worked. Insist on the mutation exercise: two tests fail, the peak-location test stays green, and the chart still looks perfectly reasonable."
 );
 
-/* 34 */ bodySlide({
+/* 35 */ bodySlide({
   eyebrow: "Section 06",
   title: "The files a person writes at work",
   bullets: [
@@ -578,30 +605,30 @@ const p = n => String(n).padStart(2, "0");
     ["Which is why you approved each one.", "Everything built today came out of those four files. A wrong line there becomes a wrong app, quickly and cheaply."],
     "labs/PROMPTS.md explains why each prompt is worded the way it is. Read it before Session 2 — you will be writing your own.",
   ],
-  footerLeft: FOOT, page: p(34),
+  footerLeft: FOOT, page: p(35),
 }).addNotes(
   "The closing idea of the session, and the bridge to Session 2. Say plainly that the documents, not the code, were the work today — the code was the cheap part, and it will only get cheaper. Anyone whose app did not run still has four documents they can show, and that is a real deliverable."
 );
 
-/* 35 */ takeawaysSlide({
+/* 36 */ takeawaysSlide({
   eyebrow: "Session 01",
   lines: [
     "An agent is a harness driving a model. Knowing which half broke is half the fix.",
     "A requirement you cannot check by running something is not a requirement yet.",
     "Looking right and being right differ, and only one of them survives a test.",
   ],
-  footerLeft: FOOT, page: p(35),
+  footerLeft: FOOT, page: p(36),
 }).addNotes(
   "Leave this up for a moment; this is the slide they photograph. Then homework, then the closing slide for questions."
 );
 
-/* 36 */ closingSlide({
+/* 37 */ closingSlide({
   question: "What did your agent get wrong?",
   reading: "Finish and deploy Lab 1 if it is not live yet",
   deadline: "Read the AI-DLC notes before Session 2",
   office: "next session · teams of four · bring a project idea",
   contact: "Your Name · you@university.ac.th",
-  page: p(36),
+  page: p(37),
 }).addNotes(
   "Leave up during questions. Stress the log: three things the agent got wrong. Anyone who writes 'it all worked fine' did not look hard enough, and it is thirty per cent of the individual mark."
 );

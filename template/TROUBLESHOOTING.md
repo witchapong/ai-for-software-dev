@@ -38,6 +38,12 @@ Different problem: that model is refusing everyone, and waiting will not help.
 Open the model selector at the bottom of the Cline panel and **switch to your
 other provider**. This is why you set up two keys.
 
+**Cline has stopped responding and one command says "Running" forever**
+You asked it to run the app. A web server never exits, so the agent is waiting
+for a command that will never finish. Press `Ctrl+C` in the terminal, or run
+`pkill -f "streamlit run"`, and it wakes up. Start servers yourself; agents are
+for changing files.
+
 **I clicked "Start New Task" and my code vanished**
 When Cline writes a file it shows a diff with **Save** and **Reject** buttons.
 Until you click Save, that work only exists in the preview — and starting a new

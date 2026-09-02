@@ -34,10 +34,8 @@ made of.
 2. **Frequency domain** — the spectrum. Two spikes: one **at 50 Hz reaching
    1.0**, one **at 120 Hz reaching 0.5**.
 
-Read that last line again. The spike heights are not decoration — they are
-the numbers you typed in, handed back to you. A spectrum can put every spike
-in exactly the right place and still be wrong by a factor of five hundred,
-and it will look completely convincing while it does.
+Those spike heights are not decoration. They are the numbers you typed in,
+handed back to you — which is what makes this app checkable at all.
 
 ---
 
@@ -169,6 +167,12 @@ streamlit run app.py
 A preview opens. If it does not, open the **Ports** tab and click the globe
 icon next to port 8501. Find your new page in the sidebar.
 
+> **Run it yourself — do not ask your agent to.** "Run my app" looks like a
+> reasonable request and it wedges Cline completely: a web server never exits,
+> so the agent sits waiting for a command that will never finish and stops
+> responding to anything else. If you have already done it, press `Ctrl+C` in
+> the terminal to stop the server and the agent comes back.
+
 ### Step 5 — Interrogate it
 
 Set **tone 1 to 50 Hz at amplitude 1.0** and **tone 2 to 120 Hz at amplitude
@@ -192,10 +196,16 @@ useful line in your log.
 ### Step 6 — Put it away
 
 ```
+Ctrl+C                                    # stop the app first
 git add -A
 git commit -m "Round 1 - just asked for it"
 git checkout main
 ```
+
+Stop the server before you switch. Leave it running and it keeps serving a file
+that no longer exists on this branch, your next `streamlit run` quietly lands on
+port 8502 instead of 8501, and you spend ten minutes looking at a stale tab
+wondering why nothing changes.
 
 Your Round 1 app is safe on the `round1` branch, and `main` is clean again.
 Your `.env` survives — it is git-ignored.
