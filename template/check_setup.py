@@ -189,19 +189,27 @@ def main() -> int:
 
     load_dotenv()
 
+    # Each check runs and prints in turn. Building the list eagerly meant the
+    # network call happened before ANY line was printed, so the terminal sat
+    # blank for ten or twenty seconds and read as a hang. It is the first thing
+    # a student ever runs; it has to look alive.
     checks = [
-        ("Python version", check_python_version()),
-        ("Packages", check_imports()),
-        ("API key present", check_env(dict(os.environ))),
-        ("API key works", check_live_call()),
-        ("Backup provider", check_second_provider(dict(os.environ))),
+        ("Python version", check_python_version),
+        ("Packages", check_imports),
+        ("API key present", lambda: check_env(dict(os.environ))),
+        ("API key works", check_live_call),
+        ("Backup provider", lambda: check_second_provider(dict(os.environ))),
     ]
 
     print()
     all_passed = True
-    for label, (passed, message) in checks:
+    for label, run in checks:
+        if label == "API key works":
+            print("  ...  asking a provider to answer. This takes a few seconds.",
+                  flush=True)
+        passed, message = run()
         mark = "PASS" if passed else "FAIL"
-        print(f"[{mark}] {label}: {message}")
+        print(f"[{mark}] {label}: {message}", flush=True)
         all_passed = all_passed and passed
 
     print()

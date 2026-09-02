@@ -73,44 +73,15 @@ your-repo/
 └── requirements.txt        the approved library list. It is closed.
 ```
 
-Two of these deserve a proper look right now.
-
-**Open `tests/test_spectrum.py`.** Do not worry about the Python. Read the
-test *names*:
-
-```
-test_a_50_hz_sine_peaks_at_50_hz
-test_a_one_volt_sine_shows_an_amplitude_of_one
-test_two_tones_each_show_their_own_amplitude
-test_a_constant_offset_appears_at_zero_hz
-test_the_frequency_axis_stops_at_half_the_sampling_rate
-test_one_second_of_signal_gives_one_hertz_resolution
-test_a_negative_sampling_rate_is_rejected
-```
-
-Those seven sentences are your customer's requirements. You did not write
-them; somebody handed them to you, which is what happens at work.
+One of these deserves a proper look right now.
 
 **Open `.clinerules`.** Plain English, in a plain file. Your agent reads it
 before every single request. Right now it contains safety rules only — no
-process, no approvals. That is deliberate, and Round 1 is why.
+process, no approvals, no one telling it to stop and check. That is
+deliberate, and Round 1 is why.
 
-Now run the tests, before you have built anything:
-
-```
-pytest
-```
-
-You should see exactly this:
-
-```
-7 failed, 22 passed, 25 deselected
-```
-
-**That is correct, not broken.** The 22 passing are the template's own
-checks. The 25 deselected belong to Session 3 and stay hidden until you get
-there. The 7 failing are your specification. Your job today is to watch
-those seven turn green.
+Leave `tests/` alone for now. You will open it in Round 2, at the point where
+it does the most good.
 
 ---
 
@@ -119,6 +90,17 @@ those seven turn green.
 Your key in `.env` is for the **app**. Cline is a separate extension with
 its own settings and its own copy of the key. Passing `check_setup.py` tells
 you nothing about whether your agent can talk to anything.
+
+**"Why the same key in two places?"** Because they are two different
+programs. `.env` is read by *your app* — `check_setup.py` today, and
+`core/llm.py` in Session 3 when your app starts calling a model itself. Cline
+is not your app; it is the tool building it, and it carries its own
+credentials. Lab 1's app never calls a model at all, so today `.env` is doing
+one job: proving your key is real before you depend on it.
+
+That split — the tool that does things, and the model that decides what to
+say — is the mental model this whole course runs on. You just met it as an
+annoyance.
 
 1. Click the **Cline icon** in the left sidebar.
 2. It asks for an **API provider**. Choose **Google Gemini**.
@@ -225,7 +207,22 @@ Your `.env` survives — it is git-ignored.
 Same app. Different route. Every prompt you need is in `labs/PROMPTS.md` —
 copy them exactly on your first run.
 
-### Step 0 — Turn the gates on
+### Step 0 — See where you are starting from
+
+```
+pytest
+```
+
+```
+7 failed, 22 passed, 25 deselected
+```
+
+**That is correct, not broken.** The 22 passing are the template's own checks.
+The 25 deselected belong to Session 3 and stay hidden until you get there. The
+7 failing are your specification, and watching those seven turn green is the
+whole of Round 2.
+
+### Step 1 — Turn the gates on
 
 In Round 1 your agent had no process rules, which is why it went straight to
 code. The rules that change that are already in your repository:
@@ -239,7 +236,7 @@ git add .clinerules && git commit -m "turn the gates on"
 the old file back, your agent stops asking for approval, and you will not
 know why.
 
-Open `.clinerules` and read it. Then **start a new Cline task** — it reads
+Open `.clinerules` and read it again — it has changed. Then **start a new Cline task** — it reads
 the rules when a task begins, so the one already open is still using the old
 set.
 

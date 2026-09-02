@@ -490,8 +490,8 @@ const p = n => String(n).padStart(2, "0");
     ".env               your keys. never commit",
   ].join("\n"),
   paras: [
-    "Three minutes reading this saves you twenty later. Two files matter today: tests/test_spectrum.py is what “finished” means, and .clinerules is what your agent obeys before every single request.",
-    "Run pytest before you build anything. Seven failed, twenty-two passed is correct — those seven are your specification.",
+    "Three minutes reading this saves you twenty later. The one to open now is .clinerules — plain English in a plain file, and your agent obeys it before every single request.",
+    "Leave tests/ shut for the moment. You meet it at Gate 2, which is the point where it does the most good.",
   ],
   prompt: "One feature, one file. In Session 2 that is what lets four people build at once.",
   footerLeft: FOOT, page: p(29),
