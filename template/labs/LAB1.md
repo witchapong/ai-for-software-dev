@@ -368,12 +368,22 @@ Do not keep prompting. A long conversation makes an agent worse, not better.
 Restore the reference version of whatever gate you are stuck at, read it, and
 carry on:
 
+**First, once per Codespace, make the reference reachable.** Your repository was
+made with "Use this template", and that copies only `main` — the solution
+branches live on the template, not on your copy. Without this the commands
+below fail with `invalid reference`:
+
+```
+git remote add reference https://github.com/witchapong/ai-workshop-template.git
+git fetch reference
+```
+
 | Stuck at | Run this |
 |---|---|
-| Gate 2 | `git checkout origin/solution/lab1 -- aidlc/requirements.md` |
-| Gate 3 | `git checkout origin/solution/lab1 -- aidlc/design.md aidlc/tasks.md` |
-| Gate 4 task 1 | `git checkout origin/solution/lab1 -- core/spectrum.py` |
-| Gate 4 task 2 | `git checkout origin/solution/lab1 -- pages/2_Spectrum_Analyzer.py` |
+| Gate 2 | `git checkout reference/solution/lab1 -- aidlc/requirements.md` |
+| Gate 3 | `git checkout reference/solution/lab1 -- aidlc/design.md aidlc/tasks.md` |
+| Gate 4 task 1 | `git checkout reference/solution/lab1 -- core/spectrum.py` |
+| Gate 4 task 2 | `git checkout reference/solution/lab1 -- pages/2_Spectrum_Analyzer.py` |
 
 Those files are a reference run — one time the agent did the job well, saved
 so you can pick it up rather than start again. **This is not cheating and it

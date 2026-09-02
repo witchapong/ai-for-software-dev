@@ -179,11 +179,21 @@ feature beats a broken one with it, and it always will.
 Fifteen minutes, then take the reference and move on — the later checkpoints are
 the more interesting ones:
 
+**First, once per Codespace, make the reference reachable.** Your repository was
+made with "Use this template", and that copies only `main` — the solution
+branches live on the template, not on your copy. Without this the commands
+below fail with `invalid reference`:
+
+```
+git remote add reference https://github.com/witchapong/ai-workshop-template.git
+git fetch reference
+```
+
 | Stuck at | Run this |
 |---|---|
-| 2 or 3 | `git checkout origin/solution/lab3 -- core/llm.py` |
-| 3 | `git checkout origin/solution/lab3 -- core/intake.py` |
-| The page | `git checkout origin/solution/lab3 -- pages/9_Intake_Desk.py` |
+| 2 or 3 | `git checkout reference/solution/lab3 -- core/llm.py` |
+| 3 | `git checkout reference/solution/lab3 -- core/intake.py` |
+| The page | `git checkout reference/solution/lab3 -- pages/9_Intake_Desk.py` |
 
 Then read what you took. Reading working code you did not write is the same
 skill you practised in Lab 1, and it is most of the job.

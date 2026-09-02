@@ -9,9 +9,14 @@ Session 3. There is no separate project brief coming later — this is it.
 Read the gate documents from Lab 1 — the app you built last week:
 
 ```
-git show origin/solution/lab1:aidlc/requirements.md
-git show origin/solution/lab1:aidlc/tasks.md
+git remote add reference https://github.com/witchapong/ai-workshop-template.git
+git fetch reference
+git show reference/solution/lab1:aidlc/requirements.md
+git show reference/solution/lab1:aidlc/tasks.md
 ```
+
+(The first two lines are needed once per Codespace: "Use this template" copies
+only `main`, so the solution branches live on the template, not your copy.)
 
 Notice two things. Every acceptance criterion names a number or an exact
 behaviour; none of them say "works correctly". And every task in `tasks.md`
@@ -26,7 +31,7 @@ reference rule with its test, on the `solution/lab2` branch. If the rule has
 beaten you and your agent for fifteen minutes:
 
 ```
-git checkout origin/solution/lab2 -- core/rules_sessions.py tests/test_rules_sessions.py
+git checkout reference/solution/lab2 -- core/rules_sessions.py tests/test_rules_sessions.py
 ```
 
 (swap `sessions` for `carpool`, `tutoring`, `roommates` or `bills`). Then wire

@@ -4,10 +4,14 @@ Reading unfamiliar code with an AI explaining it is the single most common way
 working developers use these tools. It is also the fastest way to learn from a
 solution that is better than yours.
 
-First, bring the reference version into your project:
+First, bring the reference version into your project. The first two lines are
+needed once per Codespace — "Use this template" copies only `main`, so the
+solution branches live on the template rather than on your copy:
 
 ```
-git checkout origin/solution/lab1 -- core/spectrum.py pages/2_Spectrum_Analyzer.py
+git remote add reference https://github.com/witchapong/ai-workshop-template.git
+git fetch reference
+git checkout reference/solution/lab1 -- core/spectrum.py pages/2_Spectrum_Analyzer.py
 ```
 
 Then work through these with Cline. **None of them change any code**, so none of

@@ -120,10 +120,20 @@ gate and carry on — it costs you nothing:
 
 | Stuck at | Run this |
 |---|---|
-| Gate 2 | `git checkout origin/solution/lab1 -- aidlc/requirements.md` |
-| Gate 3 | `git checkout origin/solution/lab1 -- aidlc/design.md aidlc/tasks.md` |
-| Gate 4 task 1 | `git checkout origin/solution/lab1 -- core/spectrum.py` |
-| Gate 4 task 2 | `git checkout origin/solution/lab1 -- pages/2_Spectrum_Analyzer.py` |
+**First, once per Codespace, make the reference reachable.** Your repository was
+made with "Use this template", and that copies only `main` — the solution
+branches live on the template, not on your copy. Without this the commands
+below fail with `invalid reference`:
+
+```
+git remote add reference https://github.com/witchapong/ai-workshop-template.git
+git fetch reference
+```
+
+| Gate 2 | `git checkout reference/solution/lab1 -- aidlc/requirements.md` |
+| Gate 3 | `git checkout reference/solution/lab1 -- aidlc/design.md aidlc/tasks.md` |
+| Gate 4 task 1 | `git checkout reference/solution/lab1 -- core/spectrum.py` |
+| Gate 4 task 2 | `git checkout reference/solution/lab1 -- pages/2_Spectrum_Analyzer.py` |
 
 
 ---

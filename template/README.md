@@ -43,7 +43,19 @@ class, because 60 people cannot be unblocked at once.
    - Add **Mistral** as a second provider, with model
      **`devstral-medium-latest`**
    - Type "hello" into Cline and confirm you get a reply
-8. **Post "setup done" in the class channel.**
+8. **Make the reference reachable.** In the terminal:
+
+   ```
+   git remote add reference https://github.com/witchapong/ai-workshop-template.git
+   git fetch reference
+   ```
+
+   Your repository was made with "Use this template", which copies only `main`.
+   The worked solutions live on branches of the template itself, and this is
+   what lets you pull one in when you are stuck. Do it now, while nothing is
+   going wrong — you will want it at the moment you least want to debug a
+   second thing. Repeat it if you ever create a new Codespace.
+9. **Post "setup done" in the class channel.**
 
 ## What is in here
 
