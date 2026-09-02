@@ -50,16 +50,19 @@ def check_imports() -> tuple[bool, str]:
 
 def check_env(environ: dict[str, str]) -> tuple[bool, str]:
     """At least one usable API key must be set."""
-    for name in ("GEMINI_API_KEY", "MISTRAL_API_KEY"):
-        value = (environ.get(name) or "").strip()
-        if not value:
-            continue
-        if value == PLACEHOLDER:
-            return False, (
-                f"{name} is still the placeholder text. Open .env and replace "
-                f"'{PLACEHOLDER}' with the key you created."
-            )
-        return True, f"{name} is set"
+    # Pass if EITHER provider has a real key. Returning on the first
+    # placeholder meant a student with only a Mistral key was told "no key
+    # found" on one line and "Mistral replied" on the next.
+    names = ("GEMINI_API_KEY", "MISTRAL_API_KEY")
+    usable = [n for n in names if (environ.get(n) or "").strip() not in ("", PLACEHOLDER)]
+    if usable:
+        return True, " and ".join(usable) + (" is set" if len(usable) == 1 else " are set")
+    placeholders = [n for n in names if (environ.get(n) or "").strip() == PLACEHOLDER]
+    if placeholders:
+        return False, (
+            f"{' and '.join(placeholders)} still contains the placeholder text. "
+            f"Open .env and replace '{PLACEHOLDER}' with a key you created."
+        )
     return False, (
         "No API key found. Copy .env.example to .env, then paste your key into "
         "GEMINI_API_KEY. Get one free at https://aistudio.google.com/apikey"
