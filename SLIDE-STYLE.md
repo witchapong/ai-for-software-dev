@@ -440,6 +440,12 @@ export const figureSlide = ({ eyebrow: eb, title, paras, figSource, image, foote
 };
 
 /** code: a string with newlines, <= 12 lines. */
+> **Extension, added Sep 2026.** Inside a `codeSlide`'s `code` string,
+> `**text**` marks a bold run. PowerPoint cannot mix weights within one run,
+> so each line is split into runs and only the last carries `breakLine`. Lines
+> with no marker render exactly as before. Used to make the label column of the
+> Four Gates slides scannable; nothing else relies on it.
+
 export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft, page }) => {
   const s = slide();
   chrome(s, eb, title, footerLeft, page);

@@ -235,7 +235,20 @@ export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft,
     fill: { color: PAPER_2 }, line: { color: HAIRLINE, width: 0.5 },
     shadow: { type: "none" },
   });
-  s.addText(code.split("\n").slice(0, 12).map(t => ({ text: t, options: { breakLine: true } })), {
+  // **like this** marks a bold run inside a code line. PowerPoint has no rich
+  // text in a single run, so each line becomes one or more runs and only the
+  // last carries breakLine. Lines with no marker behave exactly as before.
+  const codeRuns = [];
+  code.split("\n").slice(0, 12).forEach(line => {
+    const runs = line.split(/\*\*(.+?)\*\*/g)
+      .map((part, i) => ({ part, bold: i % 2 === 1 }))
+      .filter(r => r.part !== "")
+      .map(r => ({ text: r.part, options: { bold: r.bold } }));
+    if (runs.length === 0) runs.push({ text: "", options: {} });
+    runs[runs.length - 1].options.breakLine = true;
+    codeRuns.push(...runs);
+  });
+  s.addText(codeRuns, {
     x: px(M_X + 38), y: px(BODY_Y + 34), w: px(codeW - 76), h: px(codeH - 68),
     fontFace: MONO, fontSize: pt(28), color: INK,
     lineSpacingMultiple: 1.6, margin: 0, valign: "top", shadow: { type: "none" },
