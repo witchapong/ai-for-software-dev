@@ -478,7 +478,7 @@ there. That refusal is the file working.
 |---|---|
 | **Paste** | the **Gate 2** prompt from `labs/PROMPTS.md`, into a new Cline task |
 | **You get** | `aidlc/requirements.md` — a numbered table |
-| **Check** | every acceptance criterion could actually fail. Vague ones like "appears at 0 Hz" pass broken code — fix them yourself |
+| **Check** | every "done" bullet from your `intent.md` has a row, and every criterion could actually fail |
 | **Then** | reply `approved` in that same task |
 | **You end with** | `+ aidlc/requirements.md` · still `7 failed` |
 
@@ -497,6 +497,16 @@ that too — but they also check that **a tone entered at 1.0 reads back as
 1.0**. The gap between those two sentences is the entire skill this lab is
 teaching. Note it in your log.
 
+**Then count the rows against your `intent.md`.** Every bullet you wrote under
+*what does done look like* must appear. The ones about the screen cannot point
+at a test — no test in this repository opens a page — so they get an `EYES:`
+criterion instead, naming what to open, what to set, and what number to read.
+
+A real spec from this course had seven rows, every one of them a passing test
+on `core/spectrum.py`, and nothing at all about the chart. Every test passed.
+The chart plotted the time axis as a line and was unreadable. **A spec that
+only cites tests can only describe the half of the app that has tests.**
+
 Reply `approved` **in the same Cline task**. Then start a **new** task for
 Gate 3 — one task per gate, because a long conversation makes an agent worse.
 
@@ -506,7 +516,7 @@ Gate 3 — one task per gate, because a long conversation makes an agent worse.
 |---|---|
 | **Paste** | the **Gate 3** prompt from `labs/PROMPTS.md`, into a **new** task |
 | **You get** | `aidlc/design.md` and `aidlc/tasks.md` |
-| **Check** | exactly two tasks, and no task touches two files |
+| **Check** | exactly two tasks, no task touches two files, and both have a **Done when** that could fail |
 | **Then** | reply `approved`, and commit: `git add -A && git commit -m "gates 1-3"` |
 | **You end with** | `+ aidlc/design.md`, `aidlc/tasks.md` · committed · still `7 failed` |
 
@@ -560,7 +570,7 @@ agent is most likely to get wrong.
 |---|---|
 | **Paste** | **Gate 4, task 2**, into another **new** task |
 | **You get** | `pages/2_Spectrum_Analyzer.py` |
-| **Check** | run the app, set 50 Hz at 1.0 — **the spike reaches 1.0** |
+| **Check** | run the app, set 50 Hz at 1.0 — **the spike reaches 1.0**. If an axis name is in the chart's legend, see below |
 | **Then** | commit again |
 | **You end with** | `+ pages/2_Spectrum_Analyzer.py` · `56 passed` · committed |
 
@@ -597,6 +607,12 @@ streamlit run app.py
 
 Set 50 Hz at 1.0 and 120 Hz at 0.5. **The spike must reach 1.0.** Compare it
 with what you wrote down in Round 1, Step 5.
+
+**First, read the chart's legend.** If it lists `Time` or `Frequency (Hz)`
+beside `Signal` or `Amplitude`, your chart is drawing the axis as a line
+instead of using it as an axis, and there is no amplitude scale to read at
+all. `TROUBLESHOOTING.md` has the one-line fix. This is the most common way
+this task goes wrong, and every test still passes while it is wrong.
 
 Commit again.
 

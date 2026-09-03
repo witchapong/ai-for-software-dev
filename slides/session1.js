@@ -376,22 +376,22 @@ const p = n => String(n).padStart(2, "0");
     "**READS**   aidlc/intent.md",
     "        tests/test_spectrum.py",
     "",
-    "**PROMPT**  “intent.md says what we",
-    "        are building. Read the",
-    "        tests. WRITE a table,",
-    "        each row with a check",
-    "        that can be run.”",
+    "**PROMPT**  “Read intent.md, then",
+    "        the tests. WRITE a table.",
+    "        Every done bullet gets a",
+    "        row. pytest <name>, or",
+    "        EYES: <what to look at>.”",
     "",
     "**WRITES**  aidlc/requirements.md",
   ].join("\n"),
   paras: [
     "Notice what it reads: the intent YOU wrote at Gate 1, plus the tests. Each gate consumes what the last one produced — that chain is the whole method.",
-    "The agent drafts; a person reads every line. It is far better at the left column than at the check beside it.",
+    "Two kinds of check, and you need both. A test for the maths; a person's eyes for the screen, because no test in this repository ever opens a page.",
   ],
-  prompt: "Approve it only when every right-hand column could actually fail.",
+  prompt: "Approve it only when every done bullet from your intent has a row that could fail.",
   footerLeft: FOOT, page: p(23),
 }).addNotes(
-  "Requirement 5 is the trap that catches everyone, including the agent: the DC term must not be doubled. Ask the room how they would have written the check for requirement 3 — most say “the peak is in the right place”, which is exactly the check that misses a factor of five hundred."
+  "Requirement 5 is the trap that catches everyone, including the agent: the DC term must not be doubled. Ask the room how they would have written the check for requirement 3 — most say “the peak is in the right place”, which is exactly the check that misses a factor of five hundred. The EYES row fixes a real failure from this course: a student whose intent asked for readable axes got seven rows, every one a pytest on core/ and nothing about the screen. Every test passed and the chart was unreadable."
 );
 
 /* 24 */ codeSlide({
@@ -403,19 +403,19 @@ const p = n => String(n).padStart(2, "0");
     "**READS**   aidlc/requirements.md",
     "",
     "**PROMPT**  “requirements.md is",
-    "        approved. Read it. WRITE",
-    "        design.md and tasks.md.",
-    "        Exactly two tasks. One",
-    "        owner, one file per row.”",
+    "        approved. WRITE design.md",
+    "        and tasks.md. Two tasks,",
+    "        one file each, and a",
+    "        Done when for both.”",
     "",
     "**WRITES**  aidlc/design.md",
     "        aidlc/tasks.md",
   ].join("\n"),
   paras: [
     "It reads the spec you just approved, and nothing else. Approve a plan here, not code — no code exists yet.",
-    "Every task names the ONE file it may touch. Alone that is bookkeeping; in Session 2 it is what lets four people build at once with nothing to merge.",
+    "Every task names the ONE file it may touch, and the one criterion that says it is finished. A task with no Done when can never be wrong, so it will be.",
   ],
-  prompt: "One task, one owner, one file.",
+  prompt: "One task, one owner, one file, one check that could fail.",
   footerLeft: FOOT, page: p(24),
 }).addNotes(
   "Approve the plan, not the code — no code exists yet. Flag forward to Session 2 explicitly: this is the rule that makes group work survivable without anyone having to learn git branching in an afternoon."
@@ -655,20 +655,20 @@ const p = n => String(n).padStart(2, "0");
   code: [
     "**GATE 2 — SPEC**      the agent drafts",
     "",
-    "**DO**     start a NEW Cline task",
-    "       paste \"Gate 2\" from",
-    "       labs/PROMPTS.md",
+    "**DO**     NEW task, paste \"Gate 2\"",
+    "       from labs/PROMPTS.md",
     "       read it, reply approved",
     "",
-    "**CHECK**  could each criterion",
-    "       actually FAIL?",
+    "**CHECK**  every done bullet from",
+    "       intent.md has a row.",
+    "       could each one FAIL?",
     "",
     "**END**    aidlc/requirements.md",
     "       pytest still 7 failed",
   ].join("\n"),
   paras: [
     "Before you paste anything, write down on paper how you would check the spectrum is right. Then compare it with what comes back.",
-    "A criterion that cannot fail is not a criterion. “A spike appears near 50 Hz” passes code that is wrong by a factor of five hundred.",
+    "Count the rows against your intent. Anything about the screen cannot cite a test, so it gets EYES: open the app, set 50 Hz at 1.0, read the spike height.",
   ],
   prompt: "One task per gate. A long conversation makes an agent worse, not better.",
   footerLeft: FOOT, page: p(36),
@@ -686,8 +686,8 @@ const p = n => String(n).padStart(2, "0");
     "       reply approved",
     "       git commit -m \"gates 1-3\"",
     "",
-    "**CHECK**  exactly two tasks, and",
-    "       no task touches two files",
+    "**CHECK**  two tasks, one file each,",
+    "       and BOTH have a Done when",
     "",
     "**END**    aidlc/design.md",
     "       aidlc/tasks.md",
@@ -697,7 +697,7 @@ const p = n => String(n).padStart(2, "0");
     "You are approving a plan, not code. No code exists yet, which is exactly what makes this gate cheap to get right.",
     "One task, one file. Working alone that looks like bookkeeping; in Session 2 it is what lets four people build at once with nothing to merge.",
   ],
-  prompt: "If a task touches two files, send it back. That is the whole check.",
+  prompt: "A task with no Done when can never be wrong. That is how a broken page ships with green tests.",
   footerLeft: FOOT, page: p(37),
 }).addNotes(
   "Flag forward to Session 2 explicitly here. The one-file-per-task rule looks like pedantry to someone working alone, and it is the only reason four people can build in parallel next week without anyone having to learn how to resolve a merge conflict."
@@ -709,13 +709,13 @@ const p = n => String(n).padStart(2, "0");
   code: [
     "**GATE 4 — BUILD**   one task at a time",
     "",
-    "**DO**     NEW task, \"Gate 4 task 1\"",
-    "       pytest, then commit",
-    "       NEW task, \"Gate 4 task 2\"",
-    "       run the app, then commit",
+    "**DO**     a NEW task for each:",
+    "       task 1: pytest, commit",
+    "       task 2: run app, commit",
     "",
     "**CHECK**  7 spectrum tests pass",
     "       50 Hz spike reaches 1.0",
+    "       no axis name in the legend",
     "",
     "**END**    core/spectrum.py + page",
     "       **pytest 56 pass**",
@@ -907,13 +907,13 @@ const p = n => String(n).padStart(2, "0");
     "st.info(\"check it yourself ...\")",
   ].join("\n"),
   paras: [
-    "A widget is not an event handler. st.number_input hands back whatever is in the box right now, and the script carries straight on using it.",
-    "Move any control and Streamlit reruns this file from the top — no callbacks, no state to wire. st.columns sets two inputs side by side; st.metric, st.pyplot and st.info are how the page shows a result.",
+    "A widget is not an event handler. st.number_input hands back whatever is in the box right now, the script carries on using it, and moving any control reruns the whole file from the top.",
+    "st.metric, st.pyplot and st.info are how this page shows a result. If your agent reaches for st.line_chart instead, name the axes with x= and y=, or it draws your x-axis as a second line.",
   ],
   prompt: "The maths lives in core/ with no Streamlit in it. That is why seven tests can check it without ever opening a browser.",
   footerLeft: FOOT, page: p(46),
 }).addNotes(
-  "The rerun model is the one thing to make them say back to you: there is no onChange anywhere in this file, and every interaction runs all forty lines again. Then point at the import at the top - core.spectrum knows nothing about Streamlit, and Streamlit knows nothing about FFTs. That split is why the tests could exist before the page did, and it is worth naming as a design choice rather than an accident."
+  "The rerun model is the one thing to make them say back to you: there is no onChange anywhere in this file, and every interaction runs all forty lines again. Then point at the import at the top - core.spectrum knows nothing about Streamlit, and Streamlit knows nothing about FFTs. That split is why the tests could exist before the page did. Say the st.line_chart trap out loud: a student in this course got a chart with Time and Frequency drawn as data lines, no readable axis at all, while all their tests passed. The legend is the tell - an axis name should never be in it."
 );
 
 /* 47 */ twoColumnSlide({

@@ -26,14 +26,25 @@ one, use these.
 ## Gate 2 — ask for the spec
 
 ```
-Read tests/test_spectrum.py. Those tests are the acceptance criteria for this
-project. aidlc/intent.md says what we are building.
+Read aidlc/intent.md first. Then read tests/test_spectrum.py.
 
 Now use your file-writing tool to WRITE the file aidlc/requirements.md,
 replacing what is there. It must contain a markdown table with one numbered row
-per requirement, and each row's acceptance criterion must match something those
-tests actually check. Include the requirement that a tone entered at amplitude
-1.0 reads back as 1.0.
+per requirement, and every row needs an acceptance criterion that could fail.
+
+Exactly two kinds of criterion are allowed, and you must use both:
+
+  pytest <test name>   for anything tests/test_spectrum.py already checks.
+                       Include the requirement that a tone entered at
+                       amplitude 1.0 reads back as 1.0.
+
+  EYES: <what a person opens, and what they must see>
+                       for anything the tests do not reach. Everything about
+                       what appears on the screen is this kind.
+
+Every bullet under "What does done look like" in aidlc/intent.md must appear as
+at least one row. A bullet with no test still gets a row, with an EYES
+criterion naming the exact thing to look at and the exact value to read.
 
 Write the file now. Do not ask permission first. Do not print the table in your
 reply instead of writing it. Do not write any .py file.
@@ -50,6 +61,12 @@ Now use your file-writing tool to WRITE two files, replacing what is there:
 2. aidlc/tasks.md — a markdown table of exactly two tasks. Task 1 owns
    core/spectrum.py and nothing else. Task 2 owns pages/2_Spectrum_Analyzer.py
    and nothing else. One owner per row, one file per row.
+
+   Keep the "Done when" column of the file you are replacing, and fill it in
+   for BOTH tasks by copying an acceptance criterion from
+   aidlc/requirements.md. Task 2's must be an EYES criterion: no test in this
+   repository opens pages/, so a task that owns a page can never be finished
+   by pytest.
 
 Write both files now. Do not ask permission first. Do not print them in your
 reply instead of writing them. Do not write any .py file.
@@ -127,6 +144,14 @@ true. It was the prompt.
    agent stop *instead of* doing the work.
 6. **Forbid the near-miss.** "Do not print it in your reply instead of writing
    it" closes the one failure the other rules still allow.
+
+7. **Gate 2 must cover intent.md, not just the test file.** An earlier
+   version of this prompt said "those tests are the acceptance criteria". A
+   student whose intent.md asked for plots that "correctly display values in
+   both axes" got a spec of seven rows, every one of them a pytest test on
+   `core/spectrum.py`, and not one word about the screen. The agent obeyed
+   perfectly. Every test passed. The chart was unreadable. A spec that can
+   only cite tests can only describe the half of the app that has tests.
 
 **The transferable lesson:** when an agent tells you it *cannot* do something
 it plainly can, read your own prompt before you blame the model. Nine times in

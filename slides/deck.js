@@ -276,8 +276,18 @@ export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft,
   // **like this** marks a bold run inside a code line. PowerPoint has no rich
   // text in a single run, so each line becomes one or more runs and only the
   // last carries breakLine. Lines with no marker behave exactly as before.
+  // The 12-line cap used to silently drop whatever ran past it, which twice
+  // shipped a card whose last line — the whole point of the slide — was gone.
+  // Fail the build instead: a truncated slide is invisible, a thrown error
+  // is not.
+  const codeLines = code.split("\n");
+  if (codeLines.length > 12) {
+    throw new Error(
+      `codeSlide "${title}": ${codeLines.length} code lines, max 12. ` +
+      `Split the slide or shorten it — do not let it truncate.`);
+  }
   const codeRuns = [];
-  code.split("\n").slice(0, 12).forEach(line => {
+  codeLines.forEach(line => {
     const runs = line.split(/\*\*(.+?)\*\*/g)
       .map((part, i) => ({ part, bold: i % 2 === 1 }))
       .filter(r => r.part !== "")

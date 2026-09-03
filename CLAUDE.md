@@ -136,6 +136,10 @@ written back into it.
    lands on top of it. Fixed by stepping from the taller of the two leads,
    floored at +260 so existing slides render unchanged.
 
+`codeSlide` **throws** past 12 code lines rather than truncating. It silently
+dropped the last line twice — both times the line the slide existed to show —
+and a truncated slide is invisible where a failed build is not.
+
 Character-per-line estimates in `deck.js` are deliberately conservative:
 under-estimating gives a slightly generous gap, over-estimating gives an
 overlap. Prefer the harmless failure.

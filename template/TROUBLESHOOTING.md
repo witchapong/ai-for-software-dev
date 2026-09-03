@@ -22,6 +22,22 @@ Deliberate, not broken. Later sessions' tests are hidden until you reach them,
 so each lab shows you only its own failures. Session 3 switches its own on
 with `pytest -m lab3`.
 
+**My chart has "Time" or "Frequency (Hz)" in its legend, and looks nothing
+like a waveform**
+Your chart is plotting the axis as data. `st.line_chart` given a dict of two
+columns draws *both* of them as lines against the row number — so the axis you
+meant becomes a diagonal line and there is no scale left to read a value off.
+Name the axes explicitly:
+
+```python
+st.line_chart({"Time": times, "Signal": signal}, x="Time", y="Signal")
+st.line_chart({"Frequency (Hz)": freqs, "Amplitude": mags},
+              x="Frequency (Hz)", y="Amplitude")
+```
+
+Every test still passes while this is wrong, because no test opens a page.
+The legend is the tell: an axis name should never appear in it.
+
 **I closed the tab / where do I get back in?**
 https://github.com/codespaces — yours is listed by name, click it. Or from
 your repository, **Code → Codespaces**. Everything is as you left it: files,
