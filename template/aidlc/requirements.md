@@ -20,6 +20,16 @@ cannot see the half of the app your user actually uses.
 An EYES criterion names what to open, what to set, and what number to read. If
 it says "the chart looks right", it could never fail, so it is not a criterion.
 
+**The strongest ones change something.** "Open it and look" passes for a chart
+that is quietly wrong. "Set tone 1 to amplitude 0.3, and the 50 Hz spike reads
+0.3" cannot. Write at least one row that moves a value and predicts the number
+that must move with it.
+
+**Keep each criterion in its own half.** A `pytest` row may only back a claim
+about `core/`. Backing *"the page shows the strongest frequency"* with a test
+that calls `peak_frequency()` is the trap — that test passes perfectly while
+the page is blank.
+
 | # | Requirement | Acceptance criterion (how we check it) |
 |---|---|---|
 | 1 | | |

@@ -28,8 +28,9 @@ one, use these.
 ```
 Read aidlc/intent.md first. Then read tests/test_spectrum.py.
 
-Now use your file-writing tool to WRITE the file aidlc/requirements.md,
-replacing what is there. It must contain a markdown table with one numbered row
+Now use your file-writing tool to WRITE the file aidlc/requirements.md. Keep
+the explanation at the top of that file exactly as it is — replace the table
+and everything after it. It must contain a markdown table with one numbered row
 per requirement, and every row needs an acceptance criterion that could fail.
 
 Exactly two kinds of criterion are allowed, and you must use both:
@@ -41,6 +42,18 @@ Exactly two kinds of criterion are allowed, and you must use both:
   EYES: <what a person opens, and what they must see>
                        for anything the tests do not reach. Everything about
                        what appears on the screen is this kind.
+
+A pytest criterion may only back a claim about core/. If a row says what the
+PAGE does, it needs an EYES criterion — a real test cited for a claim it
+cannot decide is worse than no criterion at all, because it passes.
+
+Two EYES rows are required:
+
+  - One about the SPECTRUM chart that fails if an axis is drawn as a line:
+    "the spectrum chart's legend names only the amplitude series; if
+    'Frequency (Hz)' appears in it as a plotted line, this row has failed."
+  - One that CHANGES a value and predicts the number that must change with
+    it, e.g. "set tone 1 to amplitude 0.3 and the 50 Hz spike reads 0.3".
 
 Every bullet under "What does done look like" in aidlc/intent.md must appear as
 at least one row. A bullet with no test still gets a row, with an EYES
@@ -62,8 +75,8 @@ Now use your file-writing tool to WRITE two files, replacing what is there:
    core/spectrum.py and nothing else. Task 2 owns pages/2_Spectrum_Analyzer.py
    and nothing else. One owner per row, one file per row.
 
-   Keep the "Done when" column of the file you are replacing, and fill it in
-   for BOTH tasks by copying an acceptance criterion from
+   Your table needs five columns, the last one headed "Done when". Fill that
+   column in for BOTH tasks by copying an acceptance criterion from
    aidlc/requirements.md. Task 2's must be an EYES criterion: no test in this
    repository opens pages/, so a task that owns a page can never be finished
    by pytest.
@@ -75,7 +88,9 @@ reply instead of writing them. Do not write any .py file.
 ## Gate 4, task 1 — the maths
 
 ```
-aidlc/design.md and aidlc/tasks.md are approved. Implement task 1 only.
+aidlc/design.md and aidlc/tasks.md are approved. Read aidlc/design.md first:
+its function table is the contract you are implementing, and what you write
+must match it. Implement task 1 only.
 
 core/spectrum.py already exists as a stub whose functions raise
 NotImplementedError. Use your file-writing tool to OVERWRITE that whole file in
@@ -111,7 +126,8 @@ Task 1 is done. Implement task 2 only.
 
 Use your file-writing tool to CREATE pages/2_Spectrum_Analyzer.py: a Streamlit
 page with number inputs for two tones, each with a frequency in hertz and an
-amplitude, plus a sampling rate. Import make_signal, spectrum and
+amplitude, plus a sampling rate and a duration in seconds — six inputs in
+total. Import make_signal, spectrum and
 peak_frequency from core.spectrum. Show the strongest frequency, then two
 charts: the combined waveform against time, and the amplitude of each frequency
 present. Default the inputs to tone 1 at 50 Hz amplitude 1.0, tone 2 at 120 Hz

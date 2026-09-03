@@ -25,14 +25,21 @@ you noticed what it did.
 
 ### Round 2: through the gates
 
+> Three of these ask what went wrong. If nothing did, say so — and say why you
+> think it did not. A clean run that you can explain is worth more than a messy
+> one you cannot.
+
 **Which requirement did I have to fix at Gate 2, and why was the agent's
 version not good enough?**
 > The agent is much better at writing the requirement than the check beside
 > it. Which one could have passed while the code was wrong?
 
-**What did `pytest` say the first time, and what was the failure?**
+**What did `pytest` say the first time, and what was the failure?** (If it was
+`7 passed` straight away, what did your spec or design already tell the agent
+that stopped it making the usual mistake?)
 
-**How many attempts did Gate 4 take, and what did the agent get wrong?**
+**How many attempts did Gate 4 take, and what did the agent get wrong?** ("One,
+nothing" is a real answer. So is "the chart had a legend and I fixed it".)
 > Be specific about the mistake. "It was wrong" teaches you nothing later.
 
 ### Both rounds

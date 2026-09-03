@@ -1,7 +1,9 @@
 # Gate 1 — Intent
 
-<!-- PLACEHOLDER: replace every line below. Your agent will refuse to write
-     code while this placeholder text is still here. -->
+<!-- Replace every line below that starts with the word it tells you to
+     replace. Your agent refuses to write code while any of them remain.
+     This comment can stay: it deliberately avoids the word, so the Gate 1
+     check counts only your unanswered questions. -->
 
 **Who is this for?**
 PLACEHOLDER — describe one real person and their situation in one sentence.
@@ -10,8 +12,13 @@ PLACEHOLDER — describe one real person and their situation in one sentence.
 PLACEHOLDER — what is annoying or slow for them today?
 
 **What does "done" look like?**
-PLACEHOLDER — describe the moment you would call this finished. Be concrete:
-"a student can book a bench for a two-hour slot and see it in their list."
+PLACEHOLDER — replace this with a **bulleted list**, one line per thing that
+must be true before you would call this finished. Gate 2 turns each bullet
+into a requirement, so a bullet you leave out is a requirement nobody checks.
+Be concrete, and include what must be true *on the screen*:
+
+- a student can book a bench for a two-hour slot and see it in their list
+- the booking they just made appears at the top, with the right date"
 
 **What is deliberately NOT included?**
 PLACEHOLDER — name at least two things you are choosing not to build. This

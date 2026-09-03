@@ -2,9 +2,18 @@
 
 Your agent drafts this. You correct it and approve it.
 
-## What data do we store?
+## What does it compute, or store?
 
-One row per _______. Columns:
+Some apps work out an answer from what you type. Some keep rows and hand them
+back later. Fill in whichever one describes yours and delete the other.
+
+**If it computes** — name each function, what goes in, and what comes out:
+
+| Function | Takes | Returns |
+|---|---|---|
+| | | |
+
+**If it stores** — one row per _______:
 
 | Column | Meaning | Example |
 |---|---|---|
@@ -13,15 +22,16 @@ One row per _______. Columns:
 
 ## What are the screens?
 
-| Page file | What the user does here |
-|---|---|
-| `pages/1_....py` | |
-| `pages/2_....py` | |
+One row per page. Lab 1 has one page; the group project has one per person.
 
-## How does data move?
+| Page file | What the user does here | What they see |
+|---|---|---|
+| `pages/N_....py` | | |
 
-Describe in three sentences what happens when a user does the main action:
-what they type, what gets saved, what they see next.
+## How does it move?
 
-**Approved by:**
+Three sentences: what the user types, what is computed or saved, and what
+appears on the screen as a result.
+
+**Approved by:** (your name — this gate is not finished while this is blank)
 **Date:**

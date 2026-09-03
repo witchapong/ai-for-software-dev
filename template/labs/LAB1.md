@@ -478,7 +478,7 @@ there. That refusal is the file working.
 |---|---|
 | **Paste** | the **Gate 2** prompt from `labs/PROMPTS.md`, into a new Cline task |
 | **You get** | `aidlc/requirements.md` — a numbered table |
-| **Check** | every "done" bullet from your `intent.md` has a row, and every criterion could actually fail |
+| **Check** | every "done" bullet has a row; **a `pytest` criterion only ever backs a claim about `core/`**; and every `pytest` name it cites really exists |
 | **Then** | reply `approved` in that same task |
 | **You end with** | `+ aidlc/requirements.md` · still `7 failed` |
 
@@ -496,6 +496,24 @@ Most people write "the peaks should be in the right places". The tests check
 that too — but they also check that **a tone entered at 1.0 reads back as
 1.0**. The gap between those two sentences is the entire skill this lab is
 teaching. Note it in your log.
+
+**Check that each criterion can decide its own row.** This is the subtle one,
+and it is the mistake that actually gets made. A row saying *"the page reports
+the strongest frequency"* backed by `pytest test_a_50_hz_sine_peaks_at_50_hz`
+looks impeccable — but that test calls a function in `core/`, and it passes
+happily while the page shows nothing at all. **If the row says what the page
+does, it needs an `EYES:` criterion.** A real test cited for a claim it cannot
+decide is worse than no criterion, because it passes.
+
+**Check the test names are real.** An agent that writes
+`pytest test_the_chart_is_correct` has invented a test that does not exist, and
+a criterion citing a test nobody wrote can never fail. One command settles it:
+
+```
+grep -c "def test_" tests/test_spectrum.py
+```
+
+Every `pytest` name in your table must appear in that file.
 
 **Then count the rows against your `intent.md`.** Every bullet you wrote under
 *what does done look like* must appear. The ones about the screen cannot point
@@ -516,7 +534,7 @@ Gate 3 — one task per gate, because a long conversation makes an agent worse.
 |---|---|
 | **Paste** | the **Gate 3** prompt from `labs/PROMPTS.md`, into a **new** task |
 | **You get** | `aidlc/design.md` and `aidlc/tasks.md` |
-| **Check** | exactly two tasks, no task touches two files, and both have a **Done when** that could fail |
+| **Check** | `design.md`'s function table matches what `tests/test_spectrum.py` actually calls — Gate 4 builds from it. Then: two tasks, one file each, both with a **Done when** |
 | **Then** | reply `approved`, and commit: `git add -A && git commit -m "gates 1-3"` |
 | **You end with** | `+ aidlc/design.md`, `aidlc/tasks.md` · committed · still `7 failed` |
 
@@ -532,7 +550,20 @@ Working alone that looks like bookkeeping. In Session 2 it is the whole
 trick: four people build at once and never touch the same file, so there is
 nothing to merge.
 
-Check that no task touches two files, then approve.
+**Read `design.md` against the tests before you approve it.** The task table
+is easy to check and it will almost always be right, because the Gate 3 prompt
+dictated it — so checking it proves very little. `design.md` is the part
+nobody dictated. Open it beside `tests/test_spectrum.py` and confirm the
+function names and their arguments match what the tests actually call:
+
+```
+grep -n "def test_\|make_signal(\|spectrum(\|peak_frequency(" tests/test_spectrum.py
+```
+
+Gate 4 implements the contract in `design.md`. An error you approve here comes
+back as broken code twenty minutes later.
+
+Then check that no task touches two files, and approve.
 
 ### The one piece of maths you need
 
@@ -582,10 +613,13 @@ agent is most likely to get wrong.
 pytest tests/test_spectrum.py -q
 ```
 
-You are aiming for `7 passed`. You may well not get it first time — the
-common failure is `test_a_constant_offset_appears_at_zero_hz`, because a
-constant offset must not be doubled the way the tones are. If a test fails,
-paste the failure back to the agent and let it fix that one thing.
+You are aiming for `7 passed`. Some of you will get it first time and some
+will not — the failure to expect is
+`test_a_constant_offset_appears_at_zero_hz`, because a constant offset must not
+be doubled the way the tones are. Whether it fires depends on how much of the
+scaling rule reached `design.md` at Gate 3, so a clean first run is a sign your
+spec was good, not a sign you skipped something. If a test does fail, paste the
+failure back to the agent and let it fix that one thing.
 
 **You will not all get the same result.** The same prompt on the same model
 gives different answers on different runs. That is normal and it is worth
@@ -608,11 +642,15 @@ streamlit run app.py
 Set 50 Hz at 1.0 and 120 Hz at 0.5. **The spike must reach 1.0.** Compare it
 with what you wrote down in Round 1, Step 5.
 
-**First, read the chart's legend.** If it lists `Time` or `Frequency (Hz)`
-beside `Signal` or `Amplitude`, your chart is drawing the axis as a line
-instead of using it as an axis, and there is no amplitude scale to read at
-all. `TROUBLESHOOTING.md` has the one-line fix. This is the most common way
-this task goes wrong, and every test still passes while it is wrong.
+**First, look for a legend.** A correct chart here has **no legend at all** —
+one line needs no key. If you see one listing `Time` or `Frequency (Hz)` beside
+`Signal` or `Amplitude`, your chart is drawing the axis as a line instead of
+using it as an axis, and there is no amplitude scale left to read.
+`TROUBLESHOOTING.md` has the one-line fix. Every test still passes while this
+is wrong, which is exactly why your spec had to carry an `EYES:` row.
+
+**To read a value off the chart, hover over the spike.** These charts have no
+printed data labels; the number appears in a tooltip under the pointer.
 
 Commit again.
 

@@ -36,7 +36,10 @@ st.line_chart({"Frequency (Hz)": freqs, "Amplitude": mags},
 ```
 
 Every test still passes while this is wrong, because no test opens a page.
-The legend is the tell: an axis name should never appear in it.
+The legend is the tell: a correct chart here has no legend at all.
+
+`df.set_index("Frequency (Hz)")` also works, but it leaves the horizontal axis
+with **no label** — numbers with no name or unit. Prefer `x=` and `y=`.
 
 **I closed the tab / where do I get back in?**
 https://github.com/codespaces — yours is listed by name, click it. Or from

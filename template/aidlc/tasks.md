@@ -13,10 +13,12 @@ task with no Done when is a task that can never be wrong, and it will be.
 
 | # | Task | Owner | The ONE file it touches | Done when |
 |---|---|---|---|---|
-| 1 | | | `pages/1_....py` | `EYES: ...` |
-| 2 | | | `pages/2_....py` | `EYES: ...` |
-| 3 | | | `core/models.py` | `pytest ...` |
-| 4 | | | `core/storage.py` | `pytest ...` |
+| 1 | | | `core/....py` | `pytest test_...` |
+| 2 | | | `pages/N_....py` | `EYES: ...` |
+
+One row per task, and no more. **Lab 1 has exactly two.** The group project has
+one per person. Delete any row you do not use — a row naming a file nobody owns
+is worse than no row at all.
 
 **Approved by:**
 **Date:**

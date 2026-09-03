@@ -8,9 +8,10 @@ They have completed one introductory Python course.
 - Python 3.11 and Streamlit only.
 - Do not add a dependency without asking first. The approved list is in
   `requirements.txt` and it is closed.
-- When creating a new file, write it out in one go rather than building it up
-  with repeated edits.
-- Keep diffs small. Never rewrite a whole file when an edit will do.
+- When you are told to write a file in one go — creating it, or overwriting a
+  stub — do exactly that. An explicit instruction to overwrite always wins.
+- Otherwise keep diffs small, and do not rewrite a whole file when an edit
+  will do.
 - Never put an API key in code. Read it from the environment.
 - If a requirement is ambiguous, ask. Do not guess and carry on.
 
