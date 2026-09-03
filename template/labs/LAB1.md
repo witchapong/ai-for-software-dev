@@ -126,6 +126,14 @@ You will hit one of two failures today, and they need opposite responses:
 | `429` / "rate limit exceeded" | You are asking too fast. Your quota is fine. | **Wait.** About a minute. Switching wastes your other key. |
 | `503` / "high demand" / "unavailable" | That model is refusing everyone. | **Switch provider.** Waiting will not help. |
 
+**One honest warning about the second key.** Mistral's free tier is about three
+requests a minute, and one instruction to an agent is four to ten requests. It
+is a rescue for a stuck step, not a second full allowance — it will not carry a
+whole 70-minute round on its own. If your main provider dies for good, pair up
+with a neighbour whose quota is alive: one drives, one reads the diff. Then
+take the reference version for whatever you cannot finish, which is what it is
+there for.
+
 Free tiers are genuinely flaky. Both of these happened repeatedly while this
 lab was being written, on an ordinary weekday, with one user.
 
@@ -176,7 +184,7 @@ icon next to port 8501. Find your new page in the sidebar.
 ### Step 5 — Interrogate it
 
 Set **tone 1 to 50 Hz at amplitude 1.0** and **tone 2 to 120 Hz at amplitude
-0.5**. Then answer these in your AI collaboration log. Answer whichever set
+0.5**. Then answer these in `LOG.md` (your AI collaboration log — it is in your repository, with the questions already written out). Answer whichever set
 applies:
 
 **If it never ran:**
@@ -213,6 +221,10 @@ Your `.env` survives — it is git-ignored.
 ---
 
 ## Round 2: the Four Gates (70 minutes)
+
+Gate 1 five, Gate 2 ten, Gate 3 ten, Gate 4 forty. That is sixty-five, and it
+leaves nothing spare — Gate 5 (ship) happens in the ten minutes after this
+block, not inside it. If you are behind, Gate 4 task 2 is the one to shorten.
 
 Same app. Different route. Every prompt you need is in `labs/PROMPTS.md` —
 copy them exactly on your first run.
@@ -336,6 +348,28 @@ trick: four people build at once and never touch the same file, so there is
 nothing to merge.
 
 Check that no task touches two files, then approve.
+
+### The one piece of maths you need
+
+Gate 4 is where the agent gets the scaling wrong, and you cannot judge its fix
+unless you know what right looks like. It is two lines.
+
+An FFT of a signal with **N** samples splits each tone's energy between a
+positive and a negative frequency. A one-sided spectrum only shows you the
+positive half, so a tone you entered at amplitude 1.0 arrives holding **N/2**.
+To get your 1.0 back you scale every bin by **2/N**.
+
+The 0 Hz bin is the exception. A constant offset has no negative-frequency
+twin to share with, so it was never halved — doubling it makes it twice as big
+as it should be. It takes **1/N**.
+
+```python
+magnitudes = 2.0 * np.abs(coefficients) / n
+magnitudes[0] = np.abs(coefficients[0]) / n     # DC has no twin
+```
+
+That asymmetry is requirement 5 in your spec, and it is the single thing the
+agent is most likely to get wrong.
 
 ### Gate 4 — Build (40 minutes). One task at a time.
 

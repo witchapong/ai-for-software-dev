@@ -3,9 +3,6 @@
 Copy these. Improvise later, once you have seen what good looks like. On day
 one, use these.
 
-> **Note for the instructor:** this is the Phase A draft. It is replaced with
-> the eval-tuned wording once Task 9A Phase C completes.
-
 ## Gate 2 — ask for the spec
 
 ```
@@ -118,8 +115,6 @@ ten you told it not to.
 Do not keep prompting a confused agent. Restore the reference version of that
 gate and carry on — it costs you nothing:
 
-| Stuck at | Run this |
-|---|---|
 **First, once per Codespace, make the reference reachable.** Your repository was
 made with "Use this template", and that copies only `main` — the solution
 branches live on the template, not on your copy. Without this the commands
@@ -130,6 +125,8 @@ git remote add reference https://github.com/witchapong/ai-workshop-template.git
 git fetch reference
 ```
 
+| Stuck at | Run this |
+|---|---|
 | Gate 2 | `git checkout reference/solution/lab1 -- aidlc/requirements.md` |
 | Gate 3 | `git checkout reference/solution/lab1 -- aidlc/design.md aidlc/tasks.md` |
 | Gate 4 task 1 | `git checkout reference/solution/lab1 -- core/spectrum.py` |

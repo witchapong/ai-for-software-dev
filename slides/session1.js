@@ -245,7 +245,7 @@ const p = n => String(n).padStart(2, "0");
     "frequency spectrum.",
   ].join("\n"),
   paras: [
-    "Accept whatever it gives you. Do not plan, do not correct it, do not write anything down first.",
+    "First run Step 1 in labs/LAB1.md — one command, and it is what lets you compare the two rounds at the end. Then paste this and accept whatever it gives you: do not plan, do not correct it.",
     "Set tone A to amplitude 1.0. Does the spike on the chart actually reach 1.0?",
   ],
   prompt: "If a classmate asked whether your app is correct, could you show them why?",
@@ -403,7 +403,7 @@ const p = n => String(n).padStart(2, "0");
   ].join("\n"),
   paras: [
     "Paste the Gate 3 prompt. Design and a task list, and every task names the ONE file it is allowed to touch. Working alone today that looks like bookkeeping.",
-    "In Session 2 it is the whole trick: four people build at once and never touch the same file, so there is nothing to merge.",
+    "In Session 2 it is the whole trick: four people build at once and never touch the same file, so nothing has to be merged and nobody needs to learn branching to collaborate.",
   ],
   prompt: "One task, one owner, one file.",
   footerLeft: FOOT, page: p(24),
@@ -441,16 +441,16 @@ const p = n => String(n).padStart(2, "0");
   title: "One command turns them on",
   code: [
     "$ cp .clinerules.gates .clinerules",
+    "$ git add .clinerules && git commit",
+    "        -m \"turn the gates on\"",
+    "",
+    "# then START A NEW CLINE TASK",
+    "# rules load when a task begins",
     "",
     "# .clinerules",
-    "",
-    "Gate 2 - Spec. Before any code",
-    "exists, aidlc/requirements.md",
-    "must list numbered requirements,",
-    "each with an acceptance criterion",
-    "that can be checked by running",
-    "something. Draft it, then STOP",
-    "and ask for approval.",
+    "Gate 2 - Spec. Draft the",
+    "requirements, then STOP and",
+    "ask for approval.",
   ].join("\n"),
   paras: [
     "In Round 1 your agent had no process rules, which is why it went straight to code. This file is the difference, and it was in your repository the whole time.",
@@ -459,7 +459,7 @@ const p = n => String(n).padStart(2, "0");
   prompt: "Plain English, in a plain file. By Session 2 you will be editing it.",
   footerLeft: FOOT, page: p(26),
 }).addNotes(
-  "Do the copy live, on the projector, and re-ask the Round 1 question so they watch the same agent refuse it. That before-and-after is the argument of the whole session, and it costs thirty seconds. Then open the file: the rules are plain English and they can edit them. Sixty of you and one of me, so the file holds the line rather than me."
+  "Do the copy live and re-ask the Round 1 question so they watch the same agent refuse it. Budget two minutes, not thirty seconds: it is a real free-tier call and it can rate-limit on the projector, so have a screenshot of the refusal ready as a fallback. Commit the file in front of them - without the commit the next checkout silently restores the ungated version, which is the confusing failure LAB1 warns about. Then open the file: the rules are plain English and they can edit them. Sixty of you and one of me, so the file holds the line rather than me."
 );
 
 /* 27 */ twoColumnSlide({
@@ -523,7 +523,7 @@ const p = n => String(n).padStart(2, "0");
   prompt: "One feature, one file. In Session 2 that is what lets four people build at once.",
   footerLeft: FOOT, page: p(30),
 }).addNotes(
-  "Do this on the projector with the file tree open, not off the slide. Open tests/test_spectrum.py and read the seven test NAMES aloud - seven plain English sentences, and they are the customer's requirements. Then open .clinerules, so the file is already familiar when Round 2 swaps it."
+  "Do this on the projector with the file tree open, not off the slide. Open .clinerules and read a rule or two aloud, so the file is familiar before Round 2 swaps it. Do NOT open tests/ here, however tempting - the seven test names give away what Round 1 exists to let them discover. They meet the tests at Gate 2, on slide 33."
 );
 
 /* 31 */ figureSlide({
@@ -555,7 +555,7 @@ const p = n => String(n).padStart(2, "0");
   },
   footerLeft: FOOT, page: p(32),
 }).addNotes(
-  "Read this out as the acceptance criteria, because that is what it is. The height requirement is the one they will skip and the one the tests will catch: a chart with both spikes in the right place, five hundred times too short, looks entirely convincing."
+  "Read this out as the acceptance criteria, because that is what it is. The height requirement is the one they will skip and the one the tests will catch: a chart with both spikes in exactly the right place and every height wrong looks entirely convincing. Get the direction right if they ask: drop the 1/N and a unit tone reads N/2 - five hundred times too TALL at these settings, not too short."
 );
 
 /* 33 */ codeSlide({

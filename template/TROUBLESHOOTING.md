@@ -24,8 +24,37 @@ with `pytest -m lab3`.
 
 **My Codespace will not start, or is stuck**
 Go to https://github.com/codespaces, find yours, click the three dots, choose
-**Stop**, then open it again. If that fails, delete it and create a new one —
-your work is safe as long as you have pushed it.
+**Stop**, then open it again. **Try that twice before deleting anything.**
+
+Deleting a Codespace is not free: `.env` is git-ignored so it is never pushed,
+and Cline's settings live inside the Codespace too. A rebuild loses both keys
+and your agent configuration, and you set those up again from scratch. Your
+*code* is safe once pushed; your setup is not.
+
+**`error: remote reference already exists`**
+You already added it — at home, following the README. Skip that line and run
+`git fetch reference` on its own.
+
+**`error: Your local changes would be overwritten by checkout`**
+You have edits you have not committed, and git will not throw them away
+silently. Commit them first: `git add -A && git commit -m "wip"`, then run
+your checkout again.
+
+**My changes are not showing in the app**
+Three things, in order. Is the browser tab pointing at the port the terminal
+actually printed? A second `streamlit run` while the first is still going
+lands on 8502, and your old tab is still watching 8501. Press `Ctrl+C`,
+start it once, and open the URL it prints. If the port is right, hit **R** in
+the app to rerun. If it is still wrong, you saved the file in a different
+folder than the one you are running.
+
+**Deploying to Streamlit Community Cloud failed, or is still building**
+Builds take two to five minutes and everyone in the room is deploying at once,
+so slow is normal. Check that you have **pushed** — the cloud builds from
+GitHub, not from your Codespace — and that the main file is set to `app.py`.
+If it has not finished by the end of the session, push your code and deploy at
+home. The code and your four `aidlc/` documents are the deliverable; the URL
+is a bonus.
 
 ## The agent
 
