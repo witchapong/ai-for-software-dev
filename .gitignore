@@ -22,3 +22,6 @@ Thumbs.db
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Office/Keynote lock files left behind when a deck is open
+~$*
