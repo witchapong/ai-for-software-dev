@@ -377,7 +377,7 @@ Gate 3 — one task per gate, because a long conversation makes an agent worse.
 
 ### Gate 3 — Plan (10 minutes). The agent drafts, you approve.
 
-Paste the **Gate 3** prompt. You get two files:
+Paste the **Gate 3** prompt from `labs/PROMPTS.md`. You get two files:
 
 - `aidlc/design.md` — what the app computes and which screen shows it.
 - `aidlc/tasks.md` — a table of exactly two tasks. Task 1 owns
@@ -414,7 +414,8 @@ agent is most likely to get wrong.
 
 ### Gate 4 — Build (40 minutes). One task at a time.
 
-**Task 1, the maths.** Paste the **Gate 4 task 1** prompt. Then run:
+**Task 1, the maths.** Paste the **Gate 4, task 1** prompt from
+`labs/PROMPTS.md`. Then run:
 
 ```
 pytest tests/test_spectrum.py -q
@@ -435,7 +436,8 @@ When it is green:
 git add -A && git commit -m "task 1: the maths"
 ```
 
-**Task 2, the screen.** Paste the **Gate 4 task 2** prompt. Then run the app
+**Task 2, the screen.** Paste the **Gate 4, task 2** prompt from
+`labs/PROMPTS.md`. Then run the app
 and check it with your own eyes:
 
 ```

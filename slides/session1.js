@@ -402,7 +402,7 @@ const p = n => String(n).padStart(2, "0");
     "   -> pages/2_Spectrum_...py",
   ].join("\n"),
   paras: [
-    "Paste the Gate 3 prompt. Design and a task list, and every task names the ONE file it is allowed to touch. Working alone today that looks like bookkeeping.",
+    "Paste the Gate 3 prompt from labs/PROMPTS.md. Design and a task list, and every task names the ONE file it is allowed to touch. Working alone today that looks like bookkeeping.",
     "In Session 2 it is the whole trick: four people build at once and never touch the same file, so nothing has to be merged and nobody needs to learn branching to collaborate.",
   ],
   prompt: "One task, one owner, one file.",
@@ -427,7 +427,7 @@ const p = n => String(n).padStart(2, "0");
     "$ git add -A && git commit",
   ].join("\n"),
   paras: [
-    "Two prompts, one per task. The only gate with no document: the agent edits a single file, you run the tests, you read the diff, you commit.",
+    "Two prompts in labs/PROMPTS.md, one per task. The only gate with no document of its own: the agent edits a single file, you run the tests, you read the diff, you commit.",
     "Never let it run three tasks at once. When something breaks you want one small change in front of you, not three.",
   ],
   prompt: "Green tests and a diff you have actually read. Then the next task.",

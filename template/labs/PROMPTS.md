@@ -1,5 +1,21 @@
 # Prompts that work
 
+One prompt per gate, in the order you need them. Copy them exactly on your
+first run — every sentence in them fixes a failure somebody actually hit — and
+start improvising next week, once you have seen what a good one looks like.
+
+| Gate | Prompt below | What it writes |
+|---|---|---|
+| 1 — Intent | **none, you write this one** | `aidlc/intent.md` |
+| 2 — Spec | Gate 2 | `aidlc/requirements.md` |
+| 3 — Plan | Gate 3 | `aidlc/design.md`, `aidlc/tasks.md` |
+| 4 — Build, task 1 | Gate 4, task 1 | `core/spectrum.py` |
+| 4 — Build, task 2 | Gate 4, task 2 | `pages/2_Spectrum_Analyzer.py` |
+| 5 — Ship | none — `git push`, then deploy | |
+
+**Start a new Cline task for each one.** A long conversation makes an agent
+worse, not better.
+
 Copy these. Improvise later, once you have seen what good looks like. On day
 one, use these.
 
