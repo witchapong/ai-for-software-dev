@@ -16,6 +16,10 @@ start improvising next week, once you have seen what a good one looks like.
 **Start a new Cline task for each one.** A long conversation makes an agent
 worse, not better.
 
+Round 1's single prompt is not here. It lives inline in `labs/LAB1.md`, on
+purpose: it is the one you are meant to fire off without thinking, and it does
+not belong on a page called "prompts that work".
+
 Copy these. Improvise later, once you have seen what good looks like. On day
 one, use these.
 
