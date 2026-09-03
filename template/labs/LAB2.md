@@ -174,6 +174,9 @@ Anything not written down did not get agreed.
 The project continues between sessions, mostly not in the same room. The
 protocol that keeps four people from trampling each other:
 
+- **Getting back in:** https://github.com/codespaces, click your Codespace.
+  Do not create a new one — a new Codespace has no `.env` and no Cline
+  settings, and you would set both up again.
 - **`aidlc/tasks.md` is the coordination board.** Before touching anything,
   check it. When you claim or finish a task, edit it and push.
 - **Pull before you start. Push when your tests pass.** Every time.

@@ -82,6 +82,27 @@ class, because 60 people cannot be unblocked at once.
    second thing. Repeat it if you ever create a new Codespace.
 9. **Post "setup done" in the class channel.**
 
+## Closing it, and coming back
+
+**Close the tab whenever you like.** Your Codespace stops on its own after
+about thirty minutes of inactivity, and stopping is safe: your files, your
+uncommitted edits, your `.env` and Cline's settings are all still there when
+you come back. A stopped Codespace also stops using your free hours.
+
+**To get back in:** https://github.com/codespaces — your Codespace is listed
+by name; click it. You can also reach it from your repository under
+**Code → Codespaces**. Bookmark the first one; you will use it every week.
+
+Two things worth knowing:
+
+- **Stopping is not deleting.** Deleting is the destructive one — `.env` is
+  git-ignored so it is never pushed, and Cline's configuration lives inside
+  the Codespace. Delete it and you set up both keys and your agent again from
+  scratch. Only delete if something is genuinely broken.
+- **Unused Codespaces are removed after about thirty days.** That is longer
+  than this course, but push your work anyway — GitHub is where it is safe,
+  not the Codespace.
+
 ## What is in here
 
 | Folder | What it is for |

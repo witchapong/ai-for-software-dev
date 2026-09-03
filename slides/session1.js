@@ -660,7 +660,7 @@ const p = n => String(n).padStart(2, "0");
   question: "What did your agent get wrong?",
   reading: "Finish and deploy Lab 1 if it is not live yet",
   deadline: "Read the AI-DLC notes before Session 2",
-  office: "next session · teams of four · bring a project idea",
+  office: "come back in at github.com/codespaces · do not make a new one",
   contact: "Your Name · you@university.ac.th",
   page: p(38),
 }).addNotes(

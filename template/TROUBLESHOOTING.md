@@ -22,6 +22,17 @@ Deliberate, not broken. Later sessions' tests are hidden until you reach them,
 so each lab shows you only its own failures. Session 3 switches its own on
 with `pytest -m lab3`.
 
+**I closed the tab / where do I get back in?**
+https://github.com/codespaces — yours is listed by name, click it. Or from
+your repository, **Code → Codespaces**. Everything is as you left it: files,
+uncommitted edits, `.env`, and Cline's settings. Closing the tab and letting it
+stop is safe and is how you avoid burning free hours.
+
+**Should I create a new Codespace each week?**
+No. A new one starts empty of everything that is not in git — no `.env`, no
+Cline configuration — so you would do the whole setup again. Reopen the one you
+have.
+
 **My Codespace will not start, or is stuck**
 Go to https://github.com/codespaces, find yours, click the three dots, choose
 **Stop**, then open it again. **Try that twice before deleting anything.**
