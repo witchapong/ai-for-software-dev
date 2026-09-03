@@ -36,8 +36,10 @@ per requirement, and every row needs an acceptance criterion that could fail.
 Exactly two kinds of criterion are allowed, and you must use both:
 
   pytest <test name>   for anything tests/test_spectrum.py already checks.
-                       Include the requirement that a tone entered at
-                       amplitude 1.0 reads back as 1.0.
+                       There are seven tests in that file. EVERY ONE of them
+                       must appear as the criterion of some row, including
+                       the one asserting that a tone entered at amplitude 1.0
+                       reads back as 1.0.
 
   EYES: <what a person opens, and what they must see>
                        for anything the tests do not reach. Everything about

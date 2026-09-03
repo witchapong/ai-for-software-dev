@@ -478,7 +478,7 @@ there. That refusal is the file working.
 |---|---|
 | **Paste** | the **Gate 2** prompt from `labs/PROMPTS.md`, into a new Cline task |
 | **You get** | `aidlc/requirements.md` — a numbered table |
-| **Check** | every "done" bullet has a row; **a `pytest` criterion only ever backs a claim about `core/`**; and every `pytest` name it cites really exists |
+| **Check** | every "done" bullet has a row; **all seven tests are cited**; a `pytest` criterion only ever backs a claim about `core/`; and every name it cites really exists |
 | **Then** | reply `approved` in that same task |
 | **You end with** | `+ aidlc/requirements.md` · still `7 failed` |
 
@@ -513,7 +513,16 @@ a criterion citing a test nobody wrote can never fail. One command settles it:
 grep -c "def test_" tests/test_spectrum.py
 ```
 
-Every `pytest` name in your table must appear in that file.
+Every `pytest` name in your table must appear in that file — and every test in
+that file must appear in your table. Those seven tests are what Gate 4 is
+aiming at, so a test with no requirement is work nobody asked for.
+
+```
+grep -c "pytest test_" aidlc/requirements.md
+```
+
+That must be at least 7. A weaker model will happily write you a spec of nine
+EYES rows and one test, because the EYES half of the prompt is longer.
 
 **Then count the rows against your `intent.md`.** Every bullet you wrote under
 *what does done look like* must appear. The ones about the screen cannot point
