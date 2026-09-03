@@ -288,7 +288,7 @@ Then, with the app still running, open a second terminal and run:
 pytest -q | tail -1
 ```
 
-Expect `7 failed, 49 passed, 25 deselected`. **A working app and seven failing
+Expect `7 failed, 22 passed, 25 deselected`. **A working app and seven failing
 tests at the same time** — that is Round 1 in one line, and it is worth a
 sentence in your log. (If your agent happened to edit `core/spectrum.py` you
 may see fewer failures. Note whichever number you actually get.)
@@ -315,7 +315,7 @@ that is what is supposed to happen. Those files exist on the `round1` branch,
 not on this one. `git checkout round1` brings them all back whenever you want
 them.
 
-**You end on `main`: tree clean, `pytest` back to `7 failed, 49 passed`,
+**You end on `main`: tree clean, `pytest` back to `7 failed, 22 passed`,
 `core/spectrum.py` still an untouched stub.** Confirm it if you like:
 
 ```
@@ -344,14 +344,14 @@ change branch again. What changes is which files exist, and what `pytest` says.
 
 | After | Files that now exist | `pytest` |
 |---|---|---|
-| Step 0 | none of yours yet | `7 failed, 49 passed` |
-| Step 1 | `.clinerules` swapped for the gated one | `7 failed, 49 passed` |
-| Gate 1 | `aidlc/intent.md`, filled in by you | `7 failed, 49 passed` |
-| Gate 2 | `+ aidlc/requirements.md` | `7 failed, 49 passed` |
-| Gate 3 | `+ aidlc/design.md`, `aidlc/tasks.md` | `7 failed, 49 passed` |
-| Gate 4 task 1 | `core/spectrum.py` written | **`56 passed`** |
-| Gate 4 task 2 | `+ pages/2_Spectrum_Analyzer.py` | `56 passed` |
-| Gate 5 | same files, now live on the internet | `56 passed` |
+| Step 0 | none of yours yet | `7 failed, 22 passed` |
+| Step 1 | `.clinerules` swapped for the gated one | `7 failed, 22 passed` |
+| Gate 1 | `aidlc/intent.md`, filled in by you | `7 failed, 22 passed` |
+| Gate 2 | `+ aidlc/requirements.md` | `7 failed, 22 passed` |
+| Gate 3 | `+ aidlc/design.md`, `aidlc/tasks.md` | `7 failed, 22 passed` |
+| Gate 4 task 1 | `core/spectrum.py` written | **`29 passed`** |
+| Gate 4 task 2 | `+ pages/2_Spectrum_Analyzer.py` | `29 passed` |
+| Gate 5 | same files, now live on the internet | `29 passed` |
 
 **Nothing turns green until Gate 4.** Gates 1, 2 and 3 produce documents, not
 code. If you are three gates in and still staring at seven failures, you are
@@ -394,7 +394,7 @@ pytest
 ```
 
 ```
-7 failed, 49 passed, 25 deselected
+7 failed, 22 passed, 25 deselected
 ```
 
 **That is correct, not broken.** The 49 passing are the template's own checks.
@@ -595,7 +595,7 @@ agent is most likely to get wrong.
 | **You get** | `core/spectrum.py` |
 | **Check** | `pytest tests/test_spectrum.py -q` says `7 passed` |
 | **Then** | `git add -A && git commit -m "task 1: the maths"` |
-| **You end with** | `core/spectrum.py` written · **`pytest` now `56 passed`** · committed |
+| **You end with** | `core/spectrum.py` written · **`pytest` now `29 passed`** · committed |
 
 | | |
 |---|---|
@@ -603,7 +603,7 @@ agent is most likely to get wrong.
 | **You get** | `pages/2_Spectrum_Analyzer.py` |
 | **Check** | run the app, set 50 Hz at 1.0 — **the spike reaches 1.0**. If an axis name is in the chart's legend, see below |
 | **Then** | commit again |
-| **You end with** | `+ pages/2_Spectrum_Analyzer.py` · `56 passed` · committed |
+| **You end with** | `+ pages/2_Spectrum_Analyzer.py` · `29 passed` · committed |
 
 
 **Task 1, the maths.** Paste the **Gate 4, task 1** prompt from
@@ -688,7 +688,7 @@ you tried.
 | | |
 |---|---|
 | **Paste** | nothing — no prompt, no agent. This gate is all yours |
-| **You need** | branch `main`, `git status --short` printing nothing, `56 passed` |
+| **You need** | branch `main`, `git status --short` printing nothing, `29 passed` |
 | **Check** | the public URL loads for someone who is not you |
 | **You end with** | the same files, pushed to GitHub and live on the internet |
 

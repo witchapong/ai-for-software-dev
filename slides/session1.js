@@ -609,7 +609,7 @@ const p = n => String(n).padStart(2, "0");
     "  gate 3   aidlc/design.md, tasks.md",
     "",
     "**GATE 4 writes code.**",
-    "Now pytest goes 7 failed -> 56 pass.",
+    "Now pytest goes 7 failed -> 29 pass.",
     "",
     "  gate 4a  core/spectrum.py",
     "  gate 4b  the Streamlit page",
@@ -718,7 +718,7 @@ const p = n => String(n).padStart(2, "0");
     "       no axis name in the legend",
     "",
     "**END**    core/spectrum.py + page",
-    "       **pytest 56 pass**",
+    "       **pytest 29 pass**",
   ].join("\n"),
   paras: [
     "Two tasks, two fresh Cline conversations, a commit after each. Never both in one task, however tempting it looks.",

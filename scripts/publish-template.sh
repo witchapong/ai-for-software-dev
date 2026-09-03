@@ -48,7 +48,7 @@ rm -rf .venv data .env
 # --- main: the tests, but stubs where the answers would be -------------------
 # A stub matters more than an absence: without core/spectrum.py, pytest fails
 # at collection and runs ZERO tests, so a student's first `pytest` looks like a
-# broken template. With the stub they get "7 failed, 49 passed" and the failing
+# broken template. With the stub they get "7 failed, 22 passed" and the failing
 # list is their specification.
 cp "$REPO_ROOT/scripts/stubs/spectrum.py" core/spectrum.py
 rm -f pages/2_Spectrum_Analyzer.py
@@ -64,6 +64,28 @@ rm -f pages/9_Intake_Desk.py
 # Lab 2's hard-part reference rules live on solution/lab2, not main - a stuck
 # team recovers one rule and its test, not an answer key for the project.
 rm -f core/rules_*.py tests/test_rules_*.py
+
+# --- the numbers LAB1.md promises must match the branch we just built --------
+# They did not, once. They were measured against template/ in the dev tree,
+# which carries five test_rules_*.py that main deliberately strips three lines
+# above. LAB1 then told students to expect "49 passed" where the truth was 22,
+# and a student whose first command disagrees with the manual has no way to
+# tell whether they broke something. Check it here, against the files actually
+# going out, because that is the only place the real number exists.
+if [ -x "$REPO_ROOT/template/.venv/bin/python" ]; then
+  # pytest exits non-zero on the seven expected failures; pipefail would
+  # abort the publish, so swallow the status and keep the text.
+  ACTUAL=$("$REPO_ROOT/template/.venv/bin/python" -m pytest -q 2>&1 | tail -1 || true)
+  WANT=$(grep -o '7 failed, [0-9]* passed, [0-9]* deselected' \
+         "$REPO_ROOT/template/labs/LAB1.md" | head -1)
+  case "$ACTUAL" in
+    "$WANT"*) echo "  start state verified: $WANT" ;;
+    *) echo "  ERROR: LAB1.md promises '$WANT'"
+       echo "         the built template gives '$ACTUAL'"
+       echo "         Fix the docs or the stubs before publishing."
+       exit 1 ;;
+  esac
+fi
 
 git add -A
 git commit -q -m "Workshop project template" 2>/dev/null || echo "  (main unchanged)"
