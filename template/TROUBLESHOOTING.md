@@ -94,6 +94,12 @@ start it once, and open the URL it prints. If the port is right, hit **R** in
 the app to rerun. If it is still wrong, you saved the file in a different
 folder than the one you are running.
 
+**My deployed app says it cannot find an API key, but it works in my Codespace**
+`.env` is git-ignored, so it was never pushed and the cloud has never seen it.
+Open your app on Streamlit Cloud, go to **Settings → Secrets**, and paste the
+same key lines that are in your `.env` (as `NAME = "value"`). Save; the app
+restarts. This only affects apps that call a model — Lab 1's does not.
+
 **Deploying to Streamlit Community Cloud failed, or is still building**
 Builds take two to five minutes and everyone in the room is deploying at once,
 so slow is normal. Check that you have **pushed** — the cloud builds from

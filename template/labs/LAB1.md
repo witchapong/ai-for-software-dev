@@ -478,13 +478,36 @@ you tried.
 
 ### Gate 5 — Ship (10 minutes)
 
+**Push first.** Your Codespace is not the internet. Streamlit Cloud builds
+from GitHub, so anything you have not pushed does not exist as far as it is
+concerned — and the most common failure here is deploying an empty repository.
+
 ```
 git push
 ```
 
-Then deploy at https://share.streamlit.io — sign in with GitHub, pick your
-repository, set the main file to `app.py`, click **Deploy**. Post your public
-URL to the class channel.
+Then go to **https://share.streamlit.io**:
+
+1. **Continue to sign-in** → sign in with GitHub.
+2. **First time only:** you are creating a Streamlit Community Cloud account
+   and granting it access to your repositories. Read the screen, then accept.
+   This is the only account you make today.
+3. **Create app** → **Deploy a public app from GitHub**.
+4. Fill in three things and nothing else:
+   - **Repository:** `your-username/your-repo`
+   - **Branch:** `main`
+   - **Main file path:** `app.py`
+5. **Deploy**, then wait. Two to five minutes is normal, and sixty of us are
+   building at the same time. The log scrolls while it installs; that is fine.
+6. Post the public URL to the class channel.
+
+Nothing in Lab 1 needs an API key, so this is as simple as deployment gets.
+Your `requirements.txt` is at the top of the repository, which is where the
+cloud looks, and the pinned versions install on every Python it offers.
+
+**If it is not live by the end of the session, stop.** Push your code and
+deploy at home. The code and your four `aidlc/` documents are the deliverable;
+the URL is a bonus and nobody is marked down for someone else's build queue.
 
 ---
 

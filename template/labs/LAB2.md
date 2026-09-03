@@ -146,7 +146,25 @@ Reviewing code you did not write **is the job now**. Take it seriously.
 ## Part 4 — Ship and plan (15 minutes)
 
 Deploy at https://share.streamlit.io — sign in with GitHub, pick the team
-repository, set the main file to `app.py`, click Deploy.
+repository, set the main file to `app.py`, click Deploy. One person deploys;
+the rest of you just need the URL.
+
+> **When your app starts calling a model, this stops being enough.** Your
+> `.env` is git-ignored, so it is never pushed and never deployed — the cloud
+> has no idea your key exists, and the AI feature you add in Session 3 will
+> fail on the live site while working perfectly in your Codespace.
+>
+> The fix takes a minute, and you do it in the app's **Settings → Secrets**
+> box on Streamlit Cloud. Paste the same lines that are in your `.env`:
+>
+> ```
+> GEMINI_API_KEY = "your-key-here"
+> MISTRAL_API_KEY = "your-key-here"
+> ```
+>
+> Save, and the app restarts with them. Do this the first time the live site
+> says it cannot find a key — not before, or you will not understand why it
+> is there.
 
 Then agree, in writing in `aidlc/tasks.md`, who does what before Session 3.
 Anything not written down did not get agreed.

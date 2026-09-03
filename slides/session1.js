@@ -582,7 +582,34 @@ const p = n => String(n).padStart(2, "0");
   "Show the real test file on screen. Ask them to predict which of the seven tests would still pass if the scaling were wrong. Answer: all but two."
 );
 
-/* 34 */ bodySlide({
+/* 34 */ codeSlide({
+  eyebrow: "Workshop 05",
+  title: "Ship it — ten minutes",
+  code: [
+    "$ git push",
+    "",
+    "share.streamlit.io",
+    "  Continue to sign-in",
+    "  authorise GitHub  (first time)",
+    "  New app -> from existing repo",
+    "",
+    "    repo    your-repo",
+    "    branch  main",
+    "    file    app.py",
+    "",
+    "  Deploy",
+  ].join("\n"),
+  paras: [
+    "Push first. Your Codespace is not the internet — the cloud builds from GitHub, so anything you have not pushed does not exist as far as it is concerned.",
+    "The first deploy makes you a Streamlit account and asks for access to your repositories. Builds take two to five minutes, and sixty of us are building at once.",
+  ],
+  prompt: "Not live by 2:45? Push, and deploy at home. The code and the four documents are the deliverable; the URL is a bonus.",
+  footerLeft: FOOT, page: p(34),
+}).addNotes(
+  "Ten minutes is tight and it depends on someone else's servers, so say the fallback BEFORE they start rather than after it goes wrong. Two things break most often: they forgot to push, so the cloud builds an empty repo; and they point it at the wrong main file. Neither is worth your time individually - put both on the board. Nothing in Lab 1 needs an API key, so the deploy is genuinely simple today. It stops being simple in Session 3, when the app starts calling a model and .env is not in the repository - that is what Streamlit's Secrets box is for, and LAB2 says so at the point it starts to matter."
+);
+
+/* 35 */ bodySlide({
   eyebrow: "Section 06",
   title: "Read the reference before you leave",
   bullets: [
@@ -591,12 +618,12 @@ const p = n => String(n).padStart(2, "0");
     ["Nothing here edits your work,", "so none of it can break your project. Explaining is the safest thing an agent does."],
     "Reading code you did not write, with an AI explaining it, is the most common way these tools are used at work.",
   ],
-  footerLeft: FOOT, page: p(34),
+  footerLeft: FOOT, page: p(35),
 }).addNotes(
   "Last fifteen minutes, everyone, whether or not their app worked. Insist on the mutation exercise: two tests fail, the peak-location test stays green, and the chart still looks perfectly reasonable."
 );
 
-/* 35 */ bodySlide({
+/* 36 */ bodySlide({
   eyebrow: "Section 06",
   title: "The files a person writes at work",
   bullets: [
@@ -605,30 +632,30 @@ const p = n => String(n).padStart(2, "0");
     ["Which is why you approved each one.", "Everything built today came out of those four files. A wrong line there becomes a wrong app, quickly and cheaply."],
     "labs/PROMPTS.md explains why each prompt is worded the way it is. Read it before Session 2 — you will be writing your own.",
   ],
-  footerLeft: FOOT, page: p(35),
+  footerLeft: FOOT, page: p(36),
 }).addNotes(
   "The closing idea of the session, and the bridge to Session 2. Say plainly that the documents, not the code, were the work today — the code was the cheap part, and it will only get cheaper. Anyone whose app did not run still has four documents they can show, and that is a real deliverable."
 );
 
-/* 36 */ takeawaysSlide({
+/* 37 */ takeawaysSlide({
   eyebrow: "Session 01",
   lines: [
     "An agent is a harness driving a model. Knowing which half broke is half the fix.",
     "A requirement you cannot check by running something is not a requirement yet.",
     "Looking right and being right differ, and only one of them survives a test.",
   ],
-  footerLeft: FOOT, page: p(36),
+  footerLeft: FOOT, page: p(37),
 }).addNotes(
   "Leave this up for a moment; this is the slide they photograph. Then homework, then the closing slide for questions."
 );
 
-/* 37 */ closingSlide({
+/* 38 */ closingSlide({
   question: "What did your agent get wrong?",
   reading: "Finish and deploy Lab 1 if it is not live yet",
   deadline: "Read the AI-DLC notes before Session 2",
   office: "next session · teams of four · bring a project idea",
   contact: "Your Name · you@university.ac.th",
-  page: p(37),
+  page: p(38),
 }).addNotes(
   "Leave up during questions. Stress the log: three things the agent got wrong. Anyone who writes 'it all worked fine' did not look hard enough, and it is thirty per cent of the individual mark."
 );
