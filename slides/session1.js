@@ -29,6 +29,7 @@ const p = n => String(n).padStart(2, "0");
 /* 02 */ bodySlide({
   eyebrow: "Setup",
   title: "Before we start",
+  brands: ["github", "googlegemini", "mistralai", "python"],
   bullets: [
     ["A GitHub account, then a Codespace.", "Free at github.com. One click from the template page builds a Linux machine in your browser; nothing installs here."],
     ["TWO API keys, not one.", "Gemini at aistudio.google.com/apikey, Mistral at console.mistral.ai. Free tiers refuse service without warning."],
@@ -43,6 +44,7 @@ const p = n => String(n).padStart(2, "0");
 /* 03 */ codeSlide({
   eyebrow: "Setup",
   title: "The five checks",
+  brands: ["python", "googlegemini"],
   code: [
     "$ python check_setup.py",
     "",
@@ -69,6 +71,7 @@ const p = n => String(n).padStart(2, "0");
 /* 04 */ bodySlide({
   eyebrow: "Setup",
   title: "Cline needs its own key",
+  brands: ["cline", "mistralai", "googlegemini"],
   bullets: [
     [".env is for your app.", "check_setup.py and core/llm.py read it. Cline never does — separate program, separate settings, its own copy of the key."],
     ["It opens on a screen nobody expects.", "“How will you use Cline?”, with Absolutely Free already ticked. Do not take it — choose Bring my own API key, or your key is never used."],
@@ -120,6 +123,7 @@ const p = n => String(n).padStart(2, "0");
 /* 08 */ figureSlide({
   eyebrow: "Section 01",
   title: "Harness and model",
+  brands: ["cline", "googlegemini"],
   image: "figures/fig-harness-model.png",
   paras: [
     "A harness is the program that does things. Cline reads your files, writes the edits, runs the commands, and decides when to ask the model what to do next. It has no intelligence of its own.",
@@ -134,6 +138,7 @@ const p = n => String(n).padStart(2, "0");
 /* 09 */ twoColumnSlide({
   eyebrow: "Section 01",
   title: "The tools people actually use",
+  brands: ["cline", "cursor", "githubcopilot", "claude", "googlegemini", "mistralai"],
   left: {
     label: "Harnesses",
     lead: "Cline and Roo Code, free inside VS Code. Cursor and Windsurf, whole editors. GitHub Copilot. Claude Code and Gemini CLI, in the terminal. Aider.",
@@ -512,6 +517,7 @@ const p = n => String(n).padStart(2, "0");
 /* 30 */ codeSlide({
   eyebrow: "Workshop 05",
   title: "What is already in your repository",
+  brands: ["python", "pytest"],
   code: [
     "app.py             run this",
     "pages/             ONE FILE per feature",
@@ -536,6 +542,7 @@ const p = n => String(n).padStart(2, "0");
 /* 31 */ figureSlide({
   eyebrow: "Workshop 05",
   title: "What you are building",
+  brands: ["streamlit"],
   image: "figures/fig-spectrum.png",
   paras: [
     "Two sine waves in, and a chart that finds them again: spikes at exactly the frequencies you chose, at exactly the heights you set.",
@@ -568,6 +575,7 @@ const p = n => String(n).padStart(2, "0");
 /* 33 */ codeSlide({
   eyebrow: "Workshop 05",
   title: "Your customer wrote the tests",
+  brands: ["pytest"],
   code: [
     "# tests/test_spectrum.py",
     "",
@@ -591,7 +599,141 @@ const p = n => String(n).padStart(2, "0");
 
 /* 34 */ codeSlide({
   eyebrow: "Workshop 05",
+  title: "Round 2 — where each gate leaves you",
+  code: [
+    "**GATES 1-3 write documents.**",
+    "The seven failures do not move.",
+    "",
+    "  gate 1   aidlc/intent.md",
+    "  gate 2   aidlc/requirements.md",
+    "  gate 3   aidlc/design.md, tasks.md",
+    "",
+    "**GATE 4 writes code.**",
+    "Now pytest goes 7 failed -> 56 pass.",
+    "",
+    "  gate 4a  core/spectrum.py",
+    "  gate 4b  the Streamlit page",
+  ].join("\n"),
+  paras: [
+    "Every line of this happens on main. You do not change branch again — what changes is which files exist, and what pytest says.",
+    "Nothing turns green until Gate 4. Three gates of documents with the number refusing to move is the design, not a fault.",
+  ],
+  prompt: "Lost? git branch --show-current, git status --short, pytest. Those three put you back on this list.",
+  footerLeft: FOOT, page: p(34),
+}).addNotes(
+  "Leave this up for the whole of Round 2 if you can spare the projector. The panic you are heading off is at Gate 3: three gates in, an hour gone, and the test count has not moved a single digit. Say out loud that documents are the deliverable of gates 1 to 3, and that the seven failures are supposed to sit there untouched until the maths gets written."
+);
+
+/* 35 */ codeSlide({
+  eyebrow: "Workshop 05",
+  title: "Gate 1 — do this",
+  code: [
+    "**GATE 1 — INTENT**    you write this one",
+    "",
+    "**DO**     open aidlc/intent.md",
+    "       answer the four questions",
+    "       replace every PLACEHOLDER",
+    "",
+    "**CHECK**  grep -c PLACEHOLDER  ->  0",
+    "",
+    "**END**    intent.md filled in",
+    "       pytest still 7 failed",
+  ].join("\n"),
+  paras: [
+    "The only gate with no prompt. Four questions, four sentences, in your own words — this is the one the agent cannot do for you.",
+    "It will refuse to write code while PLACEHOLDER is still in the file. That refusal is the gate working, not an error.",
+  ],
+  prompt: "The question that saves you is the last one: what is deliberately NOT included.",
+  footerLeft: FOOT, page: p(35),
+}).addNotes(
+  "Five minutes, and they will want to spend twenty. Push them to write badly and move on - a rough intent that exists beats a polished one that does not. The NOT-included question is the one to read aloud: no file loading, no saving, no third tone. That single line is what stops the agent gold-plating for the rest of the afternoon."
+);
+
+/* 36 */ codeSlide({
+  eyebrow: "Workshop 05",
+  title: "Gate 2 — do this",
+  code: [
+    "**GATE 2 — SPEC**      the agent drafts",
+    "",
+    "**DO**     start a NEW Cline task",
+    "       paste \"Gate 2\" from",
+    "       labs/PROMPTS.md",
+    "       read it, reply approved",
+    "",
+    "**CHECK**  could each criterion",
+    "       actually FAIL?",
+    "",
+    "**END**    aidlc/requirements.md",
+    "       pytest still 7 failed",
+  ].join("\n"),
+  paras: [
+    "Before you paste anything, write down on paper how you would check the spectrum is right. Then compare it with what comes back.",
+    "A criterion that cannot fail is not a criterion. “A spike appears near 50 Hz” passes code that is wrong by a factor of five hundred.",
+  ],
+  prompt: "One task per gate. A long conversation makes an agent worse, not better.",
+  footerLeft: FOOT, page: p(36),
+}).addNotes(
+  "This is the gate that teaches the course's actual skill, so do not let them rush it. Ask two or three to read out one acceptance criterion, and put it to the room: could that ever fail? Most first drafts say the peak is in the right place, which is exactly the check that misses the scaling bug they are about to hit at Gate 4."
+);
+
+/* 37 */ codeSlide({
+  eyebrow: "Workshop 05",
+  title: "Gate 3 — do this",
+  code: [
+    "**GATE 3 — PLAN**    one file per task",
+    "",
+    "**DO**     NEW task, paste \"Gate 3\"",
+    "       reply approved",
+    "       git commit -m \"gates 1-3\"",
+    "",
+    "**CHECK**  exactly two tasks, and",
+    "       no task touches two files",
+    "",
+    "**END**    aidlc/design.md",
+    "       aidlc/tasks.md",
+    "       pytest still 7 failed",
+  ].join("\n"),
+  paras: [
+    "You are approving a plan, not code. No code exists yet, which is exactly what makes this gate cheap to get right.",
+    "One task, one file. Working alone that looks like bookkeeping; in Session 2 it is what lets four people build at once with nothing to merge.",
+  ],
+  prompt: "If a task touches two files, send it back. That is the whole check.",
+  footerLeft: FOOT, page: p(37),
+}).addNotes(
+  "Flag forward to Session 2 explicitly here. The one-file-per-task rule looks like pedantry to someone working alone, and it is the only reason four people can build in parallel next week without anyone having to learn how to resolve a merge conflict."
+);
+
+/* 38 */ codeSlide({
+  eyebrow: "Workshop 05",
+  title: "Gate 4 — do this",
+  code: [
+    "**GATE 4 — BUILD**   one task at a time",
+    "",
+    "**DO**     NEW task, \"Gate 4 task 1\"",
+    "       pytest, then commit",
+    "       NEW task, \"Gate 4 task 2\"",
+    "       run the app, then commit",
+    "",
+    "**CHECK**  7 spectrum tests pass",
+    "       50 Hz spike reaches 1.0",
+    "",
+    "**END**    core/spectrum.py + page",
+    "       **pytest 56 pass**",
+  ].join("\n"),
+  paras: [
+    "Two tasks, two fresh Cline conversations, a commit after each. Never both in one task, however tempting it looks.",
+    "If a test fails, paste that one failure back and let it fix that one thing. Fifteen minutes stuck is the limit, then restore the reference.",
+  ],
+  prompt: "Commit every time the tests go green. That is what makes git checkout a safe undo.",
+  footerLeft: FOOT, page: p(38),
+}).addNotes(
+  "Forty minutes, and the room will fragment here - some green in ten, some still fighting the scaling at the end. Say the timebox before they start. The failure to watch for is not a failing test, it is a student clicking approve on a diff they have not read: that feels productive and is exactly how the DC bug gets committed."
+);
+
+/* 39 */ codeSlide({
+  eyebrow: "Workshop 05",
   title: "Ship it — ten minutes",
+  brands: ["streamlit", "github"],
   code: [
     "$ git push",
     "",
@@ -611,13 +753,136 @@ const p = n => String(n).padStart(2, "0");
     "The first deploy makes you a Streamlit account and asks for access to your repositories. Builds take two to five minutes, and sixty of us are building at once.",
   ],
   prompt: "Not live by 2:45? Push, and deploy at home. The code and the four documents are the deliverable; the URL is a bonus.",
-  footerLeft: FOOT, page: p(34),
+  footerLeft: FOOT, page: p(39),
 }).addNotes(
   "Ten minutes is tight and it depends on someone else's servers, so say the fallback BEFORE they start rather than after it goes wrong. Two things break most often: they forgot to push, so the cloud builds an empty repo; and they point it at the wrong main file. Neither is worth your time individually - put both on the board. Nothing in Lab 1 needs an API key, so the deploy is genuinely simple today. It stops being simple in Session 3, when the app starts calling a model and .env is not in the repository - that is what Streamlit's Secrets box is for, and LAB2 says so at the point it starts to matter."
 );
 
-/* 35 */ bodySlide({
+/* 40 */ dividerSlide({
+  n: 6,
+  name: "How the analyser actually works",
+  framing: "You approved this code. Now read it — forty lines, and two of them are the ones that matter.",
+}).addNotes(
+  "Deliberately after the lab, not before it. They have already watched an agent get the scaling wrong and a test catch it, so the maths now answers a question they actually have. Fifteen minutes; skip the last slide and hand it out if you are short."
+);
+
+/* 41 */ codeSlide({
   eyebrow: "Section 06",
+  title: "A wave becomes a list of numbers",
+  brands: ["python", "numpy"],
+  code: [
+    "**# make_signal — building the input**",
+    "",
+    "times = np.arange(0, duration, 1/fs)",
+    "signal = np.zeros_like(times)",
+    "",
+    "for freq, amp in components:",
+    "    signal += amp * np.sin(",
+    "        2 * np.pi * freq * times)",
+    "",
+    "fs = 1000 samples per second",
+    "duration = 1 s  ->  n = 1000 numbers",
+  ].join("\n"),
+  paras: [
+    "A computer never stores a curve. It stores the height of the wave at evenly spaced instants — here a thousand of them, one every millisecond.",
+    "sin(2·pi·f·t) is one tone; the loop adds a term per tone. Everything after this works on that list of a thousand numbers.",
+  ],
+  prompt: "fs is the only reason the numbers mean anything. Without it, a list of samples has no timescale at all.",
+  footerLeft: FOOT, page: p(41),
+}).addNotes(
+  "Put the real file on the projector rather than the slide. The line to dwell on is np.arange: the gap between samples is 1/fs, and that single number decides everything the rest of the code can and cannot see."
+);
+
+/* 42 */ bodySlide({
+  eyebrow: "Section 06",
+  title: "You only ever see half the sampling rate",
+  bullets: [
+    ["Sample at 1000 Hz and the highest frequency you can measure is 500.", "That ceiling is the Nyquist frequency, exactly half the sampling rate. The lab's 50 Hz and 120 Hz sit comfortably underneath it."],
+    ["Above the ceiling, a tone comes back wearing a disguise.", "A 600 Hz tone sampled at 1000 Hz is indistinguishable from a 400 Hz one. That is aliasing, and it is why wagon wheels appear to spin backwards on film."],
+    ["Nothing in the code will warn you.", "rfftfreq simply stops at 500 Hz. A tone above it does not raise an error — it quietly reports the wrong frequency, and the chart looks entirely reasonable."],
+    ["The fix is always the sampling rate, never the maths.", "To see a 1 kHz tone you must sample faster than 2 kHz. This is the Nyquist–Shannon sampling theorem, and it is the one piece of theory worth carrying out of today."],
+  ],
+  footerLeft: FOOT, page: p(42),
+}).addNotes(
+  "The wagon wheel is the example that lands - most of them have seen it without knowing it had a name. If anyone asks why the tests use 1000 Hz for a 120 Hz tone, this is the answer: comfortably more than twice the highest frequency in the signal."
+);
+
+/* 43 */ codeSlide({
+  eyebrow: "Section 06",
+  title: "From N samples to N/2 + 1 frequencies",
+  brands: ["python", "numpy"],
+  code: [
+    "**# spectrum — time into frequency**",
+    "",
+    "coefficients = np.fft.rfft(signal)",
+    "freqs = np.fft.rfftfreq(n, 1/fs)",
+    "",
+    "n = 1000 samples, fs = 1000 Hz",
+    "  ->  501 frequencies, 0 to 500 Hz",
+    "  ->  spaced fs/n = 1 Hz apart",
+    "",
+    "one second of signal buys you",
+    "  1 Hz of frequency detail",
+  ].join("\n"),
+  paras: [
+    "The discrete Fourier transform asks, of every frequency it can see, how much of that frequency is in the signal. rfft does it for real input and returns only the positive half.",
+    "Resolution comes from duration alone: bins sit fs/n apart, and n is fs times duration, so the spacing is 1/duration. Two seconds would give 0.5 Hz.",
+  ],
+  prompt: "Longer recording, finer frequency detail. Faster sampling, higher ceiling. Two different knobs.",
+  footerLeft: FOOT, page: p(43),
+}).addNotes(
+  "The two-knobs line is the one to make them repeat back. Students reliably conflate the two and try to fix poor resolution by sampling faster, which does nothing at all - it raises a ceiling they were not hitting. Recording for longer is the only thing that separates two close tones."
+);
+
+/* 44 */ codeSlide({
+  eyebrow: "Section 06",
+  title: "The two lines that scale it",
+  brands: ["python", "numpy"],
+  code: [
+    "**# the two lines that matter**",
+    "",
+    "mag = 2.0 * np.abs(coefficients) / n",
+    "mag[0] = np.abs(coefficients[0]) / n",
+    "",
+    "why 2/n ?",
+    "  a tone splits its energy",
+    "  between +f and -f",
+    "  rfft shows you only +f",
+    "",
+    "why is bin 0 different ?",
+    "  0 Hz has no negative twin",
+  ].join("\n"),
+  paras: [
+    "Without the 2/n a one-volt tone reads about five hundred. Every spike lands in the right place and every height is wrong.",
+    "Bin 0 is a constant offset. It was never split across a pair, so doubling it makes it twice what it should be — the bug the agent writes most often.",
+  ],
+  prompt: "Requirement 5 in your spec, and the single line most worth checking by hand.",
+  footerLeft: FOOT, page: p(44),
+}).addNotes(
+  "This is the payoff for the whole lab, so land it slowly. Ask which of their seven tests would still pass with the 2/n missing - the answer is the ones checking peak position, which is most of them. That is what an acceptance criterion that cannot fail buys you, stated in code they wrote this afternoon."
+);
+
+/* 45 */ twoColumnSlide({
+  eyebrow: "Section 06",
+  title: "Where to read more",
+  brands: ["python", "numpy", "streamlit", "pytest"],
+  left: {
+    label: "The theory",
+    lead: "Steven Smith, “The Scientist and Engineer's Guide to Digital Signal Processing” — free in full at dspguide.com. Chapters 8 to 12 cover everything on the last three slides.",
+    secondary: "For intuition rather than algebra, 3Blue1Brown's “But what is the Fourier Transform?” is twenty minutes and worth all of them. Search Nyquist–Shannon sampling theorem for the ceiling.",
+  },
+  right: {
+    label: "The tools",
+    lead: "numpy.org documents fft.rfft and fft.rfftfreq, including the normalisation conventions behind every scaling bug you saw today.",
+    secondary: "docs.streamlit.io for the interface and docs.pytest.org for the tests. Both are the official pages, both are shorter than you would expect, and both are what your agent was trained on.",
+  },
+  footerLeft: FOOT, page: p(45),
+}).addNotes(
+  "Hand this out rather than reading it. The one to actually push is dspguide.com - free, written for engineers who have not done the maths yet, and the book that makes the next signals course easier. Say plainly that the official docs are what the model has read, so quoting them in a prompt works better than describing what you want in your own words."
+);
+
+/* 46 */ bodySlide({
+  eyebrow: "Section 07",
   title: "Read the reference before you leave",
   bullets: [
     ["Everyone does this,", "whether your own version works or not. The prompts are in labs/EXPLAIN.md."],
@@ -625,13 +890,13 @@ const p = n => String(n).padStart(2, "0");
     ["Nothing here edits your work,", "so none of it can break your project. Explaining is the safest thing an agent does."],
     "Reading code you did not write, with an AI explaining it, is the most common way these tools are used at work.",
   ],
-  footerLeft: FOOT, page: p(35),
+  footerLeft: FOOT, page: p(46),
 }).addNotes(
   "Last fifteen minutes, everyone, whether or not their app worked. Insist on the mutation exercise: two tests fail, the peak-location test stays green, and the chart still looks perfectly reasonable."
 );
 
-/* 36 */ bodySlide({
-  eyebrow: "Section 06",
+/* 47 */ bodySlide({
+  eyebrow: "Section 07",
   title: "The files a person writes at work",
   bullets: [
     ["Open the four you approved.", "aidlc/intent.md, requirements.md, design.md and tasks.md — read them as one set, in order."],
@@ -639,30 +904,30 @@ const p = n => String(n).padStart(2, "0");
     ["Which is why you approved each one.", "Everything built today came out of those four files. A wrong line there becomes a wrong app, quickly and cheaply."],
     "labs/PROMPTS.md explains why each prompt is worded the way it is. Read it before Session 2 — you will be writing your own.",
   ],
-  footerLeft: FOOT, page: p(36),
+  footerLeft: FOOT, page: p(47),
 }).addNotes(
   "The closing idea of the session, and the bridge to Session 2. Say plainly that the documents, not the code, were the work today — the code was the cheap part, and it will only get cheaper. Anyone whose app did not run still has four documents they can show, and that is a real deliverable."
 );
 
-/* 37 */ takeawaysSlide({
+/* 48 */ takeawaysSlide({
   eyebrow: "Session 01",
   lines: [
     "An agent is a harness driving a model. Knowing which half broke is half the fix.",
     "A requirement you cannot check by running something is not a requirement yet.",
     "Looking right and being right differ, and only one of them survives a test.",
   ],
-  footerLeft: FOOT, page: p(37),
+  footerLeft: FOOT, page: p(48),
 }).addNotes(
   "Leave this up for a moment; this is the slide they photograph. Then homework, then the closing slide for questions."
 );
 
-/* 38 */ closingSlide({
+/* 49 */ closingSlide({
   question: "What did your agent get wrong?",
   reading: "Finish and deploy Lab 1 if it is not live yet",
   deadline: "Read the AI-DLC notes before Session 2",
   office: "come back in at github.com/codespaces · do not make a new one",
   contact: "Your Name · you@university.ac.th",
-  page: p(38),
+  page: p(49),
 }).addNotes(
   "Leave up during questions. Stress the log: three things the agent got wrong. Anyone who writes 'it all worked fine' did not look hard enough, and it is thirty per cent of the individual mark."
 );

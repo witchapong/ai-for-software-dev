@@ -126,6 +126,32 @@ cards · emoji · clip art · decorative icons · text over photographs · a thi
 background colour · a second accent hue · anything below 24px · hand-drawn SVG
 illustrations.
 
+**Brand marks are the one exception, and only under the rules below.** The ban is
+on *decorative* icons. A brand mark that names a tool the slide is already about
+carries information, in the same role as a figure's source line.
+
+## Brand marks
+
+A row of tool logos, right-aligned on the eyebrow baseline. It answers "which
+tool is this slide about?" at a glance, on a deck whose subject is tools.
+
+The element is deliberately rigid, because the thing that makes an icon
+decoration is discretion about where it goes:
+
+- **Monochrome `--ink-muted`. Never brand colours.** A dozen brand hues on warm
+  paper breaks both the two-background rule and the single-accent rule.
+- **One fixed size, 32px square**, from a 24x24 viewBox, so every mark occupies
+  an identical box whatever its drawn shape.
+- **Right-aligned to the right margin, on the eyebrow row**, 22px apart. Never
+  anywhere else on the slide, never inline with body text.
+- **Six per slide at most.**
+- **Only where the slide's own body text names the tool.** A mark is a label for
+  something already said, never a substitute for saying it.
+- **Never on the title slide, a section divider, or the closing slide.**
+
+Paths come from `simple-icons` (CC0); the trademarks remain their owners' and
+are used nominatively, exactly as naming the tool in prose would be.
+
 ## Image placeholders
 
 Until real assets exist, use a striped placeholder with a mono label saying what
@@ -544,7 +570,12 @@ For a buffer, use `await pres.write({ outputType: "nodebuffer" })`.
 - Respect the per-layout limits: 4 bullets, 6 agenda items, 3 takeaways, 12 code
   lines, one idea per slide.
 - Add no shapes, dividers, icons, or emphasis these recipes don't produce. No
-  shadows, gradients, rounded corners, or coloured fills behind text.
+  shadows, gradients, rounded corners, or coloured fills behind text. Brand
+  marks are the single exception, under the rules in **Brand marks** above.
+- **Never rely on column alignment inside a code block.** Space-padded ASCII
+  tables need a real monospace font; a renderer that substitutes one collapses
+  them into ragged text. Group the lines instead, so no line depends on lining
+  up with another.
 - Leave the lower part of the content box empty when the content ends there.
 - Section dividers and the takeaways slide are the only `PAPER_2` slides; the
   full-bleed image slide is the only `INK_BG` slide.

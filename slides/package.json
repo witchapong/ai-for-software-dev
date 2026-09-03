@@ -9,6 +9,7 @@
     "session1": "node session1.js"
   },
   "dependencies": {
-    "pptxgenjs": "^4.0.1"
+    "pptxgenjs": "^4.0.1",
+    "simple-icons": "^16.29.0"
   }
 }

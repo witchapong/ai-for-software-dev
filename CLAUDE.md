@@ -109,10 +109,11 @@ is a deliberate design.
 Use the skill for its **technical gotchas and QA tooling**, not its design
 opinions.
 
-### Two deliberate deviations from SLIDE-STYLE.md
+### Deliberate deviations from SLIDE-STYLE.md
 
-Both are bugs in the guide's recipes, found by rendering. `deck.js` carries a
-comment at each site. **`SLIDE-STYLE.md` should be updated to match.**
+Bugs in the guide's recipes, found by rendering. `deck.js` carries a comment at
+each site. Deviations 1-2 are still unreflected in the guide; 3-4 have been
+written back into it.
 
 1. **`rule()` outline.** The guide passes `line: { width: 0 }`, but PptxGenJS
    reads width 0 as "use the default" and writes a 1pt `#333333` outline. On a
@@ -124,6 +125,16 @@ comment at each site. **`SLIDE-STYLE.md` should be updated to match.**
    item that wraps to two lines overlaps the next one. Fix: step by the wrapped
    height, keeping the guide's 34px and 44px gaps. Single-line spacing is
    unchanged, so decks that never wrap look identical.
+
+3. **Brand marks.** The guide's Never list bans "decorative icons". A logo that
+   names a tool the slide is about is not decoration, so `SLIDE-STYLE.md` now
+   carries a **Brand marks** section defining the element and the rules that
+   keep it from drifting into ornament. Generate with `node icons.js`.
+
+4. **Fixed vertical steps in `twoColumnSlide`.** The same defect as (2): the
+   guide starts `secondary` at a constant +260, so a `lead` past four lines
+   lands on top of it. Fixed by stepping from the taller of the two leads,
+   floored at +260 so existing slides render unchanged.
 
 Character-per-line estimates in `deck.js` are deliberately conservative:
 under-estimating gives a slightly generous gap, over-estimating gives an

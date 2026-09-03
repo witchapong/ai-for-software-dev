@@ -79,6 +79,31 @@ const eyebrow = (s, label, color = INK_MUTED) =>
   text(s, M_X, M_TOP, W, 34, label, 24,
        { color, font: MONO, space: 0.14, caps: true });
 
+/* ---- brand marks ------------------------------------------------------
+ * DEVIATION 3 from SLIDE-STYLE.md, added at the author's request.
+ *
+ * The guide's Never list bans "decorative icons". These are not decorative:
+ * a mark here names a tool the slide is already about, carrying the same
+ * informational load as a figure's source line. To keep it from drifting
+ * into ornament the element is deliberately rigid — monochrome INK_MUTED,
+ * one fixed 32px square, right-aligned on the eyebrow baseline, six per
+ * slide at most, and never on a slide whose body text does not name the
+ * tool. Section dividers, the title and the closing slide take none.
+ */
+const BRAND_PX = 32, BRAND_GAP = 22, BRAND_MAX = 6;
+
+const brands = (s, list = []) => {
+  const use = list.slice(0, BRAND_MAX);
+  const total = use.length * BRAND_PX + (use.length - 1) * BRAND_GAP;
+  use.forEach((name, i) => {
+    s.addImage({
+      path: `icons/${name}.png`,
+      x: px(1920 - M_X - total + i * (BRAND_PX + BRAND_GAP)),
+      y: px(M_TOP + 1), w: px(BRAND_PX), h: px(BRAND_PX),
+    });
+  });
+};
+
 const footer = (s, left, page) => {
   text(s, M_X, FOOTER_Y, W - 200, 34, left, 24, { color: FOOTER_C, font: MONO });
   text(s, 1920 - M_X - 200, FOOTER_Y, 200, 34, page, 24,
@@ -86,8 +111,9 @@ const footer = (s, left, page) => {
 };
 
 /** Standard content-slide frame: eyebrow, title, hairline, footer. */
-const chrome = (s, eyebrowText, title, footerLeft, page) => {
+const chrome = (s, eyebrowText, title, footerLeft, page, brandList) => {
   eyebrow(s, eyebrowText);
+  brands(s, brandList);
   text(s, M_X, TITLE_Y, W, 80, title, 56, { bold: true, line: 1.1 });
   rule(s, M_X, RULE_Y, W);
   footer(s, footerLeft, page);
@@ -120,9 +146,9 @@ export const titleSlide = ({ course, title, subtitle, presenter, date }) => {
 };
 
 /** items: up to 6 strings. Numbered 01.., read down left then down right. */
-export const agendaSlide = ({ eyebrow: eb, items, footerLeft, page }) => {
+export const agendaSlide = ({ eyebrow: eb, items, footerLeft, page, brands: bl }) => {
   const s = slide();
-  chrome(s, eb, "Agenda", footerLeft, page);
+  chrome(s, eb, "Agenda", footerLeft, page, bl);
   const colW = (W - 80) / 2;
   items.slice(0, 6).forEach((item, i) => {
     const cx = M_X + (i % 2) * (colW + 80);
@@ -144,9 +170,9 @@ export const dividerSlide = ({ n, name, framing }) => {
 };
 
 /** bullets: up to 4. Each is a string, or [lead, rest] with lead bolded. */
-export const bodySlide = ({ eyebrow: eb, title, bullets, footerLeft, page }) => {
+export const bodySlide = ({ eyebrow: eb, title, bullets, footerLeft, page, brands: bl }) => {
   const s = slide();
-  chrome(s, eb, title, footerLeft, page);
+  chrome(s, eb, title, footerLeft, page, bl);
   const BULLET_W = 1500 - 58;
   // DEVIATION from SLIDE-STYLE.md, deliberate: the guide steps a fixed 90px per
   // bullet. PowerPoint has no flow layout, so a bullet that wraps to two lines
@@ -167,16 +193,28 @@ export const bodySlide = ({ eyebrow: eb, title, bullets, footerLeft, page }) => 
 };
 
 /** left/right: { label, lead, secondary } */
-export const twoColumnSlide = ({ eyebrow: eb, title, left, right, footerLeft, page }) => {
+export const twoColumnSlide = ({ eyebrow: eb, title, left, right, footerLeft, page, brands: bl }) => {
   const s = slide();
-  chrome(s, eb, title, footerLeft, page);
+  chrome(s, eb, title, footerLeft, page, bl);
   const colW = (W - 80) / 2;
+  // Same fixed-step defect as bodySlide had: the guide starts `secondary` at a
+  // constant +260, so a lead that wraps past four lines lands on top of it.
+  // Step by the taller of the two leads instead — one baseline for both
+  // columns, since the guide asks the sides to stay the same visual length.
+  // 44 chars/line under-estimates the ~50 the column really holds; that errs
+  // toward a generous gap. Short leads still sit at exactly +260, so every
+  // existing two-column slide renders unchanged.
+  const TC_CHARS = 44, TC_LINE = 32 * 1.45;
+  const leadRows = Math.max(1,
+    Math.ceil((left.lead || "").length / TC_CHARS),
+    Math.ceil((right.lead || "").length / TC_CHARS));
+  const secY = Math.max(BODY_Y + 260, BODY_Y + 64 + leadRows * TC_LINE + 28);
   [left, right].forEach((col, i) => {
     const cx = M_X + i * (colW + 80);
     text(s, cx, BODY_Y, colW, 40, col.label, 26,
          { color: ACCENT, font: MONO, space: 0.1, caps: true });
     text(s, cx, BODY_Y + 64, colW, 200, col.lead, 32, { line: 1.45 });
-    text(s, cx, BODY_Y + 260, colW, 200, col.secondary, 32,
+    text(s, cx, secY, colW, 200, col.secondary, 32,
          { color: INK_MUTED, line: 1.45 });
   });
   return s;
@@ -199,9 +237,9 @@ export const fullBleedSlide = ({ caption, source, image }) => {
 };
 
 /** paras: up to 2. Image is aspect-fit — never cropped. */
-export const figureSlide = ({ eyebrow: eb, title, paras, figSource, image, footerLeft, page }) => {
+export const figureSlide = ({ eyebrow: eb, title, paras, figSource, image, footerLeft, page, brands: bl }) => {
   const s = slide();
-  chrome(s, eb, title, footerLeft, page);
+  chrome(s, eb, title, footerLeft, page, bl);
   const figW = (W - 64) * 0.575, figH = BODY_H - 40;
   const tx = M_X + figW + 64, tw = W - figW - 64;
   if (image) {
@@ -226,9 +264,9 @@ export const figureSlide = ({ eyebrow: eb, title, paras, figSource, image, foote
 };
 
 /** code: a string with newlines, <= 12 lines. */
-export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft, page }) => {
+export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft, page, brands: bl }) => {
   const s = slide();
-  chrome(s, eb, title, footerLeft, page);
+  chrome(s, eb, title, footerLeft, page, bl);
   const codeW = (W - 56) * 0.608, codeH = BODY_H - 40;
   s.addShape(pres.ShapeType.rect, {
     x: px(M_X), y: px(BODY_Y), w: px(codeW), h: px(codeH),
@@ -269,9 +307,9 @@ export const codeSlide = ({ eyebrow: eb, title, code, paras, prompt, footerLeft,
 };
 
 /** lines: exactly 3, in the order taught. */
-export const takeawaysSlide = ({ eyebrow: eb, lines, footerLeft, page }) => {
+export const takeawaysSlide = ({ eyebrow: eb, lines, footerLeft, page, brands: bl }) => {
   const s = slide(PAPER_2);
-  chrome(s, eb, "What to take away", footerLeft, page);
+  chrome(s, eb, "What to take away", footerLeft, page, bl);
   // Same deliberate deviation as bodySlide: the guide's fixed 132px step gives
   // a 31px gap after a two-line takeaway and 82px after a one-line one. Step by
   // the wrapped height so the gap is the 44px the guide specifies, either way.
