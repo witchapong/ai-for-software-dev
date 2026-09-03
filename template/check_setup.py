@@ -1,7 +1,7 @@
 """Run this before the first session:  python check_setup.py
 
 It checks four things and tells you exactly what to fix if any of them fail.
-Do not come to class until this prints "ALL CHECKS PASSED".
+Do not come to class until this prints "ALL CHECKS PASSED" or "READY".
 """
 
 import os

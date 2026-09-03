@@ -45,6 +45,31 @@ That is the setup command installing packages. Let it finish before you run
 `check_setup.py`, or you will be told packages are missing while they are
 still arriving.
 
+**I typed a message to Cline and it vanished**
+If the panel is showing **Resume Task**, or a command still marked *Pending*,
+Cline is not listening — anything you type is silently discarded. Resume or
+cancel the pending thing first, then type. If it will not clear, reload the
+window (see the next entry).
+
+**There is a chat panel on the right that is not Cline**
+That is GitHub Copilot ("Build with Agent"), which is on by default and looks
+like exactly the sort of AI assistant this lab talks about. We are not using
+it. Cline is the robot icon on the far LEFT strip.
+
+**Cline asks me to click Save more than once for one file**
+Normal. Creating a file, then showing you the diff, then confirming, can each
+want a click. Keep clicking Save until the panel moves on.
+
+**My typing goes into the wrong pane**
+The editor, the terminal and the app preview all take focus, and VS Code in a
+browser hands it around. Close the preview tab when you are working in the
+terminal, click into the terminal, and check the cursor is blinking there
+before you type a command.
+
+**The icons on the left strip moved**
+They reorder between reloads and none of them are labelled. Hover before you
+click — Cline is the robot.
+
 **"Start New Task" does nothing and the old task stays on screen**
 Cline will not start a new task while the old one has a command waiting for
 approval or still marked *Running*. Approve or cancel whatever is pending

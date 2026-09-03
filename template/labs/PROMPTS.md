@@ -77,7 +77,9 @@ page with number inputs for two tones, each with a frequency in hertz and an
 amplitude, plus a sampling rate. Import make_signal, spectrum and
 peak_frequency from core.spectrum. Show the strongest frequency, then two
 charts: the combined waveform against time, and the amplitude of each frequency
-present.
+present. Default the inputs to tone 1 at 50 Hz amplitude 1.0, tone 2 at 120 Hz
+amplitude 0.5, sampling rate 1000 and duration 1.0 second, so the charts are
+readable the moment the page opens.
 
 Write the whole file in one go. Write it now, do not print it in your reply
 instead. Do not modify core/spectrum.py.

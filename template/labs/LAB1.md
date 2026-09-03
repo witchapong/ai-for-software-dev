@@ -109,18 +109,24 @@ annoyance.
    Paste the matching key.
 4. Choose a **model**. Cline's list is its own and does not match the names in
    `.env` or in Mistral's documentation: the entries carry a date, like
-   `devstral-2512`, and there is no "latest" among them. Pick one starting
-   with **`devstral`** if you see one — those are the coding models — otherwise
-   **`mistral-medium`**.
+   `devstral-2512`. Some entries do say "latest", but the dated coding models
+   are the ones you want. Pick one starting with **`devstral`** if you see one,
+   otherwise **`mistral-medium`**.
 5. **If you have a second key, add that provider too.** Cline runs one provider
    at a time; switching means changing it in the model selector, not having two
    set up side by side.
 6. Type **hello** into Cline and check that you get a reply.
 
 > **Check the model name after any window reload.** It is the small grey text
-> at the bottom of the Cline box. Cline can quietly reset to a different model,
-> sometimes a **paid** one. If you see a price per million tokens beside it,
-> change it back before you do anything else.
+> at the bottom of the Cline box, and Cline can quietly reset it.
+>
+> Judge it by **whose** model it is, not by the price. Cline shows a price per
+> million tokens for everything; on a free key you are rate-limited, not
+> billed. But if the name stops looking like a Mistral one — anything with
+> `zai`, `anthropic`, `openai`, `claude` or `gpt` in it — it has jumped to a
+> provider you have no key for, and nothing will work. Set it back. If
+> `devstral` has disappeared from the list, which happens after a reload,
+> take `mistral-medium`.
 
 **Then close the `.env` tab.** Your keys are passwords and they are sitting
 on screen. Get in the habit now — you will be sharing this screen later.
@@ -128,8 +134,11 @@ on screen. Get in the habit now — you will be sharing this screen later.
 ### Switching providers is a two-minute skill you need today
 
 Do it once now, deliberately, while nothing is at stake: open the model
-selector, switch from Gemini to Mistral, ask "hello", switch back. That way
-when it happens under pressure you already know where the button is.
+selector, change the model, ask "hello", change it back. That way when it
+happens under pressure you already know where the button is.
+
+**Only got one key?** You cannot practise the switch, so read the table below
+instead and know it is there.
 
 You will hit one of two failures today, and they need opposite responses:
 
@@ -175,8 +184,12 @@ time-domain waveform and the frequency spectrum.
 ### Step 3 — Accept whatever it does
 
 Expect two or three `429 rate limit exceeded` messages per task on a free tier.
-Cline retries by itself; each costs twenty to forty seconds. That is the limit
-working, not a fault, and it is not something you need to fix.
+Cline retries by itself and each costs twenty to forty seconds — that is the
+limit working, not a fault.
+
+Sometimes it gives up: **"Auto-retry failed after 3 attempts. Manual
+intervention required."** That is not broken either. Wait about a minute and
+click **Retry**.
 
 No spec. No plan. No corrections beyond getting it to run. When it asks to
 create or edit a file, click **Save**. If it crashes, paste the error back to
@@ -359,8 +372,8 @@ that too — but they also check that **a tone entered at 1.0 reads back as
 1.0**. The gap between those two sentences is the entire skill this lab is
 teaching. Note it in your log.
 
-Reply `approved` once the file reflects what `tests/test_spectrum.py`
-actually demands.
+Reply `approved` **in the same Cline task**. Then start a **new** task for
+Gate 3 — one task per gate, because a long conversation makes an agent worse.
 
 ### Gate 3 — Plan (10 minutes). The agent drafts, you approve.
 
@@ -513,7 +526,9 @@ Either way, put one thing you learned into your log.
 - [ ] Your app is live at a public URL
 - [ ] You have run `git diff round1 main` and looked at it
 - [ ] You have worked through `labs/EXPLAIN.md`
-- [ ] Your log has the Round 1 number and the Round 2 number in it
+- [ ] Your log has the Round 1 number and the Round 2 number in it — and if
+      Round 1 never drew a chart, "no number, it crashed" is the answer, and it
+      counts
 
 ## If you finish early
 
