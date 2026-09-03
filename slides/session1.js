@@ -70,14 +70,14 @@ const p = n => String(n).padStart(2, "0");
   eyebrow: "Setup",
   title: "Cline needs its own key",
   bullets: [
-    [".env is for your app.", "check_setup.py and core/llm.py read it. Cline never does — it is a separate extension, with its own settings and its own copy of the key."],
-    ["Point it at a provider yourself.", "Cline icon in the sidebar, choose Google Gemini, paste the key, pick any current Flash model."],
-    ["Add Mistral as a second provider.", "Model devstral-medium-latest. Two providers is a dropdown change instead of a dead stop."],
-    "Type “hello” into Cline before we begin. Passing setup tells you nothing about whether your agent can talk to anything.",
+    [".env is for your app.", "check_setup.py and core/llm.py read it. Cline never does — separate program, separate settings, its own copy of the key."],
+    ["It opens on a screen nobody expects.", "“How will you use Cline?”, with Absolutely Free already ticked. Do not take it — choose Bring my own API key, or your key is never used."],
+    ["Then provider, then model.", "Mistral or Gemini, paste the key. Model names carry a date — devstral-2512, not devstral-latest. Prefer a devstral if you see one."],
+    "Check the model name after any reload: Cline can reset itself, sometimes to a paid one. A price per million tokens beside it means change it back.",
   ],
   footerLeft: FOOT, page: p(4),
 }).addNotes(
-  "The single most likely way for a student to arrive unable to work, and it is invisible: every check passes, then Cline opens on a configuration screen nobody mentioned. Walk the room on this one specifically. The model names in Cline are Cline's own list and will not match the names in .env, which confuses people who are paying attention."
+  "The single most likely way for a student to arrive unable to work, and it is invisible: every check passes, then Cline opens on a configuration screen nobody mentioned - with the wrong option already selected for them. Do this one on the projector rather than describing it, because the free option is the big attractive button and taking it leaves their key unused with no error to tell them. Cline's model list is its own: it uses dated names and has no latest, so anything you read elsewhere will not match it."
 );
 
 /* 05 */ agendaSlide({

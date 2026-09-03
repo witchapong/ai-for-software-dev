@@ -34,15 +34,28 @@ class, because 60 people cannot be unblocked at once.
    ```
 
    Keep fixing what it reports until it prints `ALL CHECKS PASSED`.
-7. **Point Cline at a model.** This is a separate step, and skipping it is the
-   most common way to arrive unable to work. `.env` holds keys for the *app*;
-   Cline is an extension with its own settings and its own copy of the key.
-   - Click the **Cline icon** in the left sidebar
-   - Choose provider **Google Gemini**, paste your Gemini key, pick any
-     current **Flash** model
-   - Add **Mistral** as a second provider, with model
-     **`devstral-medium-latest`**
-   - Type "hello" into Cline and confirm you get a reply
+7. **Point Cline at a model.** This is a separate step from `.env`, and
+   skipping it is the most common way to arrive unable to work. `.env` holds
+   keys for the *app*; Cline is a different program with its own settings.
+
+   - Click the **Cline icon** — the robot, near the bottom of the strip of
+     icons down the far left. The icons are unlabelled; hover to check.
+   - Cline opens on **"How will you use Cline?"**. It has already ticked
+     **Absolutely Free** for you. **Do not take it.** Choose
+     **Bring my own API key** — the free option signs you into Cline's own
+     service and never touches the key you just made.
+   - Provider: **Mistral** (or Google Gemini). Paste the matching key.
+   - Model: pick one whose name starts with **`devstral`** if you see one —
+     they are Mistral's coding models. Otherwise **`mistral-medium`**. The
+     names carry a date, like `devstral-2512`; there is no "latest" in this
+     list even though other Mistral documentation uses that word.
+   - Type **hello** at it and check you get a reply.
+
+   > **Check the model name after any window reload.** It is the small grey
+   > text at the bottom of the Cline box. Cline can reset itself to a
+   > different model, sometimes a **paid** one — if you see a price per
+   > million tokens next to it, change it back before you do anything else.
+
 8. **Make the reference reachable.** In the terminal:
 
    ```

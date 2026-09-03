@@ -100,15 +100,27 @@ That split — the tool that does things, and the model that decides what to
 say — is the mental model this whole course runs on. You just met it as an
 annoyance.
 
-1. Click the **Cline icon** in the left sidebar.
-2. It asks for an **API provider**. Choose **Google Gemini**.
-3. Paste your Gemini key.
-4. Choose a **model**. The names in Cline's list are Cline's own — they will
-   not all match the names in `.env` or in `core/llm.py`. Pick any current
-   **Flash** model.
-5. **Add Mistral as a second provider**, with your Mistral key, and pick
-   **`devstral-medium-latest`**. This is not optional. You will need it.
-6. Type "hello" into Cline and check that you get a reply.
+1. Click the **Cline icon** — the robot, near the bottom of the strip of icons
+   down the far left. They are unlabelled; hover to check.
+2. Cline opens on **"How will you use Cline?"** with **Absolutely Free**
+   already ticked. **Do not take it** — that signs you into Cline's own service
+   and never uses your key. Choose **Bring my own API key**.
+3. Provider: **Mistral** (or **Google Gemini** if that is the key you have).
+   Paste the matching key.
+4. Choose a **model**. Cline's list is its own and does not match the names in
+   `.env` or in Mistral's documentation: the entries carry a date, like
+   `devstral-2512`, and there is no "latest" among them. Pick one starting
+   with **`devstral`** if you see one — those are the coding models — otherwise
+   **`mistral-medium`**.
+5. **If you have a second key, add that provider too.** Cline runs one provider
+   at a time; switching means changing it in the model selector, not having two
+   set up side by side.
+6. Type **hello** into Cline and check that you get a reply.
+
+> **Check the model name after any window reload.** It is the small grey text
+> at the bottom of the Cline box. Cline can quietly reset to a different model,
+> sometimes a **paid** one. If you see a price per million tokens beside it,
+> change it back before you do anything else.
 
 **Then close the `.env` tab.** Your keys are passwords and they are sitting
 on screen. Get in the habit now — you will be sharing this screen later.
@@ -162,6 +174,10 @@ time-domain waveform and the frequency spectrum.
 
 ### Step 3 — Accept whatever it does
 
+Expect two or three `429 rate limit exceeded` messages per task on a free tier.
+Cline retries by itself; each costs twenty to forty seconds. That is the limit
+working, not a fault, and it is not something you need to fix.
+
 No spec. No plan. No corrections beyond getting it to run. When it asks to
 create or edit a file, click **Save**. If it crashes, paste the error back to
 it and let it try again. Your only goal is something on screen.
@@ -173,7 +189,19 @@ streamlit run app.py
 ```
 
 A preview opens. If it does not, open the **Ports** tab and click the globe
-icon next to port 8501. Find your new page in the sidebar.
+icon next to port 8501.
+
+**Your new page may not be in the sidebar.** Nothing told the agent about the
+`pages/` convention, so it has probably written a standalone script at the top
+level instead. If the sidebar only shows *app* and *Example*, look at what it
+actually created and run that file by name:
+
+```
+streamlit run whatever_it_made.py
+```
+
+That is not a mistake to fix — it is Round 1 being Round 1, and it is one of
+the things you will compare at the end.
 
 > **Run it yourself — do not ask your agent to.** "Run my app" looks like a
 > reasonable request and it wedges Cline completely: a web server never exits,

@@ -31,6 +31,27 @@ and Cline's settings live inside the Codespace too. A rebuild loses both keys
 and your agent configuration, and you set those up again from scratch. Your
 *code* is safe once pushed; your setup is not.
 
+**"Do you trust the authors of the files in this folder?"**
+VS Code asks this the first time a Codespace opens. It is your own repository,
+made from the template. Click **Trust Folder & Continue** — nothing works until
+you do.
+
+**A popup about `python.terminal.useEnvFile` or "environment injection"**
+Ignore it. It sounds like your key will not be read; it will. `check_setup.py`
+and the app load `.env` themselves.
+
+**The terminal is still scrolling when the Codespace opens**
+That is the setup command installing packages. Let it finish before you run
+`check_setup.py`, or you will be told packages are missing while they are
+still arriving.
+
+**"Start New Task" does nothing and the old task stays on screen**
+Cline will not start a new task while the old one has a command waiting for
+approval or still marked *Running*. Approve or cancel whatever is pending
+first. If that does not free it, reload the editor: **Ctrl+Shift+P** →
+**Developer: Reload Window**. Your files are safe; check the model name at the
+bottom of the Cline box afterwards, because a reload can reset it.
+
 **`error: remote reference already exists`**
 You already added it — at home, following the README. Skip that line and run
 `git fetch reference` on its own.

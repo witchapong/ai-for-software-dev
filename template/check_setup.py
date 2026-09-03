@@ -91,9 +91,9 @@ def check_second_provider(environ: dict[str, str]) -> tuple[bool, str]:
         else "https://aistudio.google.com/apikey"
     )
     return False, (
-        f"only one provider is set. Add {missing} to .env - free at {where}. "
-        "When a provider refuses service mid-lab, the second key is how you "
-        "carry on instead of stopping."
+        f"only one provider is set. You can start the lab like this. Add "
+        f"{missing} to .env when you can - free at {where} - because when a "
+        "provider refuses service mid-lab, a second key is how you carry on."
     )
 
 
@@ -196,28 +196,38 @@ def main() -> int:
     # network call happened before ANY line was printed, so the terminal sat
     # blank for ten or twenty seconds and read as a hang. It is the first thing
     # a student ever runs; it has to look alive.
+    # (label, function, required). The backup provider is ADVICE, not a gate:
+    # a student who cannot get a second key - no phone number, blocked account,
+    # wrong region - was being told by three separate documents that they were
+    # not ready to start, with no way to satisfy the check. They would sit and
+    # wait for an instructor instead of working.
     checks = [
-        ("Python version", check_python_version),
-        ("Packages", check_imports),
-        ("API key present", lambda: check_env(dict(os.environ))),
-        ("API key works", check_live_call),
-        ("Backup provider", lambda: check_second_provider(dict(os.environ))),
+        ("Python version", check_python_version, True),
+        ("Packages", check_imports, True),
+        ("API key present", lambda: check_env(dict(os.environ)), True),
+        ("API key works", check_live_call, True),
+        ("Backup provider", lambda: check_second_provider(dict(os.environ)), False),
     ]
 
     print()
     all_passed = True
-    for label, run in checks:
+    warned = False
+    for label, run, required in checks:
         if label == "API key works":
             print("  ...  asking a provider to answer. This takes a few seconds.",
                   flush=True)
         passed, message = run()
-        mark = "PASS" if passed else "FAIL"
+        mark = "PASS" if passed else ("FAIL" if required else "WARN")
         print(f"[{mark}] {label}: {message}", flush=True)
-        all_passed = all_passed and passed
+        if required:
+            all_passed = all_passed and passed
+        elif not passed:
+            warned = True
 
     print()
-    if all_passed:
-        print("ALL CHECKS PASSED - you are ready for the session.")
+    if all_passed and warned:
+        print("READY - with one warning above. A [WARN] is advice, not a", flush=True)
+        print("blocker: you can start the lab now and fix it later.")
         return 0
     print("Some checks failed. Fix the items marked FAIL above, then run this again.")
     print("Still stuck after 10 minutes? See TROUBLESHOOTING.md")
