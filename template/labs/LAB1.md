@@ -343,6 +343,14 @@ file.
 
 ### Gate 1 — Intent (5 minutes). You write this one.
 
+| | |
+|---|---|
+| **Paste** | nothing — this is the gate a person writes |
+| **You edit** | `aidlc/intent.md` |
+| **Check** | `grep -c PLACEHOLDER aidlc/intent.md` returns `0` |
+| **Then** | move to Gate 2 |
+
+
 Open `aidlc/intent.md`. Replace every `PLACEHOLDER` line with your own
 answer. Four questions:
 
@@ -357,6 +365,14 @@ Your agent will refuse to write code while the placeholder text is still
 there. That refusal is the file working.
 
 ### Gate 2 — Spec (10 minutes). The agent drafts, you approve.
+
+| | |
+|---|---|
+| **Paste** | the **Gate 2** prompt from `labs/PROMPTS.md`, into a new Cline task |
+| **You get** | `aidlc/requirements.md` — a numbered table |
+| **Check** | every acceptance criterion could actually fail. Vague ones like "appears at 0 Hz" pass broken code — fix them yourself |
+| **Then** | reply `approved` in that same task |
+
 
 **Before you prompt anything**, write down in your own words how you would
 *check* that the spectrum your app draws is correct. Do it now, on paper.
@@ -376,6 +392,14 @@ Reply `approved` **in the same Cline task**. Then start a **new** task for
 Gate 3 — one task per gate, because a long conversation makes an agent worse.
 
 ### Gate 3 — Plan (10 minutes). The agent drafts, you approve.
+
+| | |
+|---|---|
+| **Paste** | the **Gate 3** prompt from `labs/PROMPTS.md`, into a **new** task |
+| **You get** | `aidlc/design.md` and `aidlc/tasks.md` |
+| **Check** | exactly two tasks, and no task touches two files |
+| **Then** | reply `approved`, and commit: `git add -A && git commit -m "gates 1-3"` |
+
 
 Paste the **Gate 3** prompt from `labs/PROMPTS.md`. You get two files:
 
@@ -413,6 +437,21 @@ That asymmetry is requirement 5 in your spec, and it is the single thing the
 agent is most likely to get wrong.
 
 ### Gate 4 — Build (40 minutes). One task at a time.
+
+| | |
+|---|---|
+| **Paste** | **Gate 4, task 1** from `labs/PROMPTS.md`, into a **new** task |
+| **You get** | `core/spectrum.py` |
+| **Check** | `pytest tests/test_spectrum.py -q` says `7 passed` |
+| **Then** | `git add -A && git commit -m "task 1: the maths"` |
+
+| | |
+|---|---|
+| **Paste** | **Gate 4, task 2**, into another **new** task |
+| **You get** | `pages/2_Spectrum_Analyzer.py` |
+| **Check** | run the app, set 50 Hz at 1.0 — **the spike reaches 1.0** |
+| **Then** | commit again |
+
 
 **Task 1, the maths.** Paste the **Gate 4, task 1** prompt from
 `labs/PROMPTS.md`. Then run:
