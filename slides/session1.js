@@ -431,7 +431,7 @@ const p = n => String(n).padStart(2, "0");
     "        core/spectrum.py.”",
     "",
     "**WRITES**  core/spectrum.py",
-    "        $ pytest -> 7 passed",
+    "        7 spectrum tests pass",
   ].join("\n"),
   paras: [
     "The only box that produces code instead of a document, and it still reads the two documents before it. One task, one file, tests run, diff read, commit.",

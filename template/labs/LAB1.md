@@ -162,7 +162,40 @@ lab was being written, on an ordinary weekday, with one user.
 
 ## Round 1: just ask for it (25 minutes)
 
+### Where each step leaves you
+
+Round 1 happens on a branch called `round1`. Nothing you build here reaches
+`main` — that is deliberate, and it is what makes the comparison at the end
+honest.
+
+| After | You are on | Your files | `pytest` |
+|---|---|---|---|
+| Step 1 | `round1` | nothing changed yet | not run |
+| Step 3 | `round1` | whatever the agent chose to write | `7 failed` |
+| Step 6 | `main` | Round 1's files vanish from the explorer — safe on `round1` | `7 failed` |
+
+**One file decides how this round goes: `.clinerules`.** Right now it holds
+the ungated version — safety rules only, no approval stops. That is why your
+agent will go straight to code without asking you anything.
+`.clinerules.gates` is sitting next to it, unused, until Round 2 Step 1.
+
+**Round 1 is not expected to make a single test pass, and it is not supposed
+to.** Your agent was never told the tests exist, so it is not aiming at them.
+Seven failures at the start, almost certainly seven at the end — that is the
+honest measure of what "just ask for it" bought you.
+
 ### Step 1 — Put Round 1 on its own branch
+
+**Start on `main`, with nothing uncommitted.** Check both:
+
+```
+git branch --show-current     # must print: main
+git status --short            # must print nothing at all
+```
+
+If `git status --short` lists any file, commit it before you go on. A branch
+switch carries uncommitted changes with you, and they resurface in the middle
+of Round 1 looking like something your agent did.
 
 You are going to throw this work away, but keeping it lets you compare the
 two rounds at the end.
@@ -171,7 +204,14 @@ two rounds at the end.
 git checkout -b round1
 ```
 
+**You are now on `round1`, and not one file has changed.** You have only made
+a place to put them.
+
 ### Step 2 — Ask for the app
+
+**You are on `round1`.** The agent has no spec, no plan, and no rule telling
+it to stop and ask. It will decide by itself which files to create — and
+where it puts them is one of the things you compare at the end.
 
 Open Cline, start a **new task**, and paste exactly this:
 
@@ -242,7 +282,21 @@ applies:
 Whatever you find, write down the number you actually saw. It is the most
 useful line in your log.
 
+Then, with the app still running, open a second terminal and run:
+
+```
+pytest -q | tail -1
+```
+
+Expect `7 failed, 49 passed, 25 deselected`. **A working app and seven failing
+tests at the same time** — that is Round 1 in one line, and it is worth a
+sentence in your log. (If your agent happened to edit `core/spectrum.py` you
+may see fewer failures. Note whichever number you actually get.)
+
 ### Step 6 — Put it away
+
+**You are on `round1`, the server is running, and your work is uncommitted.**
+All three change here.
 
 ```
 Ctrl+C                                    # stop the app first
@@ -256,8 +310,21 @@ that no longer exists on this branch, your next `streamlit run` quietly lands on
 port 8502 instead of 8501, and you spend ten minutes looking at a stale tab
 wondering why nothing changes.
 
-Your Round 1 app is safe on the `round1` branch, and `main` is clean again.
-Your `.env` survives — it is git-ignored.
+**Everything the agent wrote will disappear from the file explorer**, and
+that is what is supposed to happen. Those files exist on the `round1` branch,
+not on this one. `git checkout round1` brings them all back whenever you want
+them.
+
+**You end on `main`: tree clean, `pytest` back to `7 failed, 49 passed`,
+`core/spectrum.py` still an untouched stub.** Confirm it if you like:
+
+```
+git branch --show-current     # main
+git status --short            # nothing
+```
+
+Your `.env` survives the switch — it is git-ignored, so it belongs to no
+branch and is never committed.
 
 ---
 
@@ -270,6 +337,36 @@ block, not inside it. If you are behind, Gate 4 task 2 is the one to shorten.
 Same app. Different route. Every prompt you need is in `labs/PROMPTS.md` —
 copy them exactly on your first run.
 
+### Where each gate leaves you
+
+**Everything from here to the end of the lab happens on `main`.** You do not
+change branch again. What changes is which files exist, and what `pytest` says.
+
+| After | Files that now exist | `pytest` |
+|---|---|---|
+| Step 0 | none of yours yet | `7 failed, 49 passed` |
+| Step 1 | `.clinerules` swapped for the gated one | `7 failed, 49 passed` |
+| Gate 1 | `aidlc/intent.md`, filled in by you | `7 failed, 49 passed` |
+| Gate 2 | `+ aidlc/requirements.md` | `7 failed, 49 passed` |
+| Gate 3 | `+ aidlc/design.md`, `aidlc/tasks.md` | `7 failed, 49 passed` |
+| Gate 4 task 1 | `core/spectrum.py` written | **`56 passed`** |
+| Gate 4 task 2 | `+ pages/2_Spectrum_Analyzer.py` | `56 passed` |
+| Gate 5 | same files, now live on the internet | `56 passed` |
+
+**Nothing turns green until Gate 4.** Gates 1, 2 and 3 produce documents, not
+code. If you are three gates in and still staring at seven failures, you are
+exactly where you should be — the count does not move until the maths gets
+written.
+
+> **Lost at any point?** These three lines tell you where you are. Match them
+> against the table above.
+>
+> ```
+> git branch --show-current      # which branch you are on
+> git status --short             # what you have changed but not committed
+> pytest -q | tail -1            # how far the code has actually got
+> ```
+
 ### Step 0 — Check you are on `main`, and see where you start from
 
 Round 2 belongs on `main`. If you are still on the `round1` branch, everything
@@ -278,10 +375,11 @@ files are still sitting there for your agent to find.
 
 ```
 git branch --show-current
+git status --short
 ```
 
-**It must say `main`.** If it says `round1`, you have not finished Round 1 —
-go back and do Step 6:
+**The first must say `main`, and the second must print nothing.** If it says
+`round1`, you have not finished Round 1 — go back and do Step 6:
 
 ```
 git add -A
@@ -296,23 +394,32 @@ pytest
 ```
 
 ```
-7 failed, 22 passed, 25 deselected
+7 failed, 49 passed, 25 deselected
 ```
 
-**That is correct, not broken.** The 22 passing are the template's own checks.
+**That is correct, not broken.** The 49 passing are the template's own checks.
 The 25 deselected belong to Session 3 and stay hidden until you get there. The
 7 failing are your specification, and watching those seven turn green is the
 whole of Round 2.
 
+**You get exactly this number because you are on `main`.** Round 1's code is
+on `round1` and cannot affect anything here. Everyone in the room sees the
+same seven failures at this point, no matter how Round 1 went for them.
+
 ### Step 1 — Turn the gates on
 
 In Round 1 your agent had no process rules, which is why it went straight to
-code. The rules that change that are already in your repository:
+code. The rules that change that are already in your repository — this copies
+one file over another:
 
 ```
 cp .clinerules.gates .clinerules
 git add .clinerules && git commit -m "turn the gates on"
 ```
+
+**`.clinerules` now holds the gated rules; `.clinerules.gates` is unchanged
+and still sits beside it** as the copy you took it from. Nothing else in the
+repository moved.
 
 **Commit it.** Otherwise the next `git checkout -- .` you run quietly puts
 the old file back, your agent stops asking for approval, and you will not
@@ -349,6 +456,7 @@ file.
 | **You edit** | `aidlc/intent.md` |
 | **Check** | `grep -c PLACEHOLDER aidlc/intent.md` returns `0` |
 | **Then** | move to Gate 2 |
+| **You end with** | `aidlc/intent.md` filled in · no code yet · still `7 failed` |
 
 
 Open `aidlc/intent.md`. Replace every `PLACEHOLDER` line with your own
@@ -372,6 +480,7 @@ there. That refusal is the file working.
 | **You get** | `aidlc/requirements.md` — a numbered table |
 | **Check** | every acceptance criterion could actually fail. Vague ones like "appears at 0 Hz" pass broken code — fix them yourself |
 | **Then** | reply `approved` in that same task |
+| **You end with** | `+ aidlc/requirements.md` · still `7 failed` |
 
 
 **Before you prompt anything**, write down in your own words how you would
@@ -399,6 +508,7 @@ Gate 3 — one task per gate, because a long conversation makes an agent worse.
 | **You get** | `aidlc/design.md` and `aidlc/tasks.md` |
 | **Check** | exactly two tasks, and no task touches two files |
 | **Then** | reply `approved`, and commit: `git add -A && git commit -m "gates 1-3"` |
+| **You end with** | `+ aidlc/design.md`, `aidlc/tasks.md` · committed · still `7 failed` |
 
 
 Paste the **Gate 3** prompt from `labs/PROMPTS.md`. You get two files:
@@ -444,6 +554,7 @@ agent is most likely to get wrong.
 | **You get** | `core/spectrum.py` |
 | **Check** | `pytest tests/test_spectrum.py -q` says `7 passed` |
 | **Then** | `git add -A && git commit -m "task 1: the maths"` |
+| **You end with** | `core/spectrum.py` written · **`pytest` now `56 passed`** · committed |
 
 | | |
 |---|---|
@@ -451,6 +562,7 @@ agent is most likely to get wrong.
 | **You get** | `pages/2_Spectrum_Analyzer.py` |
 | **Check** | run the app, set 50 Hz at 1.0 — **the spike reaches 1.0** |
 | **Then** | commit again |
+| **You end with** | `+ pages/2_Spectrum_Analyzer.py` · `56 passed` · committed |
 
 
 **Task 1, the maths.** Paste the **Gate 4, task 1** prompt from
@@ -519,11 +631,19 @@ you tried.
 
 ### Gate 5 — Ship (10 minutes)
 
+| | |
+|---|---|
+| **Paste** | nothing — no prompt, no agent. This gate is all yours |
+| **You need** | branch `main`, `git status --short` printing nothing, `56 passed` |
+| **Check** | the public URL loads for someone who is not you |
+| **You end with** | the same files, pushed to GitHub and live on the internet |
+
 **Push first.** Your Codespace is not the internet. Streamlit Cloud builds
 from GitHub, so anything you have not pushed does not exist as far as it is
 concerned — and the most common failure here is deploying an empty repository.
 
 ```
+git status --short     # must print nothing — anything listed is not going anywhere
 git push
 ```
 
