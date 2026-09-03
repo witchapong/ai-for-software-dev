@@ -761,7 +761,7 @@ const p = n => String(n).padStart(2, "0");
 /* 40 */ dividerSlide({
   n: 6,
   name: "How the analyser actually works",
-  framing: "You approved this code. Now read it — forty lines, and two of them are the ones that matter.",
+  framing: "You approved this code. Now read it — the maths first, then the page that puts it on screen.",
 }).addNotes(
   "Deliberately after the lab, not before it. They have already watched an agent get the scaling wrong and a test catch it, so the maths now answers a question they actually have. Fifteen minutes; skip the last slide and hand it out if you are short."
 );
@@ -862,7 +862,61 @@ const p = n => String(n).padStart(2, "0");
   "This is the payoff for the whole lab, so land it slowly. Ask which of their seven tests would still pass with the 2/n missing - the answer is the ones checking peak position, which is most of them. That is what an acceptance criterion that cannot fail buys you, stated in code they wrote this afternoon."
 );
 
-/* 45 */ twoColumnSlide({
+/* 45 */ codeSlide({
+  eyebrow: "Section 06",
+  title: "One file per page, and Streamlit finds it",
+  brands: ["streamlit", "python"],
+  code: [
+    "**app.py**   run this. the entry point.",
+    "",
+    "**pages/**   one file = one tab",
+    "  1_Example.py",
+    "  2_Spectrum_Analyzer.py",
+    "  9_Intake_Desk.py",
+    "",
+    "the leading number orders the tabs",
+    "underscores become spaces",
+    "there is no routing code to write",
+  ].join("\n"),
+  paras: [
+    "Streamlit turns every file in pages/ into a tab by itself. You never register a route or edit a config — you add a file, and it appears.",
+    "That is why the plan at Gate 3 gives one file to one task. Next week it is one file to one person, and four people never touch the same one.",
+  ],
+  prompt: "The convention doing the real work here is a naming rule, not a framework feature.",
+  footerLeft: FOOT, page: p(45),
+}).addNotes(
+  "Show the sidebar next to the file tree so the mapping is literally visible. This is also where the Round 1 mess pays off: their agent knew nothing about pages/ and wrote a loose script at the top level, so the tab never appeared. The convention only looks obvious once you have watched an agent miss it."
+);
+
+/* 46 */ codeSlide({
+  eyebrow: "Section 06",
+  title: "Widgets in, chart out, and it reruns every time",
+  brands: ["streamlit", "python"],
+  code: [
+    "**# the page, top to bottom**",
+    "",
+    "fs = st.select_slider(...)",
+    "freq_a = st.number_input(...)",
+    "amp_a = st.number_input(...)",
+    "",
+    "times, sig = make_signal(...)",
+    "freqs, mag = spectrum(sig, fs)",
+    "",
+    "st.metric(\"Strongest frequency\", ...)",
+    "st.pyplot(figure)",
+    "st.info(\"check it yourself ...\")",
+  ].join("\n"),
+  paras: [
+    "A widget is not an event handler. st.number_input hands back whatever is in the box right now, and the script carries straight on using it.",
+    "Move any control and Streamlit reruns this file from the top — no callbacks, no state to wire. st.columns sets two inputs side by side; st.metric, st.pyplot and st.info are how the page shows a result.",
+  ],
+  prompt: "The maths lives in core/ with no Streamlit in it. That is why seven tests can check it without ever opening a browser.",
+  footerLeft: FOOT, page: p(46),
+}).addNotes(
+  "The rerun model is the one thing to make them say back to you: there is no onChange anywhere in this file, and every interaction runs all forty lines again. Then point at the import at the top - core.spectrum knows nothing about Streamlit, and Streamlit knows nothing about FFTs. That split is why the tests could exist before the page did, and it is worth naming as a design choice rather than an accident."
+);
+
+/* 47 */ twoColumnSlide({
   eyebrow: "Section 06",
   title: "Where to read more",
   brands: ["python", "numpy", "streamlit", "pytest"],
@@ -876,12 +930,12 @@ const p = n => String(n).padStart(2, "0");
     lead: "numpy.org documents fft.rfft and fft.rfftfreq, including the normalisation conventions behind every scaling bug you saw today.",
     secondary: "docs.streamlit.io for the interface and docs.pytest.org for the tests. Both are the official pages, both are shorter than you would expect, and both are what your agent was trained on.",
   },
-  footerLeft: FOOT, page: p(45),
+  footerLeft: FOOT, page: p(47),
 }).addNotes(
   "Hand this out rather than reading it. The one to actually push is dspguide.com - free, written for engineers who have not done the maths yet, and the book that makes the next signals course easier. Say plainly that the official docs are what the model has read, so quoting them in a prompt works better than describing what you want in your own words."
 );
 
-/* 46 */ bodySlide({
+/* 48 */ bodySlide({
   eyebrow: "Section 07",
   title: "Read the reference before you leave",
   bullets: [
@@ -890,12 +944,12 @@ const p = n => String(n).padStart(2, "0");
     ["Nothing here edits your work,", "so none of it can break your project. Explaining is the safest thing an agent does."],
     "Reading code you did not write, with an AI explaining it, is the most common way these tools are used at work.",
   ],
-  footerLeft: FOOT, page: p(46),
+  footerLeft: FOOT, page: p(48),
 }).addNotes(
   "Last fifteen minutes, everyone, whether or not their app worked. Insist on the mutation exercise: two tests fail, the peak-location test stays green, and the chart still looks perfectly reasonable."
 );
 
-/* 47 */ bodySlide({
+/* 49 */ bodySlide({
   eyebrow: "Section 07",
   title: "The files a person writes at work",
   bullets: [
@@ -904,30 +958,30 @@ const p = n => String(n).padStart(2, "0");
     ["Which is why you approved each one.", "Everything built today came out of those four files. A wrong line there becomes a wrong app, quickly and cheaply."],
     "labs/PROMPTS.md explains why each prompt is worded the way it is. Read it before Session 2 — you will be writing your own.",
   ],
-  footerLeft: FOOT, page: p(47),
+  footerLeft: FOOT, page: p(49),
 }).addNotes(
   "The closing idea of the session, and the bridge to Session 2. Say plainly that the documents, not the code, were the work today — the code was the cheap part, and it will only get cheaper. Anyone whose app did not run still has four documents they can show, and that is a real deliverable."
 );
 
-/* 48 */ takeawaysSlide({
+/* 50 */ takeawaysSlide({
   eyebrow: "Session 01",
   lines: [
     "An agent is a harness driving a model. Knowing which half broke is half the fix.",
     "A requirement you cannot check by running something is not a requirement yet.",
     "Looking right and being right differ, and only one of them survives a test.",
   ],
-  footerLeft: FOOT, page: p(48),
+  footerLeft: FOOT, page: p(50),
 }).addNotes(
   "Leave this up for a moment; this is the slide they photograph. Then homework, then the closing slide for questions."
 );
 
-/* 49 */ closingSlide({
+/* 51 */ closingSlide({
   question: "What did your agent get wrong?",
   reading: "Finish and deploy Lab 1 if it is not live yet",
   deadline: "Read the AI-DLC notes before Session 2",
   office: "come back in at github.com/codespaces · do not make a new one",
   contact: "Your Name · you@university.ac.th",
-  page: p(49),
+  page: p(51),
 }).addNotes(
   "Leave up during questions. Stress the log: three things the agent got wrong. Anyone who writes 'it all worked fine' did not look hard enough, and it is thirty per cent of the individual mark."
 );
