@@ -262,10 +262,10 @@ const p = n => String(n).padStart(2, "0");
     "Both were built by the same agent, on the same model, within the same hour. The left was one sentence. The right went through four checkpoints where a person decided before it could carry on.",
     "The left even drew its own “Expected: 50 Hz” markers. It verified the axis it got right and never checked the one it got wrong.",
   ],
-  figSource: "Fig. 4 — measured in the dry run, 1 September 2026",
+  figSource: "Fig. 4 — one measured run, 1 September 2026. Yours will differ.",
   footerLeft: FOOT, page: p(17),
 }).addNotes(
-  "This is the bridge out of the warm-up and into the gates, and it is the strongest thing in the deck because it is not an argument, it is a measurement. Ask the room how many of them checked the spike height before this slide appeared. Then say the sentence the whole session rests on: the gates did not make the agent correct, they made it wrong out loud."
+  "The bridge out of the warm-up and into the gates. Do NOT claim everyone got this - across four runs of Round 1 while building this lab, one read 0.5 for a 1.0 tone, one crashed before drawing a spectrum at all, and one was simply correct. Poll the room for those three outcomes by show of hands; you will get all three, and the spread is the point. Then land it: not one of you could tell which you had, and the ones who were right were right by luck. The gates did not make the agent correct - they made it wrong out loud. If a student says theirs worked, agree, and ask how they would have known if it had not."
 );
 
 /* 18 */ dividerSlide({
