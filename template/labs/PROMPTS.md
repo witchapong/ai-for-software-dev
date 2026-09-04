@@ -39,7 +39,13 @@ Exactly two kinds of criterion are allowed, and you must use both:
                        There are seven tests in that file. EVERY ONE of them
                        must appear as the criterion of some row, including
                        the one asserting that a tone entered at amplitude 1.0
-                       reads back as 1.0.
+                       reads back as 1.0, and the one about a constant offset
+                       at zero hertz.
+                       Word these rows as claims about the COMPUTATION, never
+                       about the screen: "the spectrum of a 50 Hz tone peaks
+                       at 50 Hz", not "the system accepts a frequency". If the
+                       row describes what a person types or sees, it is not a
+                       pytest row.
 
   EYES: <what a person opens, and what they must see>
                        for anything the tests do not reach. Everything about
@@ -70,7 +76,10 @@ reply instead of writing it. Do not write any .py file.
 ```
 aidlc/requirements.md is approved. Read it.
 
-Now use your file-writing tool to WRITE two files, replacing what is there:
+Now use your file-writing tool to WRITE two files. In BOTH of them, keep the
+explanation above the table exactly as it is and replace only the table and
+what follows it — that text is what the student reads when they come back to
+the file later:
 
 1. aidlc/design.md — what the app computes, and which screen shows it. It must
    include a function table with one row per function in core/spectrum.py,
