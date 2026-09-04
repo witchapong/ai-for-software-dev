@@ -543,7 +543,7 @@ Gate 3 — one task per gate, because a long conversation makes an agent worse.
 |---|---|
 | **Paste** | the **Gate 3** prompt from `labs/PROMPTS.md`, into a **new** task |
 | **You get** | `aidlc/design.md` and `aidlc/tasks.md` |
-| **Check** | `design.md`'s function table matches what `tests/test_spectrum.py` actually calls — Gate 4 builds from it. Then: two tasks, one file each, both with a **Done when** |
+| **Check** | `design.md`'s function table matches what `tests/test_spectrum.py` calls; two tasks, one file each; and **task 2's Done when names a number to read**, not just something to look at |
 | **Then** | reply `approved`, and commit: `git add -A && git commit -m "gates 1-3"` |
 | **You end with** | `+ aidlc/design.md`, `aidlc/tasks.md` · committed · still `7 failed` |
 
@@ -572,7 +572,14 @@ grep -n "def test_\|make_signal(\|spectrum(\|peak_frequency(" tests/test_spectru
 Gate 4 implements the contract in `design.md`. An error you approve here comes
 back as broken code twenty minutes later.
 
-Then check that no task touches two files, and approve.
+Then check the task table. Two tasks, one file each — and read task 2's **Done
+when** carefully, because this is where a good spec quietly goes soft. *"Two
+spikes appear in the spectrum chart"* can be ticked by someone who never read a
+spike height, and the height is the whole reason this app exists. Task 2 owns
+the entire screen, so its Done when has to name a number: *"the 50 Hz spike
+reads 1.0"*. Send it back if it does not.
+
+Then approve.
 
 ### The one piece of maths you need
 

@@ -15,7 +15,12 @@ PLACEHOLDER — what is annoying or slow for them today?
 PLACEHOLDER — replace this with a **bulleted list**, one line per thing that
 must be true before you would call this finished. Gate 2 turns each bullet
 into a requirement, so a bullet you leave out is a requirement nobody checks.
-Be concrete, and include what must be true *on the screen*:
+Be concrete, and include what must be true *on the screen*.
+
+The two lines below are from a **different project** — a lab-bench booking app
+— and are here only to show you the shape of a good bullet. Delete them, along
+with every other line of instruction in this file. Only your answers should
+survive:
 
 - a student can book a bench for a two-hour slot and see it in their list
 - the booking they just made appears at the top, with the right date"
