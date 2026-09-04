@@ -72,7 +72,11 @@ aidlc/requirements.md is approved. Read it.
 
 Now use your file-writing tool to WRITE two files, replacing what is there:
 
-1. aidlc/design.md — what the app computes, and which screen shows it.
+1. aidlc/design.md — what the app computes, and which screen shows it. It must
+   include a function table with one row per function in core/spectrum.py,
+   giving the exact name, what it takes and what it returns, matching how
+   tests/test_spectrum.py calls them. Gate 4 implements that table, so it is
+   the part of this document that has to be right.
 2. aidlc/tasks.md — a markdown table of exactly two tasks. Task 1 owns
    core/spectrum.py and nothing else. Task 2 owns pages/2_Spectrum_Analyzer.py
    and nothing else. One owner per row, one file per row.
@@ -112,7 +116,7 @@ Write the file now.
 
 Then run this exact command and paste its output verbatim into your reply:
 
-    python -m pytest tests/test_spectrum.py -q
+    pytest tests/test_spectrum.py -q
 
 Do NOT write your own test script, and do NOT judge the implementation by one.
 The file tests/test_spectrum.py is the only thing that decides whether this is
@@ -245,7 +249,7 @@ Item names must come from the menu — pass the menu names into the prompt and
 say they are the only permitted values. Do NOT ask the model to compute any
 total; order_total does that in Python.
 
-Then run: python -m pytest -m lab3 tests/test_intake.py -q
+Then run: pytest -m lab3 tests/test_intake.py -q
 and paste the output verbatim. Do not write your own test script.
 ```
 
@@ -256,7 +260,7 @@ Implement needs_review() in core/intake.py: return the ids of records the model
 flagged with needs_review true, plus any record with an empty required field or
 a quantity of zero or less. Plain Python, no model call.
 
-Then run: python -m pytest -m lab3 tests/test_intake.py -q
+Then run: pytest -m lab3 tests/test_intake.py -q
 and paste the output verbatim.
 ```
 

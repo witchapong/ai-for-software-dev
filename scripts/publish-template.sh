@@ -41,6 +41,30 @@ else
   cd "$WORK" && git init -q -b main
 fi
 
+# --- LAB1 and PROMPTS must agree about where the prompts live ---------------
+# A student follows LAB1.md and copies each Round 2 prompt out of PROMPTS.md.
+# When LAB1 tells them to check something the prompt never asked the agent to
+# produce, the gate silently stops working - that is exactly how the Gate 3
+# function table came to be checked but never requested. Structure is all that
+# can be verified mechanically; the wording still needs a human.
+LAB1="$REPO_ROOT/template/labs/LAB1.md"
+PROMPTS="$REPO_ROOT/template/labs/PROMPTS.md"
+for G in 2 3 4; do
+  if grep -q "Gate $G\*\* prompt from \`labs/PROMPTS.md\`\|Gate $G, task" "$LAB1"; then
+    grep -q "^## Gate $G" "$PROMPTS" || {
+      echo "  ERROR: LAB1.md sends students to Gate $G in PROMPTS.md,"
+      echo "         but PROMPTS.md has no '## Gate $G' section."; exit 1; }
+  fi
+done
+# Round 2 prompts belong in PROMPTS.md only. LAB1 carries Round 1's inline, on
+# purpose, and nothing else - a second copy is a second thing to drift.
+INLINE=$(grep -c "use your file-writing tool" "$LAB1" || true)
+if [ "$INLINE" != "0" ]; then
+  echo "  ERROR: LAB1.md appears to carry a gate prompt inline ($INLINE hit(s))."
+  echo "         Round 2 prompts live in PROMPTS.md only."; exit 1
+fi
+echo "  prompt sources verified: LAB1 references, PROMPTS.md defines"
+
 cp -R "$REPO_ROOT/template/." "$WORK/"
 cd "$WORK"
 rm -rf .venv data .env

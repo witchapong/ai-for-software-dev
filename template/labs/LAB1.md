@@ -610,7 +610,7 @@ agent is most likely to get wrong.
 |---|---|
 | **Paste** | **Gate 4, task 2**, into another **new** task |
 | **You get** | `pages/2_Spectrum_Analyzer.py` |
-| **Check** | run the app, set 50 Hz at 1.0 — **the spike reaches 1.0**. If an axis name is in the chart's legend, see below |
+| **Check** | the page opens at 50 Hz / 1.0 — **that spike reaches 1.0**. Then change it to 0.3 and watch the spike follow |
 | **Then** | commit again |
 | **You end with** | `+ pages/2_Spectrum_Analyzer.py` · `29 passed` · committed |
 
@@ -648,8 +648,13 @@ and check it with your own eyes:
 streamlit run app.py
 ```
 
-Set 50 Hz at 1.0 and 120 Hz at 0.5. **The spike must reach 1.0.** Compare it
-with what you wrote down in Round 1, Step 5.
+The page opens with tone 1 at 50 Hz and amplitude 1.0 already filled in, so
+there is nothing to type: **that spike must reach 1.0.** Compare it with what
+you wrote down in Round 1, Step 5.
+
+**Then change tone 1's amplitude to 0.3 and watch the spike drop to 0.3.** A
+chart that is quietly wrong can still look right at one setting; it rarely
+survives being moved. This is the `EYES:` perturbation row from your own spec.
 
 **First, look for a legend.** A correct chart here has **no legend at all** —
 one line needs no key. If you see one listing `Time` or `Frequency (Hz)` beside
