@@ -20,29 +20,183 @@ const p = n => String(n).padStart(2, "0");
   course: "AI for Software Development · 3rd Year EE",
   title: "Meet your agent",
   subtitle: "Session 1 — how an AI coding agent works, and how to make it build what you meant",
-  presenter: "Your Name · Department of Electrical Engineering",
+  presenter: "Witchapong Daroontham · Department of Electrical Engineering",
   date: "Session 1 of 3",
 }).addNotes(
   "Cover. Hold it while people sit down. Say the one-line promise: by the end of today you will have built and published a working app, and you will know why the careful route beat the quick one."
 );
 
-/* 02 */ bodySlide({
-  eyebrow: "Setup",
+/* 02 */ agendaSlide({
+  eyebrow: "Session 01",
+  items: [
+    "How an agent works",
+    "What it costs, and why it fails",
+    "Warm-up — build it by asking",
+    "The Four Gates",
+    "Lab 1 — the same app, done properly",
+    "Read the reference, then ship",
+  ],
+  footerLeft: FOOT, page: p(2),
+}).addNotes(
+  "Agenda. Point out that item 05 is where they build the real thing; everything before it exists to make 05 work."
+);
+
+/* 03 */ dividerSlide({
+  n: 1,
+  name: "How an agent works",
+  framing: "What actually happens between typing a request and a file changing on disk.",
+}).addNotes(
+  "Before clicking on: ask who has used ChatGPT to write code. Most hands. Then ask who knows what happens between typing the request and the file changing. Few hands. That gap is this section."
+);
+
+/* 04 */ figureSlide({
+  eyebrow: "Section 01",
+  title: "What a language model is",
+  image: "figures/fig-language-model.png",
+  paras: [
+    "Trained once, on a very large amount of writing, to do a single thing: given some text, guess what comes next. Everything it appears to do is built on top of that one trick.",
+    "It consults no database. An answer is reconstructed from patterns, never retrieved — which is the mechanism behind everything on the next three slides.",
+  ],
+  figSource: "Fig. 1 — trained once, then rented by the word",
+  footerLeft: FOOT, page: p(4),
+}).addNotes(
+  "Keep this to three minutes and resist the detail. The two things they must leave with: training happened once and is finished, and the model predicts rather than looks up. Say the cost out loud — training one of these runs to millions of dollars, which is why you rent it instead of building it. Someone always asks whether it is on the internet: no. It is a fixed set of numbers that has been frozen since the day training stopped."
+);
+
+/* 05 */ figureSlide({
+  eyebrow: "Section 01",
+  title: "Harness and model",
+  brands: ["cline", "googlegemini"],
+  image: "figures/fig-harness-model.png",
+  paras: [
+    "A harness is the program that does things. Cline reads your files, writes the edits, runs the commands, and decides when to ask the model what to do next. It has no intelligence of its own.",
+    "The model is the thing that decides what to say. It runs on someone else’s computer, never sees your disk, and can be swapped for another in three clicks.",
+  ],
+  figSource: "Fig. 2 — the two pieces you are driving",
+  footerLeft: FOOT, page: p(5),
+}).addNotes(
+  "The single most useful distinction in the course. When something goes wrong they must ask which half broke: rate limited is a model problem, Diff Edit Failed is a harness problem."
+);
+
+/* 06 */ twoColumnSlide({
+  eyebrow: "Section 01",
+  title: "The tools people actually use",
+  brands: ["cline", "cursor", "githubcopilot", "claude", "googlegemini", "mistralai"],
+  left: {
+    label: "Harnesses",
+    lead: "Cline and Roo Code, free inside VS Code. Cursor and Windsurf, whole editors. GitHub Copilot. Claude Code and Gemini CLI, in the terminal. Aider.",
+    secondary: "All do the same job: read your files, write the edits, run the commands. We use Cline because it is free and shows you every step it takes.",
+  },
+  right: {
+    label: "Models",
+    lead: "Claude, GPT, Gemini, Mistral, Llama, Qwen, DeepSeek. Some you rent by the word; some you can download and run yourself.",
+    secondary: "Nearly every harness lets you point at any of them. Swapping is a settings change, not a new tool — which is exactly why the split is worth knowing.",
+  },
+  footerLeft: FOOT, page: p(6),
+}).addNotes(
+  "Name-drop deliberately: these are the tools in job adverts, and students should recognise them. The point to land is the last line — when a model runs out of quota this afternoon they will change a dropdown and carry on working, and that only makes sense if they hold the two halves apart."
+);
+
+/* 07 */ figureSlide({
+  eyebrow: "Section 01",
+  title: "The loop the agent runs",
+  image: "figures/fig-agent-loop.png",
+  paras: [
+    "Read, plan, edit, run, observe — then round again. The harness drives this loop until the task is done or you stop it.",
+    "One sentence from you becomes four to ten laps, and every lap re-sends everything so far. That is where your allowance goes.",
+  ],
+  figSource: "Fig. 3 — one instruction, many laps",
+  footerLeft: FOOT, page: p(7),
+}).addNotes(
+  "Walk the loop out loud with a concrete example: add a plot of the frequency response. Read the file, propose the edit, apply, run, read the error, go round again. The second paragraph sets up the quota slide."
+);
+
+/* 08 */ dividerSlide({
+  n: 2,
+  name: "What it costs, and why it fails",
+  framing: "Three limits you will meet before lunch, and the reason none of them are bugs.",
+}).addNotes(
+  "This section is the one that changes their behaviour. Everything here is a constraint they hit today, not theory."
+);
+
+/* 09 */ bodySlide({
+  eyebrow: "Section 02",
+  title: "Context and its limits",
+  bullets: [
+    ["The model has no memory.", "Between one request and the next it retains nothing at all."],
+    ["So everything is re-sent.", "Every request carries the whole conversation and every file read so far."],
+    ["The context window is the ceiling", "on how much can be re-sent at once. Past it, the earliest parts fall away."],
+    "A long conversation therefore makes an agent worse, not better. Start a new task for each feature.",
+  ],
+  footerLeft: FOOT, page: p(9),
+}).addNotes(
+  "The counter-intuitive point is the last one. Students assume a long conversation means the agent understands more; it means the opposite. The practical instruction is: start a new task per feature."
+);
+
+/* 10 */ codeSlide({
+  eyebrow: "Section 02",
+  title: "Your free allowance, and its two failures",
+  code: [
+    "one instruction from you",
+    "    -> 4 to 10 requests",
+    "a 2-hour lab",
+    "    ~ 100 to 200 requests",
+    "",
+    "Gemini   250 req/day, 10/min",
+    "         ~6s between steps",
+    "Mistral  25,000 tokens/min",
+    "         ~3 req/min",
+    "         ~20s between steps",
+  ].join("\n"),
+  paras: [
+    "One lab session is roughly one day of your Gemini allowance, and the pauses between steps are the limit working rather than a fault.",
+    "Two different failures, opposite fixes. 429 “rate limited” means wait about a minute. 503 “high demand” means that model is refusing everyone — switch providers, because waiting will not help.",
+  ],
+  prompt: "Everything that cuts your request count is also just good engineering.",
+  footerLeft: FOOT, page: p(10),
+}).addNotes(
+  "Do this arithmetic on the board with them rather than reading it. The number that lands is roughly one lab session per day on one account. Then the bridge into the gates."
+);
+
+/* 11 */ bodySlide({
+  eyebrow: "Section 02",
+  title: "Why an agent invents things",
+  bullets: [
+    ["It predicts, it does not look up.", "The reply is the text most likely to follow your request, not a fact retrieved from anywhere."],
+    ["A plausible function looks real.", "A library call that ought to exist looks exactly like one that does."],
+    ["It cannot warn you.", "Not knowing and knowing feel identical from the inside, so both come out equally confident."],
+    "Which leaves one rule: you check by running something, never by reading something that sounds right.",
+  ],
+  footerLeft: FOOT, page: p(11),
+}).addNotes(
+  "The key sentence is the third. A model cannot report not-knowing, because from the inside it looks the same as knowing. Hence the rule for the whole course: verify by running."
+);
+
+/* 12 */ dividerSlide({
+  n: 3,
+  name: "Warm-up — build it by asking",
+  framing: "Set the machine up, then ask for the whole thing with no plan and see what arrives. 15 minutes of setup, 25 of building.",
+}).addNotes(
+  "Setup happens here rather than at the door, so nobody sits idle waiting for the room to catch up - get every check green before anyone pastes a prompt. Then say plainly: this round is meant to go badly, and going badly is the useful part. Do not rescue anyone during it."
+);
+
+/* 13 */ bodySlide({
+  eyebrow: "Workshop 03",
   title: "Before we start",
   brands: ["github", "googlegemini", "mistralai", "python"],
   bullets: [
-    ["A GitHub account, then a Codespace.", "Free at github.com. One click from the template page builds a Linux machine in your browser; nothing installs here."],
+    ["A GitHub account, then a Codespace.", "The template is at github.com/witchapong/ai-workshop-template — Use this template, then Code, then Codespaces. One click builds a Linux machine in your browser; nothing installs here."],
     ["TWO API keys, not one.", "Gemini at aistudio.google.com/apikey, Mistral at console.mistral.ai. Free tiers refuse service without warning."],
     ["Paste both into .env, save, close the tab.", "A key is a password, and you will be sharing this screen before the day is out."],
     ["Then run check_setup.py.", "Five checks. It names whichever one is not right yet. Do not move on until they are all green."],
   ],
-  footerLeft: FOOT, page: p(2),
+  footerLeft: FOOT, page: p(13),
 }).addNotes(
   "This is on screen as they walk in, and stays up for the first fifteen minutes. Say the key rule out loud: the key goes in .env, never in a file you commit, and never pasted into the chat. Walk the room rather than talking — the failures are individual, and the check script names each one."
 );
 
-/* 03 */ codeSlide({
-  eyebrow: "Setup",
+/* 14 */ codeSlide({
+  eyebrow: "Workshop 03",
   title: "The five checks",
   brands: ["python", "googlegemini"],
   code: [
@@ -63,13 +217,13 @@ const p = n => String(n).padStart(2, "0");
     "Still stuck after ten minutes? Ask a neighbour before you ask me. TROUBLESHOOTING.md carries the same list with fixes.",
   ],
   prompt: "Nothing installs on the lab PC. The machine you are working on is in the browser.",
-  footerLeft: FOOT, page: p(3),
+  footerLeft: FOOT, page: p(14),
 }).addNotes(
   "The most common two failures: the key pasted with a trailing space, and the placeholder text left in place. Both are named explicitly by the script. If a whole row is stuck, it is usually the proxy rather than the student."
 );
 
-/* 04 */ bodySlide({
-  eyebrow: "Setup",
+/* 15 */ bodySlide({
+  eyebrow: "Workshop 03",
   title: "Cline needs its own key",
   brands: ["cline", "mistralai", "googlegemini"],
   bullets: [
@@ -78,163 +232,9 @@ const p = n => String(n).padStart(2, "0");
     ["Then provider, then model.", "Mistral or Gemini, paste the key. Model names carry a date — devstral-2512, not devstral-latest. Prefer a devstral if you see one."],
     "Check the model name after any reload: Cline can reset itself, sometimes to a paid one. A price per million tokens beside it means change it back.",
   ],
-  footerLeft: FOOT, page: p(4),
+  footerLeft: FOOT, page: p(15),
 }).addNotes(
   "The single most likely way for a student to arrive unable to work, and it is invisible: every check passes, then Cline opens on a configuration screen nobody mentioned - with the wrong option already selected for them. Do this one on the projector rather than describing it, because the free option is the big attractive button and taking it leaves their key unused with no error to tell them. Cline's model list is its own: it uses dated names and has no latest, so anything you read elsewhere will not match it."
-);
-
-/* 05 */ agendaSlide({
-  eyebrow: "Session 01",
-  items: [
-    "How an agent works",
-    "What it costs, and why it fails",
-    "Warm-up — build it by asking",
-    "The Four Gates",
-    "Lab 1 — the same app, done properly",
-    "Read the reference, then ship",
-  ],
-  footerLeft: FOOT, page: p(5),
-}).addNotes(
-  "Agenda. Point out that item 05 is where they build the real thing; everything before it exists to make 05 work."
-);
-
-/* 06 */ dividerSlide({
-  n: 1,
-  name: "How an agent works",
-  framing: "What actually happens between typing a request and a file changing on disk.",
-}).addNotes(
-  "Before clicking on: ask who has used ChatGPT to write code. Most hands. Then ask who knows what happens between typing the request and the file changing. Few hands. That gap is this section."
-);
-
-/* 07 */ figureSlide({
-  eyebrow: "Section 01",
-  title: "What a language model is",
-  image: "figures/fig-language-model.png",
-  paras: [
-    "Trained once, on a very large amount of writing, to do a single thing: given some text, guess what comes next. Everything it appears to do is built on top of that one trick.",
-    "It consults no database. An answer is reconstructed from patterns, never retrieved — which is the mechanism behind everything on the next three slides.",
-  ],
-  figSource: "Fig. 1 — trained once, then rented by the word",
-  footerLeft: FOOT, page: p(7),
-}).addNotes(
-  "Keep this to three minutes and resist the detail. The two things they must leave with: training happened once and is finished, and the model predicts rather than looks up. Say the cost out loud — training one of these runs to millions of dollars, which is why you rent it instead of building it. Someone always asks whether it is on the internet: no. It is a fixed set of numbers that has been frozen since the day training stopped."
-);
-
-/* 08 */ figureSlide({
-  eyebrow: "Section 01",
-  title: "Harness and model",
-  brands: ["cline", "googlegemini"],
-  image: "figures/fig-harness-model.png",
-  paras: [
-    "A harness is the program that does things. Cline reads your files, writes the edits, runs the commands, and decides when to ask the model what to do next. It has no intelligence of its own.",
-    "The model is the thing that decides what to say. It runs on someone else’s computer, never sees your disk, and can be swapped for another in three clicks.",
-  ],
-  figSource: "Fig. 2 — the two pieces you are driving",
-  footerLeft: FOOT, page: p(8),
-}).addNotes(
-  "The single most useful distinction in the course. When something goes wrong they must ask which half broke: rate limited is a model problem, Diff Edit Failed is a harness problem."
-);
-
-/* 09 */ twoColumnSlide({
-  eyebrow: "Section 01",
-  title: "The tools people actually use",
-  brands: ["cline", "cursor", "githubcopilot", "claude", "googlegemini", "mistralai"],
-  left: {
-    label: "Harnesses",
-    lead: "Cline and Roo Code, free inside VS Code. Cursor and Windsurf, whole editors. GitHub Copilot. Claude Code and Gemini CLI, in the terminal. Aider.",
-    secondary: "All do the same job: read your files, write the edits, run the commands. We use Cline because it is free and shows you every step it takes.",
-  },
-  right: {
-    label: "Models",
-    lead: "Claude, GPT, Gemini, Mistral, Llama, Qwen, DeepSeek. Some you rent by the word; some you can download and run yourself.",
-    secondary: "Nearly every harness lets you point at any of them. Swapping is a settings change, not a new tool — which is exactly why the split is worth knowing.",
-  },
-  footerLeft: FOOT, page: p(9),
-}).addNotes(
-  "Name-drop deliberately: these are the tools in job adverts, and students should recognise them. The point to land is the last line — when a model runs out of quota this afternoon they will change a dropdown and carry on working, and that only makes sense if they hold the two halves apart."
-);
-
-/* 10 */ figureSlide({
-  eyebrow: "Section 01",
-  title: "The loop the agent runs",
-  image: "figures/fig-agent-loop.png",
-  paras: [
-    "Read, plan, edit, run, observe — then round again. The harness drives this loop until the task is done or you stop it.",
-    "One sentence from you becomes four to ten laps, and every lap re-sends everything so far. That is where your allowance goes.",
-  ],
-  figSource: "Fig. 3 — one instruction, many laps",
-  footerLeft: FOOT, page: p(10),
-}).addNotes(
-  "Walk the loop out loud with a concrete example: add a plot of the frequency response. Read the file, propose the edit, apply, run, read the error, go round again. The second paragraph sets up the quota slide."
-);
-
-/* 11 */ dividerSlide({
-  n: 2,
-  name: "What it costs, and why it fails",
-  framing: "Three limits you will meet before lunch, and the reason none of them are bugs.",
-}).addNotes(
-  "This section is the one that changes their behaviour. Everything here is a constraint they hit today, not theory."
-);
-
-/* 12 */ bodySlide({
-  eyebrow: "Section 02",
-  title: "Context and its limits",
-  bullets: [
-    ["The model has no memory.", "Between one request and the next it retains nothing at all."],
-    ["So everything is re-sent.", "Every request carries the whole conversation and every file read so far."],
-    ["The context window is the ceiling", "on how much can be re-sent at once. Past it, the earliest parts fall away."],
-    "A long conversation therefore makes an agent worse, not better. Start a new task for each feature.",
-  ],
-  footerLeft: FOOT, page: p(12),
-}).addNotes(
-  "The counter-intuitive point is the last one. Students assume a long conversation means the agent understands more; it means the opposite. The practical instruction is: start a new task per feature."
-);
-
-/* 13 */ codeSlide({
-  eyebrow: "Section 02",
-  title: "Your free allowance, and its two failures",
-  code: [
-    "one instruction from you",
-    "    -> 4 to 10 requests",
-    "a 2-hour lab",
-    "    ~ 100 to 200 requests",
-    "",
-    "Gemini   250 req/day, 10/min",
-    "         ~6s between steps",
-    "Mistral  25,000 tokens/min",
-    "         ~3 req/min",
-    "         ~20s between steps",
-  ].join("\n"),
-  paras: [
-    "One lab session is roughly one day of your Gemini allowance, and the pauses between steps are the limit working rather than a fault.",
-    "Two different failures, opposite fixes. 429 “rate limited” means wait about a minute. 503 “high demand” means that model is refusing everyone — switch providers, because waiting will not help.",
-  ],
-  prompt: "Everything that cuts your request count is also just good engineering.",
-  footerLeft: FOOT, page: p(13),
-}).addNotes(
-  "Do this arithmetic on the board with them rather than reading it. The number that lands is roughly one lab session per day on one account. Then the bridge into the gates."
-);
-
-/* 14 */ bodySlide({
-  eyebrow: "Section 02",
-  title: "Why an agent invents things",
-  bullets: [
-    ["It predicts, it does not look up.", "The reply is the text most likely to follow your request, not a fact retrieved from anywhere."],
-    ["A plausible function looks real.", "A library call that ought to exist looks exactly like one that does."],
-    ["It cannot warn you.", "Not knowing and knowing feel identical from the inside, so both come out equally confident."],
-    "Which leaves one rule: you check by running something, never by reading something that sounds right.",
-  ],
-  footerLeft: FOOT, page: p(14),
-}).addNotes(
-  "The key sentence is the third. A model cannot report not-knowing, because from the inside it looks the same as knowing. Hence the rule for the whole course: verify by running."
-);
-
-/* 15 */ dividerSlide({
-  n: 3,
-  name: "Warm-up — build it by asking",
-  framing: "No plan, no specification. Ask for the whole thing and see what arrives. 25 minutes.",
-}).addNotes(
-  "Say plainly: this round is meant to go badly, and going badly is the useful part. Do not rescue anyone during it."
 );
 
 /* 16 */ codeSlide({
@@ -980,7 +980,7 @@ const p = n => String(n).padStart(2, "0");
   reading: "Finish and deploy Lab 1 if it is not live yet",
   deadline: "Read the AI-DLC notes before Session 2",
   office: "come back in at github.com/codespaces · do not make a new one",
-  contact: "Your Name · you@university.ac.th",
+  contact: "Witchapong Daroontham · Department of Electrical Engineering",
   page: p(51),
 }).addNotes(
   "Leave up during questions. Stress the log: three things the agent got wrong. Anyone who writes 'it all worked fine' did not look hard enough, and it is thirty per cent of the individual mark."
